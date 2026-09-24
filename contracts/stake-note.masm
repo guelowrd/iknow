@@ -1,0 +1,49 @@
+use miden::protocol::active_account
+use miden::protocol::account_id
+use miden::protocol::active_note
+use miden::standards::wallets::basic as basic_wallet
+
+# Storage layout: [pot_prefix, pot_suffix, side, salt0, salt1, salt2, salt3]
+const STORAGE_PTR = 0
+const POT_PREFIX_ITEM = STORAGE_PTR
+const POT_SUFFIX_ITEM = STORAGE_PTR + 1
+const NUM_STORAGE_ITEMS = 7
+
+const ERR_STAKE_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS = "stake note expects exactly 7 note storage items"
+const ERR_STAKE_NOT_SENDER = "only the sender can take back an unopened stake note"
+
+#! Stake note.
+#! Consumed by the pot named in storage: calls the pot's `stake`, which reads this note's
+#! sender, storage and assets itself. Consumed by the sender's own wallet instead: hands the
+#! assets back, so an unopened stake can always be taken back. Any other account fails.
+@note_script
+pub proc main
+    push.STORAGE_PTR exec.active_note::get_storage
+    # => [num_storage_items]
+    eq.NUM_STORAGE_ITEMS assert.err=ERR_STAKE_UNEXPECTED_NUMBER_OF_STORAGE_ITEMS
+    # => []
+
+    mem_load.POT_PREFIX_ITEM mem_load.POT_SUFFIX_ITEM
+    # => [pot_suffix, pot_prefix]
+    exec.active_account::get_id
+    # => [account_suffix, account_prefix, pot_suffix, pot_prefix]
+    exec.account_id::eq
+    # => [is_pot]
+
+    if.true
+        # the pot reads the active note itself; pad for the call convention and clean up after
+        padw padw padw padw
+        call.::"miden:pot/pot@0.1.0"::stake
+        dropw dropw dropw dropw
+        # => []
+    else
+        exec.active_note::get_sender
+        # => [sender_suffix, sender_prefix]
+        exec.active_account::get_id
+        # => [account_suffix, account_prefix, sender_suffix, sender_prefix]
+        exec.account_id::eq assert.err=ERR_STAKE_NOT_SENDER
+        # => []
+        exec.basic_wallet::move_note_assets_to_account
+        # => []
+    end
+end

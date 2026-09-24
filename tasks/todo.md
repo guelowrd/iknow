@@ -12,8 +12,9 @@
 
 ## Phase 1 to 6: implementation (details in docs/feasibility.md section 10)
 
-- [ ] 1. Scaffold + spikes → verify: MockChain tests for raw FPI from a Rust account proc, dual-context
-      Rust note (else MASM), 30-note batch with proving time recorded, hash_elements round trip
+- [x] 1. Scaffold + spikes (2026-09-24) → FPI read from a note passes; dual-context note is MASM
+      (Rust cannot call the standard wallet); 30-note batch executes in ~150 ms in MockChain; Poseidon2
+      commitments verified on chain
 - [ ] 2. Oracle contract + operator oracle commands → verify: deployed on testnet, `oracle read` shows
       the entry, `node operator/rules.mjs` self-check passes
 - [ ] 3. Pot + stake note + claim note + settle script → verify: batch totals and commitments, reclaim,

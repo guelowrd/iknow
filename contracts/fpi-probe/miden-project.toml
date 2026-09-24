@@ -1,0 +1,13 @@
+[package]
+name = "fpi-probe"
+version = "0.1.0"
+
+[lib]
+path = "src/lib.rs"
+kind = "note"
+namespace = "miden:fpi-probe/miden-fpi-probe@0.1.0"
+
+[dependencies]
+miden-core = "*"
+miden-protocol = "*"
+pot = { path = "../pot" }

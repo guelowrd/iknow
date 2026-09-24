@@ -1,0 +1,15 @@
+[package]
+name = "oracle"
+version = "0.1.0"
+
+[lib]
+path = "src/lib.rs"
+kind = "account-component"
+namespace = "miden:oracle/oracle@0.1.0"
+
+[dependencies]
+miden-core = "*"
+miden-protocol = "*"
+
+[package.metadata.miden]
+supported-types = ["RegularAccountImmutableCode"]

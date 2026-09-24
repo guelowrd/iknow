@@ -15,13 +15,15 @@
 - [x] 1. Scaffold + spikes (2026-09-24) → FPI read from a note passes; dual-context note is MASM
       (Rust cannot call the standard wallet); 30-note batch executes in ~150 ms in MockChain; Poseidon2
       commitments verified on chain
-- [ ] 2. Oracle contract + operator oracle commands → verify: deployed on testnet, `oracle read` shows
-      the entry, `node operator/rules.mjs` self-check passes
+- [x] 2. Oracle contract + operator oracle commands (2026-09-25) → deployed on testnet as
+      0x54133848adb3ec113228cd45041fab, heartbeat and value published and read back, rules self-check passes
 - [x] 3. Pot + stake note + claim note + settle script (2026-09-24) → 13 MockChain tests: batch totals
       and commitments, reclaim, oracle write-once and heartbeat, settle YES / NO / pending / VOID,
       pro-rata claims, loser / wrong tuple / double / early claims fail, operator claims on behalf,
       VOID refunds. Not yet covered: stake after lock height (needs a block-number gate test)
-- [ ] 4. Operator CLI + testnet → verify: full cycle from the CLI with two bettor wallets
+- [x] 4. Operator CLI + testnet (2026-09-25) → full cycle on testnet with two bettor wallets: bets,
+      two batches, settle YES through FPI, payout, claim (ids in README). Same cycle runs on the SDK
+      mock chain with IKNOW_MOCK=1
 - [ ] 5. Web app (user + admin) → verify: vitest on note building, two-browser testnet run
 - [ ] 6. End to end + README runbook → verify: recorded run with account, note and transaction ids
 

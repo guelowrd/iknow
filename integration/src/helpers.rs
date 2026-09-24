@@ -317,7 +317,7 @@ pub fn add_pot(
     let component = AccountComponent::from_package(pot_pkg, &init)?;
     Ok(builder.add_account_from_builder(
         AUTH,
-        _AccountBuilder::new([9_u8; 32]).account_type(AccountType::Public).with_component(component),
+        _AccountBuilder::new([9_u8; 32]).account_type(AccountType::Public).with_component(component).with_component(BasicWallet),
         AccountState::Exists,
     )?)
 }

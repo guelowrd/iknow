@@ -9,6 +9,8 @@ local-keystore/
 local-node-data/
 local-store.sqlite3
 node_modules/
+operator/node_modules/
+operator/state.mock.json
 store.sqlite3
 store.sqlite3*
 target/

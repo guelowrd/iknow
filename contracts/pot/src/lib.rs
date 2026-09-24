@@ -100,10 +100,13 @@ impl Pot for PotStorage {
         t[idx] = Felt::new_unchecked(new_total);
         self.totals.set(Word::from(t));
 
-        self.add_asset(asset);
+        // Hash and record the position before touching the vault: hashing after `add_asset`
+        // panics in the SDK's executor (observed on testnet and in the mock client, not in
+        // miden-testing). The transaction reverts as a whole either way.
         let key = position_key(target, side, units, salt);
         assert!(self.positions.get(key).as_canonical_u64() == 0);
         self.positions.set(key, felt!(1));
+        self.add_asset(asset);
     }
 
     fn settle(&mut self) {

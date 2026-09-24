@@ -257,7 +257,9 @@ export const commands = {
   },
   async "pot deploy"(c, state, args) {
     const deadlineMs = Date.parse(arg(args, "deadline"));
-    const lockHeight = Number(arg(args, "lock-height", (await c.getSyncHeight()) + 2_000));
+    // Default lock height: the block expected at the deadline (testnet blocks every ~3 s).
+    const height = await c.getSyncHeight();
+    const lockHeight = Number(arg(args, "lock-height", height + Math.max(0, Math.floor((deadlineMs - Date.now()) / 3000))));
     const graceS = Number(arg(args, "grace-days", 30)) * 86_400;
     const unit = Number(arg(args, "unit", 1_000_000));
     const asset = await feeFaucetId();
@@ -267,7 +269,7 @@ export const commands = {
     const potId = await createContract(c, potComponent(params));
     state.pots[potId] = params;
     saveState(state);
-    console.log(`pot ${potId} deadline ${new Date(deadlineMs).toISOString()} lock ${lockHeight}`);
+    console.log(`pot ${potId} deadline ${new Date(deadlineMs).toISOString()} lock ${lockHeight} (now ${height})`);
     await fund(c, potId, "pot");
   },
   async "pot status"(c, state, args) {

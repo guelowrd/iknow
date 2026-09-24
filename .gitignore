@@ -1,0 +1,6 @@
+node_modules/
+target/
+store.sqlite3*
+keystore/
+.env
+.DS_Store

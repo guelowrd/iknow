@@ -1,0 +1,127 @@
+import { useCallback, useEffect, useState } from "react";
+import { useMiden, useMidenClient, useSessionAccount } from "@miden-sdk/react";
+import { useMidenFiWallet } from "@miden-sdk/miden-wallet-adapter-react";
+import { WalletReadyState } from "@miden-sdk/miden-wallet-adapter-base";
+import { MIDEN_FAUCET, UNIT } from "@/config";
+import { parseId, requestFaucetTokens } from "@/lib/iknow";
+
+export type Session = {
+  mode: "bread" | "guest" | null;
+  /** Account address as the wallet reports it (bech32 for Bread, hex for guests). */
+  address: string | null;
+  /** Whole MIDEN tokens available. */
+  balance: number | null;
+  breadInstalled: boolean;
+  breadConnecting: boolean;
+  guestStep: string;
+  error: string | null;
+  connectBread: () => Promise<void>;
+  startGuest: () => Promise<void>;
+  disconnect: () => Promise<void>;
+  refreshBalance: () => Promise<void>;
+};
+
+const GUEST_KEY = "iknow:guest";
+
+export function useSession(): Session {
+  const bread = useMidenFiWallet();
+  const { isReady, runExclusive } = useMiden();
+  const client = useMidenClient();
+  const [mode, setMode] = useState<Session["mode"]>(() => (localStorage.getItem(GUEST_KEY) === "1" ? "guest" : null));
+  const [balance, setBalance] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const guest = useSessionAccount({
+    fund: async (id) => {
+      await requestFaucetTokens(id);
+    },
+    assetId: MIDEN_FAUCET,
+    // numeric Falcon discriminant: the SDK's default enum value hangs newWallet (frontend-template note)
+    walletOptions: { storageMode: "private", authScheme: 2 as never },
+    maxWaitMs: 120_000,
+    storagePrefix: "iknow-guest",
+  });
+
+  const readyState = bread.wallet?.readyState;
+  const breadInstalled = readyState === WalletReadyState.Installed || readyState === WalletReadyState.Loadable;
+
+  useEffect(() => {
+    if (bread.connected) setMode("bread");
+  }, [bread.connected]);
+
+  const address = mode === "bread" ? bread.address : mode === "guest" ? guest.sessionAccountId : null;
+
+  const refreshBalance = useCallback(async () => {
+    try {
+      if (mode === "bread" && bread.requestAssets) {
+        const assets = await bread.requestAssets();
+        const faucet = parseId(MIDEN_FAUCET).toString();
+        const hit = assets.find((a) => parseId(a.faucetId).toString() === faucet);
+        setBalance(hit ? Number(BigInt(hit.amount) / UNIT) : 0);
+      } else if (mode === "guest" && guest.sessionAccountId && isReady) {
+        const id = guest.sessionAccountId;
+        const amount = await runExclusive(async () => {
+          const account = await client.getAccount(parseId(id));
+          return account ? account.vault().getBalance(parseId(MIDEN_FAUCET)) : 0n;
+        });
+        setBalance(Number(amount / UNIT));
+      } else {
+        setBalance(null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, [mode, bread, guest.sessionAccountId, isReady, runExclusive, client]);
+
+  useEffect(() => {
+    refreshBalance();
+  }, [refreshBalance, guest.isReady]);
+
+  const connectBread = useCallback(async () => {
+    setError(null);
+    try {
+      await bread.connect();
+      setMode("bread");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, [bread]);
+
+  const startGuest = useCallback(async () => {
+    setError(null);
+    setMode("guest");
+    localStorage.setItem(GUEST_KEY, "1");
+    try {
+      if (!guest.isReady) await guest.initialize();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, [guest]);
+
+  const disconnect = useCallback(async () => {
+    if (mode === "bread") await bread.disconnect().catch(() => undefined);
+    localStorage.removeItem(GUEST_KEY);
+    setMode(null);
+    setBalance(null);
+  }, [mode, bread]);
+
+  // resume a guest session created earlier
+  useEffect(() => {
+    if (mode === "guest" && isReady && !guest.isReady && guest.step === "idle") guest.initialize().catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, isReady]);
+
+  return {
+    mode,
+    address,
+    balance,
+    breadInstalled,
+    breadConnecting: bread.connecting,
+    guestStep: guest.step,
+    error: error ?? guest.error?.message ?? null,
+    connectBread,
+    startGuest,
+    disconnect,
+    refreshBalance,
+  };
+}

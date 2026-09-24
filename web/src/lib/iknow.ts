@@ -1,0 +1,175 @@
+import {
+  AccountComponent, AccountId, Address, Felt, FeltArray, FungibleAsset, Note, NoteArray, NoteAssets, NoteMetadata,
+  NoteRecipient, NoteScript, NoteStorage, NoteTag, NoteType, Package, Poseidon2, StorageMap, StorageSlot,
+  StorageSlotArray, TransactionRequestBuilder, Word, type Account, type WebClient,
+} from "@miden-sdk/miden-sdk";
+import { FAUCET_URL, MARKETS, MIDEN_FAUCET, POT_PACKAGE_URL, UNIT } from "@/config";
+import stakeMasm from "../../../contracts/stake-note.masm?raw";
+
+export type Market = (typeof MARKETS)[number] & { yes: number; no: number; outcome: 0 | 1 | 2 | 3; lockHeight: number };
+export type Position = {
+  market: string;
+  side: 1 | 2;
+  units: number;
+  salt: string[];
+  noteId: string;
+  txId?: string;
+  at: number;
+  wallet: string;
+  /** Guest bets: whether the note reached the pot through the transport service. */
+  relayed?: boolean;
+  state?: "pending" | "in" | "won" | "lost" | "paid" | "refund";
+};
+
+export const felt = (n: bigint | number | string) => new Felt(BigInt(n));
+export const parseId = (s: string) => (s.startsWith("0x") ? AccountId.fromHex(s) : AccountId.fromBech32(s));
+export const fmt = (units: number) => units.toLocaleString("en-US");
+export const pct = (yes: number, no: number) => (yes + no === 0 ? 50 : Math.round((100 * yes) / (yes + no)));
+export const randomWord = () =>
+  Word.newFromFelts(Array.from({ length: 4 }, () => felt(new DataView(crypto.getRandomValues(new Uint8Array(8)).buffer).getBigUint64(0) >> 2n)));
+export const short = (s: string) => `${s.slice(0, 6)}…${s.slice(-4)}`;
+
+// ---------------------------------------------------------------------------------------------
+// reading pots (public accounts imported into the local client)
+// ---------------------------------------------------------------------------------------------
+
+async function potAccount(client: WebClient, id: string): Promise<Account | undefined> {
+  const accountId = parseId(id);
+  if (!(await client.getAccount(parseId(id)))) await client.importAccountById(accountId);
+  return client.getAccount(parseId(id));
+}
+
+export async function readMarkets(client: WebClient): Promise<Market[]> {
+  const out: Market[] = [];
+  for (const m of MARKETS) {
+    const account = await potAccount(client, m.id);
+    const storage = account?.storage();
+    const totals = storage?.getItem("pot::pot::totals")?.toU64s();
+    const market = storage?.getItem("pot::pot::market")?.toU64s();
+    const outcome = Number(storage?.getItem("pot::pot::outcome")?.toU64s()[0] ?? 0n) as Market["outcome"];
+    out.push({ ...m, yes: Number(totals?.[0] ?? 0n), no: Number(totals?.[1] ?? 0n), outcome, lockHeight: Number(market?.[1] ?? 0n) });
+  }
+  return out;
+}
+
+/** Same commitment the pot computes: Poseidon2 over [prefix, suffix, side, units, salt]. */
+export function positionKey(target: AccountId, side: number, units: number, salt: string[]): Word {
+  return Poseidon2.hashElements(new FeltArray([target.prefix(), target.suffix(), felt(side), felt(units), ...salt.map(felt)]));
+}
+
+export async function positionStates(client: WebClient, positions: Position[], markets: Market[]): Promise<Position[]> {
+  const out: Position[] = [];
+  for (const p of positions) {
+    const market = markets.find((m) => m.id === p.market);
+    const account = await potAccount(client, p.market);
+    const flag = Number(account?.storage().getMapItem("pot::pot::positions", positionKey(parseId(p.wallet), p.side, p.units, p.salt))?.toU64s()[0] ?? 0n);
+    let state: Position["state"] = flag === 0 ? "pending" : "in";
+    if (flag === 2) state = "paid";
+    else if (flag === 1 && market?.outcome) state = market.outcome === 3 ? "refund" : market.outcome === p.side ? "won" : "lost";
+    out.push({ ...p, state });
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------------------------
+// building a stake note
+// ---------------------------------------------------------------------------------------------
+
+let potComponentPromise: Promise<AccountComponent> | null = null;
+/** The pot component, only used to link its `stake` procedure into the note script. */
+export function potComponent(): Promise<AccountComponent> {
+  potComponentPromise ??= (async () => {
+    const res = await fetch(POT_PACKAGE_URL);
+    if (!res.ok) throw new Error(`cannot load ${POT_PACKAGE_URL}: ${res.status}`);
+    const pkg = Package.deserialize(new Uint8Array(await res.arrayBuffer()));
+    const zero = Word.newFromFelts([felt(0), felt(0), felt(0), felt(0)]);
+    const slots = new StorageSlotArray([
+      ...["market", "asset_id", "oracle", "oracle_root", "feed_key", "p2id_root", "totals", "outcome"].map((n) => StorageSlot.fromValue(`pot::pot::${n}`, zero)),
+      StorageSlot.map("pot::pot::positions", new StorageMap()),
+    ]);
+    return AccountComponent.fromPackage(pkg, slots);
+  })();
+  return potComponentPromise;
+}
+
+export const STAKE_MASM = stakeMasm;
+
+export type StakeDraft = { pot: string; sender: string; side: 1 | 2; units: number; salt: string[]; serial: Word };
+
+export function newDraft(pot: string, sender: string, side: 1 | 2, units: number): StakeDraft {
+  return { pot, sender, side, units, salt: Array.from(randomWord().toU64s(), String), serial: randomWord() };
+}
+
+/** Builds the stake note. Call it again for a second identical note: wasm-bindgen moves value args. */
+export function buildStakeNote(script: NoteScript, d: StakeDraft): Note {
+  const pot = parseId(d.pot);
+  const storage = new NoteStorage(new FeltArray([pot.prefix(), pot.suffix(), felt(d.side), ...d.salt.map(felt)]));
+  const assets = new NoteAssets([new FungibleAsset(parseId(MIDEN_FAUCET), BigInt(d.units) * UNIT)]);
+  const metadata = new NoteMetadata(parseId(d.sender), NoteType.Private, NoteTag.withAccountTarget(parseId(d.pot)));
+  return new Note(assets, metadata, new NoteRecipient(d.serial, script, storage));
+}
+
+export function stakeRequest(note: Note) {
+  return new TransactionRequestBuilder().withOwnOutputNotes(new NoteArray([note])).build();
+}
+
+export const potAddress = (pot: string) => Address.fromAccountId(parseId(pot));
+
+// ---------------------------------------------------------------------------------------------
+// positions in localStorage
+// ---------------------------------------------------------------------------------------------
+
+const KEY = "iknow:positions";
+export function loadPositions(): Position[] {
+  try {
+    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+export function savePosition(p: Position) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify([p, ...loadPositions()]));
+  } catch {
+    /* private mode: the bet still exists on chain */
+  }
+}
+export function markRelayed(noteId: string) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(loadPositions().map((p) => (p.noteId === noteId ? { ...p, relayed: true } : p))));
+  } catch {
+    /* ignore */
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// testnet faucet (guest wallets)
+// ---------------------------------------------------------------------------------------------
+
+/** Requests a public funding note over HTTP; PoW is SHA-256(challenge || nonce_be) below target. */
+export async function requestFaucetTokens(accountId: string): Promise<string> {
+  const get = async (p: string, params?: URLSearchParams) => {
+    const res = await fetch(`${FAUCET_URL}/${p}${params ? `?${params}` : ""}`, { signal: AbortSignal.timeout(30_000) });
+    if (!res.ok) throw new Error(`faucet ${p}: ${res.status}`);
+    return res.json();
+  };
+  const meta = await get("get_metadata");
+  const amount = String(meta.base_amount);
+  const pow = await get("pow", new URLSearchParams({ account_id: accountId, amount }));
+  const challenge = Uint8Array.from((String(pow.challenge).replace(/^0x/, "").match(/../g) ?? []), (b) => parseInt(b, 16));
+  const input = new Uint8Array(challenge.length + 8);
+  input.set(challenge);
+  const view = new DataView(input.buffer);
+  const target = BigInt(pow.target);
+  let nonce = new DataView(crypto.getRandomValues(new Uint8Array(8)).buffer).getBigUint64(0);
+  for (;;) {
+    view.setBigUint64(challenge.length, nonce);
+    const digest = new DataView(await crypto.subtle.digest("SHA-256", input));
+    if (digest.getBigUint64(0) < target) break;
+    nonce = BigInt.asUintN(64, nonce + 1n);
+  }
+  const result = await get("get_tokens", new URLSearchParams({
+    account_id: accountId, is_private_note: "false", asset_amount: amount, challenge: pow.challenge, nonce: String(nonce),
+  }));
+  return result.note_id;
+}

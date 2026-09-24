@@ -87,15 +87,21 @@ export function useSession(): Session {
     }
   }, [bread]);
 
+  /** True while useSessionAccount has a stored wallet it has not loaded into state yet: calling
+   * initialize() then would create (and fund) a second wallet. */
+  const guestStateLoading = () => !!localStorage.getItem("iknow-guest:accountId") && !guest.sessionAccountId;
+
   const startGuest = useCallback(async () => {
     setError(null);
     setMode("guest");
     localStorage.setItem(GUEST_KEY, "1");
+    if (guest.isReady || guestStateLoading()) return;
     try {
-      if (!guest.isReady) await guest.initialize();
+      await guest.initialize();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guest]);
 
   const disconnect = useCallback(async () => {
@@ -105,11 +111,12 @@ export function useSession(): Session {
     setBalance(null);
   }, [mode, bread]);
 
-  // resume a guest session created earlier
+  // resume a guest session created earlier (funding may still be pending); never create a second wallet
   useEffect(() => {
-    if (mode === "guest" && isReady && !guest.isReady && guest.step === "idle") guest.initialize().catch(() => undefined);
+    if (mode !== "guest" || !isReady || guest.isReady || guest.step !== "idle" || guestStateLoading()) return;
+    guest.initialize().catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, isReady]);
+  }, [mode, isReady, guest.sessionAccountId, guest.step]);
 
   return {
     mode,

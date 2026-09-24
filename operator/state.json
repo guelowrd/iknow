@@ -175,5 +175,20 @@
       "asset": "0x18101fa522c174b165efd4f70a0385"
     }
   },
-  "positions": []
+  "positions": [
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x085fb6e3e738ca411bebc70f119424",
+      "side": 1,
+      "units": 3,
+      "salt": [
+        "3440405769205494832",
+        "130464349140198946",
+        "704253707668051261",
+        "1320131721543321589"
+      ],
+      "noteId": "0x9d850c6fff9353fc0cc6be04dd09d8f7247f0cfb6f9ed1e4c0ba6a91228a6677",
+      "claimed": false
+    }
+  ]
 }

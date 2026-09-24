@@ -2,9 +2,25 @@
 
 Private prediction market on Miden. First markets: when will @0xMiden post "Partner Mainnet starts now" on X.
 
-Status (2026-09-25): spec in [docs/feasibility.md](docs/feasibility.md). Contracts, 13 MockChain tests
-and the operator CLI are done, and a full cycle ran on Miden testnet v0.16 (see "Testnet run" below).
-Remaining: the web app (user and admin views), tracked in [tasks/todo.md](tasks/todo.md).
+Status (2026-09-25): first testable version. Three live markets on Miden testnet v0.16 (before Oct 20,
+Oct 28 and Nov 5, 2026), a Winamp-styled web app with Bread wallet and guest wallets, the operator CLI
+running batches in a loop. Spec in [docs/feasibility.md](docs/feasibility.md), progress in
+[tasks/todo.md](tasks/todo.md).
+
+## Try it
+
+```
+cd web && npm install && npm run dev        # http://localhost:5180
+```
+
+Connect with **Bread** (Chrome extension on testnet) or click **guest** for a throwaway wallet funded
+from the testnet faucet (takes about a minute). Pick a date in the playlist, press **iKnow**, choose a
+stake in MIDEN, press **YES** or **NO**. The bet lands in the next batch (the operator loop opens waiting
+notes every 10 minutes), after which the totals and your position update. `#admin` at the end of the
+URL shows the pots and the CLI commands.
+
+Live markets: oracle `0x91456cba0c509191225c89225c385a`, pots `0x8eddfd14bf6626913cb31a58428793`
+(Oct 20), `0x1d20145e5360cfd10671e1f093e97c` (Oct 28), `0xfb13ce79ff4bb7d1310de3bc1c8d3b` (Nov 5).
 
 Design in one paragraph: one pari-mutuel pot per market date. Bettors send private stake notes to the pot;
 the pot opens them in daily batches, so per-side totals are public and verifiable on chain while individual
@@ -23,7 +39,7 @@ contracts/claim-note      Rust note: calls claim with the position tuple
 contracts/settle-script   Rust transaction script: calls settle
 integration/              Rust MockChain tests (miden-testing 0.16)
 operator/                 Node CLI on the Miden SDK: oracle, pots, bets, batches, settle, payout
-web/                      React app, user and admin views (next phase)
+web/                      React app: player, playlist, my bets, admin panel (#admin)
 ```
 
 ## Toolchain
@@ -72,8 +88,15 @@ node cli.mjs wallet new                         # a funded test bettor
 node cli.mjs bet --wallet <id> --pot <id> --side yes|no --units 3
 node cli.mjs pot inbox|batch|status|settle|payout --pot <id>
 node cli.mjs wallet claim --wallet <id>         # winner consumes the payout note
+node cli.mjs oracle resolve --post-id <id> [--account <x user id>] [--pattern <regex>]
 IKNOW_MOCK=1 node mock-cycle.mjs                # the same commands end to end on the SDK's mock chain
+nohup sh operator/loop.sh > operator/loop.log & # batches every 10 min, heartbeat hourly
 ```
+
+`oracle resolve` evaluates "a post by account X whose normalized text matches this regex" and
+publishes the post's snowflake timestamp; defaults are @0xMiden and the exact phrase. The oracle is
+a mock: the admin can publish or override values by hand with `oracle publish`. `pot payout` relays
+each payout note to its target through the transport service, so Bread and guest wallets receive it.
 
 State (account ids, positions learned from opened notes) lives in `operator/state.json`; raw X responses
 in `operator/evidence/`. Contracts are read from `contracts/*/target/miden/release`, so build them first.
@@ -90,6 +113,20 @@ in `operator/evidence/`. Contracts are read from `contracts/*/target/miden/relea
 | Oracle publish (value 2026-11-01T00:00Z) | `0x9d3c8557…6803` |
 | Settle (outcome YES, totals 3/1) | `0xa7bdc46a…6d25` |
 | Payout (winner gets 4 tokens) | `0x87ef4bc3…1748` |
+
+## Web app notes
+
+- The SDK's `useTransaction({ privateNoteTarget })` crashes in its commit wait (`TransactionFilter.ids`,
+  "array contains a value of the wrong type"), so guest notes are relayed with
+  `client.sendPrivateOutputNote` after the transaction; Bread notes with `client.sendPrivateNote`.
+- `useSessionAccount` must get `authScheme: 2` (numeric Falcon): the SDK's default enum value makes
+  `newWallet` hang and every later client call queue behind it.
+- With `useWorker: false` the page freezes for a few seconds while a transaction executes locally;
+  proving is delegated to the testnet prover.
+- The dev server is pinned to port 5180: IndexedDB is per origin and another Miden app on 5173 would
+  share the store.
+- The Bread path (`requestTransaction` with a custom note request) is written per the adapter API but
+  was not exercised end to end here: the extension cannot be driven by automation.
 
 ## SDK gotchas met on the way
 

@@ -24,8 +24,12 @@
 - [x] 4. Operator CLI + testnet (2026-09-25) → full cycle on testnet with two bettor wallets: bets,
       two batches, settle YES through FPI, payout, claim (ids in README). Same cycle runs on the SDK
       mock chain with IKNOW_MOCK=1
-- [ ] 5. Web app (user + admin) → verify: vitest on note building, two-browser testnet run
-- [ ] 6. End to end + README runbook → verify: recorded run with account, note and transaction ids
+- [x] 5. Web app (2026-09-25) → Winamp-styled player, playlist, my bets, admin panel; guest wallet
+      bet placed from the browser, relayed, opened by the operator batch, totals and position state
+      updated on screen. Bread path written, not exercised (extension cannot be automated)
+- [x] 6. First testable version → three live markets, operator loop, README "Try it"
+- [ ] 7. Next: Bread end-to-end check with a real user, payout receipt in the app after a settlement,
+      hosting (no Vercel CLI on this machine), mobile pass, stake-after-lock test
 
 ## Review (Phase 0)
 

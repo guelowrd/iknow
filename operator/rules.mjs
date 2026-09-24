@@ -13,15 +13,18 @@ export const normalize = (text) =>
   text.normalize("NFKC").replace(/https?:\/\/\S+/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
 
 /** Applies rules 1 to 4 and 7 to one syndication post. Edits and deletions are handled by the
- * operator (rules 5 and 6): pass the version you observed, keep the raw JSON as evidence. */
-export function evaluate(post) {
+ * operator (rules 5 and 6): pass the version you observed, keep the raw JSON as evidence.
+ * The question is "a post by `accountId` whose normalized text matches `pattern`" (a regex source,
+ * matched case-insensitively); defaults are @0xMiden and the exact phrase. */
+export function evaluate(post, { accountId = X_USER_ID, pattern } = {}) {
+  const re = new RegExp(pattern ?? PHRASE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
   const author = post?.user?.id_str;
-  if (author !== X_USER_ID) return { qualifies: false, reason: `author ${author} is not @0xMiden` };
+  if (author !== accountId) return { qualifies: false, reason: `author ${author} is not ${accountId}` };
   if (post.retweeted_status || post.retweeted_tweet) return { qualifies: false, reason: "repost of someone else" };
   const parentAuthor = post.parent?.user?.id_str ?? post.in_reply_to_user_id_str;
-  if (parentAuthor && parentAuthor !== X_USER_ID) return { qualifies: false, reason: "reply outside own thread" };
+  if (parentAuthor && parentAuthor !== accountId) return { qualifies: false, reason: "reply outside own thread" };
   const text = normalize(post.note_tweet?.text ?? post.text ?? "");
-  if (!text.includes(PHRASE)) return { qualifies: false, reason: "phrase not found" };
+  if (!re.test(text)) return { qualifies: false, reason: "pattern not found" };
   return { qualifies: true, postId: post.id_str, tsMs: snowflakeMs(post.id_str) };
 }
 
@@ -51,5 +54,8 @@ if (process.argv.includes("--check")) {
   assert(evaluate(miden({ quoted_tweet: { user: { id_str: "42" }, text: "Partner Mainnet starts now" } })).qualifies, "quote with own matching text");
   assert(!evaluate(miden({ text: "so true", quoted_tweet: { user: { id_str: "42" }, text: "Partner Mainnet starts now" } })).qualifies, "quote of someone else's text");
   assert(evaluate(miden({})).tsMs === 1777045455067, "timestamp from snowflake");
+  assert(evaluate(miden({ text: "Partner Mainnet is live!" }), { pattern: "partner mainnet (is live|starts now)" }).qualifies, "custom regex");
+  assert(!evaluate(miden({ user: { id_str: "42" } }), { accountId: "43" }).qualifies, "custom account");
+  assert(evaluate(miden({ user: { id_str: "42" } }), { accountId: "42" }).qualifies, "custom account match");
   console.log("rules ok");
 }

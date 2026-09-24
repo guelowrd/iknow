@@ -46,8 +46,8 @@ function Spectrum({ yes, no }: { yes: number; no: number }) {
 }
 
 function WalletChip({ session }: { session: Session }) {
-  if (session.mode === "bread" && session.address) return <span className="chip"><i className="dot on" />{short(session.address)}<button onClick={session.disconnect}>×</button></span>;
-  if (session.mode === "guest") return <span className="chip"><i className={`dot${session.address ? " on" : ""}`} />guest {session.address ? short(session.address) : session.guestStep}<button onClick={session.disconnect}>×</button></span>;
+  if (session.mode === "bread" && session.address) return <span className="chip"><i className="dot on" /><span className="addr">{short(session.address)}</span><button onClick={session.disconnect}>×</button></span>;
+  if (session.mode === "guest") return <span className="chip"><i className={`dot${session.address ? " on" : ""}`} />guest <span className="addr">{session.address ? short(session.address) : session.guestStep}</span><button onClick={session.disconnect}>×</button></span>;
   return (
     <span className="chip">
       {session.breadInstalled
@@ -100,7 +100,7 @@ export function Player({ market, index, count, session, bet, onPrev, onNext }: P
       </div>
       <div className="body">
         <div className="lcd" aria-live="polite">
-          <div className="marquee"><span>{X_ACCOUNT} posts “{QUESTION}” before {market?.label ?? "…"}?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+          <div className="marquee"><span>{[0, 1].map((i) => <span key={i}>{X_ACCOUNT} posts “{QUESTION}” before {market?.label ?? "…"}?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>)}</span></div>
           {staking && market ? (
             <>
               <div className="big">{fmt(units)}<small>MIDEN</small></div>

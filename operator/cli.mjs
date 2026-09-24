@@ -245,7 +245,7 @@ export const commands = {
   async "oracle resolve"(c, state, args) {
     const postId = arg(args, "post-id");
     const post = await fetchPost(postId);
-    const verdict = evaluate(post);
+    const verdict = evaluate(post, { accountId: arg(args, "account", undefined), pattern: arg(args, "pattern", undefined) });
     const file = path.join(ROOT, "operator", "evidence", `${postId}.json`);
     fs.writeFileSync(file, JSON.stringify({ fetchedAt: new Date().toISOString(), verdict, post }, null, 2));
     console.log(`evidence ${file}`, verdict);
@@ -350,6 +350,21 @@ export const commands = {
     for (const p of due) p.claimed = true;
     saveState(state);
     console.log(`paid ${due.length} position(s) tx ${tx(r)}`);
+    // Hand each payout note to its target: wallets outside this client (Bread, guests) receive it
+    // through the transport service; wallets in this client already have it.
+    if (MOCK) return;
+    for (const out of r.result.executedTransaction().outputNotes().notes()) {
+      const note = out.intoFull();
+      if (!note) continue;
+      const [suffix, prefix] = note.recipient().storage().items();
+      const target = new AccountId(prefix, suffix).toString();
+      try {
+        await c.notes.sendPrivateOutput({ noteId: note.id().toString(), to: id(target) });
+        console.log(`relayed payout ${note.id().toString().slice(0, 12)} to ${target}`);
+      } catch (err) {
+        console.log(`relay to ${target} skipped: ${err.message ?? err}`);
+      }
+    }
   },
   async "fund"(c, state, args) {
     const account = arg(args, "account");

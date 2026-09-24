@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useMiden, useMidenClient } from "@miden-sdk/react";
+import { useConsume, useMiden, useMidenClient } from "@miden-sdk/react";
 import * as sdk from "@miden-sdk/miden-sdk";
 import { Player } from "@/components/Player";
 import { Playlist } from "@/components/Playlist";
@@ -8,7 +8,7 @@ import { Admin } from "@/components/Admin";
 import { useMarkets } from "@/hooks/useMarkets";
 import { useSession } from "@/hooks/useSession";
 import { useBet } from "@/hooks/useBet";
-import { loadPositions, positionStates, type Position } from "@/lib/iknow";
+import { loadPositions, parseId, positionStates, type Position } from "@/lib/iknow";
 
 /** useMidenClient throws until the client exists, so everything below waits for isReady. */
 export default function App() {
@@ -23,6 +23,7 @@ function Main() {
   const client = useMidenClient();
   const { markets, refresh, error } = useMarkets();
   const session = useSession();
+  const consume = useConsume();
   // QA handle: the client object, reachable from the browser console.
   useEffect(() => { (window as unknown as { __iknow: unknown }).__iknow = { client, sdk }; }, [client]);
   const [selected, setSelected] = useState(0);
@@ -54,6 +55,28 @@ function Main() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markets, isReady]);
 
+  // guest wallets pull payout notes from the transport service and consume them
+  const [collecting, setCollecting] = useState(false);
+  const collect = useCallback(async () => {
+    if (!session.address) return;
+    setCollecting(true);
+    try {
+      const address = session.address;
+      await runExclusive(async () => {
+        await client.fetchPrivateNotes();
+        await client.syncState();
+      });
+      const notes = await runExclusive(() => client.getConsumableNotes(parseId(address)));
+      const ids = notes.map((n) => n.inputNoteRecord().id()?.toString()).filter((x): x is string => !!x);
+      if (ids.length > 0) await consume.consume({ accountId: address, notes: ids });
+      await session.refreshBalance();
+    } catch (err) {
+      console.error("collect failed", err);
+    } finally {
+      setCollecting(false);
+    }
+  }, [session, runExclusive, client, consume]);
+
   const market = markets[selected] ?? null;
   return (
     <main className="stack">
@@ -67,7 +90,7 @@ function Main() {
         onNext={() => setSelected((i) => Math.min(markets.length - 1, i + 1))}
       />
       <Playlist markets={markets} selected={selected} onSelect={setSelected} />
-      <MyBets positions={positions} markets={markets} />
+      <MyBets positions={positions} markets={markets} onCollect={session.mode === "guest" ? collect : undefined} collecting={collecting} />
       {admin && <Admin markets={markets} />}
       <div className="tiny">
         {error ? `sync: ${error}` : "Miden testnet · private bets, public totals"}

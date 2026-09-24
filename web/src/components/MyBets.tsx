@@ -10,8 +10,9 @@ const STATE_LABEL: Record<NonNullable<Position["state"]>, string> = {
   refund: "refund",
 };
 
-export function MyBets({ positions, markets }: { positions: Position[]; markets: Market[] }) {
+export function MyBets({ positions, markets, onCollect, collecting }: { positions: Position[]; markets: Market[]; onCollect?: () => void; collecting?: boolean }) {
   const label = (id: string) => markets.find((m) => m.id === id)?.label ?? "?";
+  const paid = positions.some((p) => p.state === "paid" || p.state === "refund");
   return (
     <section className="win">
       <div className="title"><span className="dot" /><span className="name">My bets</span><span className="dot" /></div>
@@ -27,6 +28,9 @@ export function MyBets({ positions, markets }: { positions: Position[]; markets:
             </div>
           ))}
         </div>
+        {paid && onCollect && (
+          <div className="footer"><span>payout sent to your wallet</span><button className="btn link" onClick={onCollect} disabled={collecting}>{collecting ? "collecting…" : "collect"}</button></div>
+        )}
       </div>
     </section>
   );

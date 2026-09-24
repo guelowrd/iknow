@@ -51,9 +51,6 @@ trait Pot {
     /// Called by a claim note: verifies the position and pays the target through a private P2ID note.
     #[account_procedure]
     fn claim(&mut self, target: AccountId, side: Felt, units: Felt, salt: Word, tag: Felt);
-    /// TEMPORARY (phase 1 spike): dumps the 16 FPI output felts into positions[[i,0,0,0]].
-    #[account_procedure]
-    fn debug_fpi(&mut self);
 }
 
 fn position_key(target: AccountId, side: Felt, units: u64, salt: Word) -> Word {
@@ -116,13 +113,15 @@ impl Pot for PotStorage {
         let grace_ms = m[2].as_canonical_u64() * 1000;
         let o = self.oracle.get().into_elements();
         let k = self.feed_key.get().into_elements();
+        // Words cross the FPI boundary reversed in both directions: pass the key as [k3, k2, k1, k0]
+        // and read the returned entry with get(0) = element 3 ... get(3) = element 0.
         let out = tx::execute_foreign_procedure(
             AccountId::new(o[0], o[1]),
             self.oracle_root.get(),
-            tx::ForeignProcedureInputs::new([k[0], k[1], k[2], k[3]]),
+            tx::ForeignProcedureInputs::new([k[3], k[2], k[1], k[0]]),
         );
-        let value_ms = out.get(1).as_canonical_u64();
-        let observed_ms = out.get(3).as_canonical_u64() * 1000;
+        let value_ms = out.get(2).as_canonical_u64();
+        let observed_ms = out.get(0).as_canonical_u64() * 1000;
         let now_ms = (tx::get_block_timestamp() as u64) * 1000;
 
         let outcome = if value_ms != 0 {
@@ -135,22 +134,6 @@ impl Pot for PotStorage {
             panic!()
         };
         self.outcome.set(Felt::new_unchecked(outcome));
-    }
-
-    fn debug_fpi(&mut self) {
-        let o = self.oracle.get().into_elements();
-        let k = self.feed_key.get().into_elements();
-        let out = tx::execute_foreign_procedure(
-            AccountId::new(o[0], o[1]),
-            self.oracle_root.get(),
-            tx::ForeignProcedureInputs::new([k[0], k[1], k[2], k[3]]),
-        );
-        let mut i: u32 = 0;
-        while i < 16 {
-            let key = Word::from([Felt::from_u32(i), felt!(0), felt!(0), felt!(0)]);
-            self.positions.set(key, out.get(i as usize));
-            i += 1;
-        }
     }
 
     fn claim(&mut self, target: AccountId, side: Felt, units: Felt, salt: Word, tag: Felt) {

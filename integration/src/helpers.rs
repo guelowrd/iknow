@@ -259,6 +259,8 @@ pub const UNIT: u64 = 1_000_000;
 pub const DEADLINE_MS: u64 = 1_767_225_600_000;
 pub const GRACE_S: u64 = 30 * 86_400;
 pub const STAKE_MASM: &str = include_str!("../../contracts/stake-note.masm");
+pub const ORACLE_ENTRIES_SLOT: &str = "oracle::oracle::entries";
+pub const FEED_KEY: Word = Word::new([Felt::new_unchecked(0), Felt::new_unchecked(0), Felt::new_unchecked(0), Felt::new_unchecked(100)]);
 
 pub fn pot_slot(name: &str) -> Result<StorageSlotName> {
     Ok(StorageSlotName::new(format!("pot::pot::{name}"))?)
@@ -346,4 +348,72 @@ pub fn stake_note(
             s[3],
         ])?
         .build()?)
+}
+
+/// Deploys an oracle with one seeded entry under `FEED_KEY` and returns it with its pointer.
+pub fn add_oracle(
+    builder: &mut MockChainBuilder,
+    oracle_pkg: &Package,
+    entry: Word,
+) -> Result<(Account, OraclePointer)> {
+    let mut init = InitStorageData::default();
+    init.insert_map_entry(StorageSlotName::new(ORACLE_ENTRIES_SLOT)?, FEED_KEY, entry)?;
+    let component = AccountComponent::from_package(oracle_pkg, &init)?;
+    let oracle = builder.add_account_from_builder(
+        AUTH,
+        _AccountBuilder::new([7_u8; 32]).account_type(AccountType::Public).with_component(component),
+        AccountState::Exists,
+    )?;
+    let pointer = OraclePointer {
+        id_word: Word::from([oracle.id().prefix().as_felt(), oracle.id().suffix(), Felt::ZERO, Felt::ZERO]),
+        root: procedure_root(oracle_pkg, "get-entry")?,
+        feed_key: FEED_KEY,
+    };
+    Ok((oracle, pointer))
+}
+
+/// Oracle entry word `[0, value_ms, 0, observed_at_s]`.
+pub fn entry(value_ms: u64, observed_at_s: u64) -> Result<Word> {
+    word(0, value_ms, 0, observed_at_s)
+}
+
+/// Builds a claim note (Rust package) for a position.
+pub fn claim_note(
+    claim_pkg: &Package,
+    sender: &Account,
+    target: &Account,
+    side: u64,
+    units: u64,
+    salt: Word,
+) -> Result<Note> {
+    let mut rng = RandomCoin::new(salt);
+    let s = salt.as_elements();
+    let tag = miden_client::note::NoteTag::with_account_target(target.id());
+    Ok(NoteBuilder::new(sender.id(), &mut rng)
+        .package(claim_pkg.clone())
+        .note_storage([
+            target.id().prefix().as_felt(),
+            target.id().suffix(),
+            Felt::new(side)?,
+            Felt::new(units)?,
+            s[0],
+            s[1],
+            s[2],
+            s[3],
+            Felt::from(u32::from(tag)),
+        ])?
+        .build()?)
+}
+
+/// Inline assembly transaction script that publishes an entry on the oracle.
+pub fn publish_script(oracle_pkg: &Package, key: Word, entry: Word) -> Result<miden_client::transaction::TransactionScript> {
+    let k = key.as_elements();
+    let e = entry.as_elements();
+    let code = format!(
+        "use miden::core::sys\n\n@transaction_script\npub proc main\n    padw padw\n    push.{}.{}.{}.{}.{}.{}.{}.{}\n    call.::\"miden:oracle/oracle@0.1.0\"::\"publish-entry\"\n    dropw dropw dropw dropw\n    exec.sys::truncate_stack\nend\n",
+        e[3], e[2], e[1], e[0], k[3], k[2], k[1], k[0]
+    );
+    Ok(miden_client::assembly::CodeBuilder::new()
+        .with_dynamically_linked_package(oracle_pkg)?
+        .compile_tx_script(code)?)
 }

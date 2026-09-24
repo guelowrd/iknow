@@ -2,8 +2,9 @@
 
 Private prediction market on Miden. First markets: when will @0xMiden post "Partner Mainnet starts now" on X.
 
-Status (2026-09-24): spec in [docs/feasibility.md](docs/feasibility.md), phase 1 done (contracts compile,
-spikes pass), phases 2 to 6 tracked in [tasks/todo.md](tasks/todo.md).
+Status (2026-09-24): spec in [docs/feasibility.md](docs/feasibility.md). Contracts done and covered by
+13 MockChain tests (phases 1 and 3). Operator CLI, testnet run and web app tracked in
+[tasks/todo.md](tasks/todo.md).
 
 Design in one paragraph: one pari-mutuel pot per market date. Bettors send private stake notes to the pot;
 the pot opens them in daily batches, so per-side totals are public and verifiable on chain while individual
@@ -20,7 +21,6 @@ contracts/pot             Rust account component: stake / settle / claim
 contracts/stake-note.masm Miden Assembly note: pot path calls stake, sender path takes the stake back
 contracts/claim-note      Rust note: calls claim with the position tuple
 contracts/settle-script   Rust transaction script: calls settle
-contracts/fpi-probe       Rust note used by the FPI spike test only
 integration/              Rust MockChain tests (miden-testing 0.16)
 operator/                 Node CLI on the Miden SDK (phase 2)
 web/                      React app, user and admin views (phase 5)
@@ -53,5 +53,9 @@ Build one contract by hand: `cd contracts/pot && "$(dirname "$CARGO_MIDEN")/carg
   note is assembly. Everything that only talks to our own components stays Rust.
 - Account procedures can read the active note (`active_note::get_sender/get_storage/get_initial_assets`),
   so `stake()` takes no arguments and the assembly note needs no argument marshalling.
-- A `Word` returned through FPI arrives reversed in `ForeignProcedureOutputs`: `get(0)` is element 3,
-  `get(3)` is element 0. For an oracle entry `[0, value, 0, observed_at]` read `get(2)` and `get(0)`.
+- Words cross the FPI boundary reversed in both directions: pass a key as `[k3, k2, k1, k0]` and read
+  a returned `[0, value, 0, observed_at]` as `get(2)` and `get(0)`.
+- Inline assembly transaction scripts on 0.16 are a module with `@transaction_script pub proc main`,
+  compiled by `CodeBuilder::compile_tx_script` with the callee package linked dynamically. Calls into a
+  compiled component take their arguments first-parameter-on-top: `push.e3.e2.e1.e0.k3.k2.k1.k0` for
+  `publish_entry(key, entry)`, padded to 16 with `padw padw` below and dropped after.

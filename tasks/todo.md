@@ -17,9 +17,10 @@
       commitments verified on chain
 - [ ] 2. Oracle contract + operator oracle commands → verify: deployed on testnet, `oracle read` shows
       the entry, `node operator/rules.mjs` self-check passes
-- [ ] 3. Pot + stake note + claim note + settle script → verify: batch totals and commitments, reclaim,
-      stake after lock fails, settle YES / NO / pending / VOID, claim math incl. lopsided pot, double
-      claim fails, wrong tuple fails
+- [x] 3. Pot + stake note + claim note + settle script (2026-09-24) → 13 MockChain tests: batch totals
+      and commitments, reclaim, oracle write-once and heartbeat, settle YES / NO / pending / VOID,
+      pro-rata claims, loser / wrong tuple / double / early claims fail, operator claims on behalf,
+      VOID refunds. Not yet covered: stake after lock height (needs a block-number gate test)
 - [ ] 4. Operator CLI + testnet → verify: full cycle from the CLI with two bettor wallets
 - [ ] 5. Web app (user + admin) → verify: vitest on note building, two-browser testnet run
 - [ ] 6. End to end + README runbook → verify: recorded run with account, note and transaction ids

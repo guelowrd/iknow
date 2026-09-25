@@ -37,7 +37,10 @@
       step (multisig needs a declared fee conversion salt): stake requests for Bread now carry one.
       Connect dialog BREAD / GUEST, close crosses top left, batch countdown in prediction details,
       operator opens a batch early once 5 predictions wait, pots carry short titles
-- [ ] 8. Next: Bread end-to-end with a real user (predict again after the salt fix, withdraw, SAVE), a real X post test from a
+- [x] 10. Bread predict verified by Gaylord (2026-09-25, NO 8 MIDEN on the Oct 28 pot): the salt fix
+      holds, Bread delivers the note itself, the app's own relay was a rejected duplicate and it ran
+      before the position was saved (fixed: no relay for Bread, save first)
+- [ ] 8. Next: Bread withdraw and SAVE with a real user, recover-from-chain for positions the app lost, a real X post test from a
       personal account (create a pot with that account id + regex in Admin, then "resolve from post"),
       payout receipt in the app after a settlement, admin lockdown, hosting, mobile pass,
       stake-after-lock test

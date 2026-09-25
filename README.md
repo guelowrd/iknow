@@ -132,7 +132,7 @@ in `operator/evidence/`. Contracts are read from `contracts/*/target/miden/relea
 
 - The SDK's `useTransaction({ privateNoteTarget })` crashes in its commit wait (`TransactionFilter.ids`,
   "array contains a value of the wrong type"), so guest notes are relayed with
-  `client.sendPrivateOutputNote` after the transaction; Bread notes with `client.sendPrivateNote`.
+  `client.sendPrivateOutputNote` after the transaction.
 - `useSessionAccount` must get `authScheme: 2` (numeric Falcon): the SDK's default enum value makes
   `newWallet` hang and every later client call queue behind it.
 - With `useWorker: false` the page freezes for a few seconds while a transaction executes locally;
@@ -143,8 +143,10 @@ in `operator/evidence/`. Contracts are read from `contracts/*/target/miden/relea
   a custom request that declares none ("failed to execute transaction at anchor ... fee_conversion_salt"
   at the Guardian step), so the stake request built for Bread carries `withFeeConversionSalt(random word)`.
   Guests are single-sig and need none.
-- The Bread path (predict, withdraw, SAVE) is written per the adapter API but not exercised by
-  automation: the extension cannot be driven from here.
+- Bread delivers its private output notes to the recipient address given in the custom transaction,
+  so the app does not relay them. A second send of the same note is rejected by the transport
+  (unique constraint), which grpc-web reports as "malformed response" with an empty body. Verified
+  with a real Bread prediction on 2026-09-25. Withdraw and SAVE through Bread are still unexercised.
 
 ## SDK gotchas met on the way
 

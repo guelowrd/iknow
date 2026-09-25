@@ -51,7 +51,7 @@ function schedule() {
   }, nextBatch() - Date.now() + 2_000);
 }
 
-// X is read every two minutes; a qualifying post is published to the oracle at once
+// X is read every five minutes; a qualifying post is published to the oracle at once
 async function watch() {
   try { const r = await run("oracle watch"); const hit = r.filter((x) => /qualifies/.test(x)); if (hit.length) log("watch", hit.join(" | ")); } catch (err) { log("watch failed", err.message ?? err); }
 }
@@ -90,5 +90,4 @@ http.createServer(async (req, res) => {
 }).listen(PORT, "127.0.0.1", () => log(`operator server on http://127.0.0.1:${PORT}, next batch ${new Date(nextBatch()).toISOString()}`));
 schedule();
 setInterval(() => batchAll(BATCH_MIN), 60_000);
-setInterval(watch, 120_000);
-watch();
+setInterval(watch, 300_000); // the syndication endpoint answers 429 when read more often

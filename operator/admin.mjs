@@ -58,7 +58,8 @@ let watchPausedUntil = Date.now() + Number(process.env.IKNOW_WATCH_PAUSE_MS ?? 0
 async function watch() {
   if (Date.now() < watchPausedUntil) return;
   try {
-    const r = await run("oracle watch", ["--only", String(watchTurn++)]);
+    // through the X API every profile is read each tick; the public widget gets one profile per tick
+    const r = await run("oracle watch", process.env.X_BEARER_TOKEN ? [] : ["--only", String(watchTurn++)]);
     const hit = r.filter((x) => /qualifies/.test(x));
     if (hit.length) log("watch", hit.join(" | "));
   } catch (err) {

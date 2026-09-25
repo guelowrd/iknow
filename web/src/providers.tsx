@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { MidenProvider } from "@miden-sdk/react";
 import { MidenFiSignerProvider } from "@miden-sdk/miden-wallet-adapter-react";
-import { WalletAdapterNetwork } from "@miden-sdk/miden-wallet-adapter-base";
+import { AllowedPrivateData, PrivateDataPermission, WalletAdapterNetwork } from "@miden-sdk/miden-wallet-adapter-base";
 import { NOTE_TRANSPORT_URL, PROVER, RPC_URL } from "@/config";
 
 // MidenProvider stays OUTSIDE the wallet provider: the app reads pots and relays notes with its
@@ -14,7 +14,15 @@ export function AppProviders({ children }: { children: ReactNode }) {
       config={{ rpcUrl: RPC_URL, prover: PROVER, noteTransportUrl: NOTE_TRANSPORT_URL, useWorker: false }}
       loadingComponent={<div className="tiny">loading…</div>}
     >
-      <MidenFiSignerProvider appName="iKnow" network={WalletAdapterNetwork.Testnet} autoConnect={false}>
+      {/* Assets are shared automatically once granted at connect: with the default UponRequest every
+          balance read opened a Bread popup. */}
+      <MidenFiSignerProvider
+        appName="iKnow"
+        network={WalletAdapterNetwork.Testnet}
+        autoConnect={false}
+        privateDataPermission={PrivateDataPermission.Auto}
+        allowedPrivateData={AllowedPrivateData.Assets}
+      >
         {children}
       </MidenFiSignerProvider>
     </MidenProvider>

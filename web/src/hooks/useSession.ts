@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMiden, useMidenClient, useSessionAccount } from "@miden-sdk/react";
 import { useMidenFiWallet } from "@miden-sdk/miden-wallet-adapter-react";
 import { WalletReadyState } from "@miden-sdk/miden-wallet-adapter-base";
@@ -55,10 +55,17 @@ export function useSession(): Session {
   const breadInstalled = readyState === WalletReadyState.Installed || readyState === WalletReadyState.Loadable;
   const address = mode === "bread" ? bread.address : mode === "guest" ? guest.sessionAccountId : null;
 
+  // one Bread asset request at a time: StrictMode and provider state changes re-run the effect below
+  const breadRef = useRef(bread);
+  breadRef.current = bread;
+  const reading = useRef(false);
+  const breadAddress = bread.address;
   const refreshBalance = useCallback(async () => {
+    if (mode === "bread" && reading.current) return;
+    reading.current = true;
     try {
-      if (mode === "bread" && bread.requestAssets) {
-        const assets = await bread.requestAssets();
+      if (mode === "bread" && breadAddress && breadRef.current.requestAssets) {
+        const assets = await breadRef.current.requestAssets();
         const faucet = parseId(MIDEN_FAUCET).toString();
         const hit = assets.find((a) => parseId(a.faucetId).toString() === faucet);
         const raw = hit ? BigInt(hit.amount) : 0n;
@@ -78,8 +85,10 @@ export function useSession(): Session {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      reading.current = false;
     }
-  }, [mode, bread, guest.sessionAccountId, isReady, runExclusive, client]);
+  }, [mode, breadAddress, guest.sessionAccountId, isReady, runExclusive, client]);
 
   useEffect(() => {
     refreshBalance();

@@ -30,6 +30,7 @@ export function ConnectDialog({ session, onClose }: { session: Session; onClose:
     <div className="overlay" role="dialog" aria-modal="true" aria-label="connect">
       <Win title="Connect" className="dialog" onClose={onClose}>
         <div className="body">
+          <img className="logo" src="/ik.svg" alt="iKnow" />
           <div className="choice">
             {session.breadInstalled
               ? <button className="btn wide go" onClick={bread} disabled={busy}>{busy ? "waiting for Bread…" : "BREAD"}</button>

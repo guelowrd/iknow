@@ -14,8 +14,8 @@ import { loadPositions, parseId, positionStates, type Position } from "@/lib/ikn
 /** useMidenClient throws until the client exists, so everything below waits for isReady. */
 export default function App() {
   const { isReady, error: midenError } = useMiden();
-  if (midenError) return <main className="stack"><div className="tiny">client error: {midenError.message}</div></main>;
-  if (!isReady) return <main className="stack"><div className="tiny">starting…</div></main>;
+  if (midenError) return <main className="stack boot"><img className="logo" src="/ik.svg" alt="iKnow" /><div className="tiny">client error: {midenError.message}</div></main>;
+  if (!isReady) return <main className="stack boot"><img className="logo blink" src="/ik.svg" alt="iKnow" /><div className="tiny">starting…</div></main>;
   return <Main />;
 }
 

@@ -107,7 +107,7 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
 
   const bar = (
     <>
-      <button className={`dot play${audio.playing ? " on" : ""}`} onClick={audio.toggle} aria-label={audio.playing ? "stop music" : "play music"} title={audio.playing ? "stop" : "play"} />
+      <button className={`play${audio.playing ? " on" : ""}`} onClick={audio.toggle} aria-label={audio.playing ? "stop music" : "play music"} title={audio.playing ? "stop" : "play"}><img src="/ik.svg" alt="" /></button>
       <span className="name"><WalletChip session={session} onSave={onSave} onConnect={onConnect} /></span>
       <span className="spacer" />
     </>

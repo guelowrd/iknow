@@ -73,8 +73,16 @@ a { color: var(--lcd); }
 }
 .title .dot { width: 8px; height: 8px; border: 1px solid var(--chrome-light); background: var(--chrome-dark); padding: 0; }
 .title .dot.on { background: var(--lcd); box-shadow: 0 0 6px var(--lcd); }
-.title .dot.play { width: 12px; height: 12px; cursor: pointer; }
-.title .dot.play:hover { border-color: var(--lcd); }
+/* the iK logo at the top left is the hidden music toggle, lit while playing */
+.title .play { width: 14px; height: 14px; padding: 0; border: 0; background: none; display: inline-flex; }
+.title .play img { width: 14px; height: 14px; display: block; opacity: 0.85; }
+.title .play:hover img, .title .play.on img { opacity: 1; }
+.title .play.on img { filter: drop-shadow(0 0 3px var(--lcd)); }
+.logo { display: block; margin: 0 auto 8px; width: 32px; height: 32px; }
+.boot { align-items: center; justify-content: center; min-height: 60vh; }
+.boot .logo { width: 48px; height: 48px; margin: 0; }
+.blink { animation: blink 1.2s steps(2, jump-none) infinite; }
+@keyframes blink { 50% { opacity: 0.35; } }
 .title .spacer { width: 12px; }
 .close {
   flex: none; width: 14px; height: 14px; padding: 0; margin-right: 6px;

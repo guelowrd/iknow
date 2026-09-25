@@ -5,6 +5,7 @@ import type { Session } from "@/hooks/useSession";
 import type { PredictStatus } from "@/hooks/usePrediction";
 import { useAudio } from "@/hooks/useAudio";
 import { useNow } from "@/hooks/useNow";
+import { useSkin } from "@/hooks/useSkin";
 
 type Props = {
   market: Market | null;
@@ -77,6 +78,7 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
   const [staking, setStaking] = useState(false);
   const [units, setUnits] = useState(1);
   const audio = useAudio();
+  const skin = useSkin();
   const max = Math.max(1, Math.min(session.balance ?? 1, 1000));
   const canPredict = !!market && !market.outcome && !!session.address && (session.balance ?? 0) >= 1;
   const now = useNow();
@@ -107,9 +109,13 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
 
   const bar = (
     <>
-      <button className={`play${audio.playing ? " on" : ""}`} onClick={audio.toggle} aria-label={audio.playing ? "stop music" : "play music"} title={audio.playing ? "stop" : "play"}><img src="/ik.svg" alt="" /></button>
+      <button className="skin" onClick={skin.toggle} aria-label="switch skin" title={`skin: ${skin.skin === "lcd" ? "iKnow" : "classic"}`}><img src="/ik.svg" alt="" /></button>
       <span className="name"><WalletChip session={session} onSave={onSave} onConnect={onConnect} /></span>
-      <span className="spacer" />
+      <button className={`play${audio.playing ? " on" : ""}`} onClick={audio.toggle} aria-label={audio.playing ? "stop music" : "play music"} title={audio.playing ? "stop" : "play"}>
+        {audio.playing
+          ? <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden><rect x="1" y="1" width="6" height="6" fill="currentColor" /></svg>
+          : <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden><path d="M1.5 0.5 L7.5 4 L1.5 7.5 Z" fill="currentColor" /></svg>}
+      </button>
     </>
   );
 

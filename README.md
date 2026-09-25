@@ -18,7 +18,8 @@ throwaway wallet funded from the testnet faucet in about a minute. Pick a pot, p
 a stake in MIDEN, press **YES** or **NO**. The prediction lands in the next batch (the operator server
 opens waiting notes at every 10-minute mark, or as soon as 5 are waiting), after which the totals and your position update. Click a
 prediction for its details; a pending one can be withdrawn. Guests can move their MIDEN to Bread with
-the red **SAVE** button. Double-click a title bar to shade a window; the top-left LED plays music.
+the red **SAVE** button. Double-click a title bar to shade a window. The iK logo at the top left switches between the two
+skins (dark iKnow, classic Winamp); the play button at the top right plays music.
 
 `#admin` at the end of the URL shows the operator view, live when the operator server runs:
 

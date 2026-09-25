@@ -17,9 +17,42 @@
   --gold: #ffd500;
   --select: #0000c6;
   --page: #101014;
+  --btn: var(--chrome);
+  --btn-light: var(--chrome-light);
+  --btn-dark: var(--chrome-dark);
+  --btn-text: var(--chrome-text);
   --font-ui: "Silkscreen", "Courier New", monospace;
   --font-lcd: "VT323", "Courier New", monospace;
 }
+/* "classic" skin: the Winamp base skin. Blue-gray brushed body, striped light title bars, pure
+   green on black display, silver bevel buttons with dark glyphs. Same structure, other paint. */
+:root[data-skin="classic"] {
+  --chrome: #33364a;
+  --chrome-light: #666b8e;
+  --chrome-dark: #121319;
+  --chrome-text: #dcdff0;
+  --title-a: #30334a;
+  --title-b: #9aa0c4;
+  --lcd-bg: #000;
+  --lcd: #00ff00;
+  --lcd-dim: #00a800;
+  --yes: #00ff00;
+  --no: #ff4a4a;
+  --gold: #ffcc00;
+  --select: #0000c6;
+  --page: #0c0c12;
+  --btn: #c9cbd6;
+  --btn-light: #f4f5fa;
+  --btn-dark: #70738a;
+  --btn-text: #14151d;
+}
+:root[data-skin="classic"] .win {
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 3px);
+}
+:root[data-skin="classic"] .title { letter-spacing: 2px; text-shadow: 0 1px 0 #000; }
+:root[data-skin="classic"] .btn.go { color: var(--btn-text); text-shadow: none; }
+:root[data-skin="classic"] .btn.yes { color: #087a12; }
+:root[data-skin="classic"] .btn.no { color: #b01818; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --page: #101014; }
 }
@@ -73,11 +106,19 @@ a { color: var(--lcd); }
 }
 .title .dot { width: 8px; height: 8px; border: 1px solid var(--chrome-light); background: var(--chrome-dark); padding: 0; }
 .title .dot.on { background: var(--lcd); box-shadow: 0 0 6px var(--lcd); }
-/* the iK logo at the top left is the hidden music toggle, lit while playing */
-.title .play { width: 14px; height: 14px; padding: 0; border: 0; background: none; display: inline-flex; }
-.title .play img { width: 14px; height: 14px; display: block; opacity: 0.85; }
-.title .play:hover img, .title .play.on img { opacity: 1; }
-.title .play.on img { filter: drop-shadow(0 0 3px var(--lcd)); }
+/* top left: the iK logo switches skins; top right: the music toggle, lit while playing */
+.title .skin { width: 14px; height: 14px; padding: 0; border: 0; background: none; display: inline-flex; flex: none; }
+.title .skin img { width: 14px; height: 14px; display: block; opacity: 0.85; }
+.title .skin:hover img { opacity: 1; }
+.title .play {
+  flex: none; width: 14px; height: 14px; padding: 0; margin-left: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--btn); border: 1px solid var(--btn-dark);
+  box-shadow: inset 1px 1px 0 var(--btn-light), inset -1px -1px 0 var(--btn-dark);
+  color: var(--btn-text);
+}
+.title .play.on { color: var(--lcd); }
+:root[data-skin="classic"] .title .play.on { color: #087a12; }
 .logo { display: block; margin: 0 auto 8px; width: 32px; height: 32px; }
 .boot { align-items: center; justify-content: center; min-height: 60vh; }
 .boot .logo { width: 48px; height: 48px; margin: 0; }
@@ -87,12 +128,12 @@ a { color: var(--lcd); }
 .close {
   flex: none; width: 14px; height: 14px; padding: 0; margin-right: 6px;
   display: inline-flex; align-items: center; justify-content: center;
-  background: var(--chrome); border: 1px solid var(--chrome-dark);
-  box-shadow: inset 1px 1px 0 var(--chrome-light), inset -1px -1px 0 var(--chrome-dark);
-  color: var(--chrome-text);
+  background: var(--btn); border: 1px solid var(--btn-dark);
+  box-shadow: inset 1px 1px 0 var(--btn-light), inset -1px -1px 0 var(--btn-dark);
+  color: var(--btn-text);
 }
 .close:hover { color: var(--no); }
-.close:active { box-shadow: inset -1px -1px 0 var(--chrome-light), inset 1px 1px 0 var(--chrome-dark); }
+.close:active { box-shadow: inset -1px -1px 0 var(--btn-light), inset 1px 1px 0 var(--btn-dark); }
 .win.shade .title { border-bottom: 0; }
 .body { padding: 8px; }
 
@@ -166,16 +207,16 @@ a { color: var(--lcd); }
 .controls { display: flex; gap: 4px; margin-top: 6px; align-items: stretch; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
-  background: var(--chrome);
-  border: 1px solid var(--chrome-dark);
-  box-shadow: inset 1px 1px 0 var(--chrome-light), inset -1px -1px 0 var(--chrome-dark);
-  color: var(--chrome-text);
+  background: var(--btn);
+  border: 1px solid var(--btn-dark);
+  box-shadow: inset 1px 1px 0 var(--btn-light), inset -1px -1px 0 var(--btn-dark);
+  color: var(--btn-text);
   padding: 6px 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
   min-width: 34px;
 }
-.btn:active:not(:disabled) { box-shadow: inset -1px -1px 0 var(--chrome-light), inset 1px 1px 0 var(--chrome-dark); }
+.btn:active:not(:disabled) { box-shadow: inset -1px -1px 0 var(--btn-light), inset 1px 1px 0 var(--btn-dark); }
 .btn.wide { flex: 1; font-size: 13px; padding: 10px; }
 .btn.go { color: var(--lcd); text-shadow: 0 0 8px rgba(53,255,90,0.6); text-transform: none; font-family: var(--font-lcd); font-size: 24px; padding: 6px 10px; }
 .btn.yes { flex: 1; color: var(--yes); font-size: 15px; padding: 12px; }
@@ -193,12 +234,12 @@ a { color: var(--lcd); }
 }
 .slider input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 16px; height: 20px;
-  background: var(--chrome); border: 1px solid var(--chrome-dark);
-  box-shadow: inset 1px 1px 0 var(--chrome-light), inset -1px -1px 0 var(--chrome-dark);
+  background: var(--btn); border: 1px solid var(--btn-dark);
+  box-shadow: inset 1px 1px 0 var(--btn-light), inset -1px -1px 0 var(--btn-dark);
 }
 .slider input[type="range"]::-moz-range-thumb {
   width: 16px; height: 20px; border-radius: 0;
-  background: var(--chrome); border: 1px solid var(--chrome-dark);
+  background: var(--btn); border: 1px solid var(--btn-dark);
 }
 .slider .amount { font-family: var(--font-lcd); font-size: 26px; color: var(--lcd); min-width: 110px; text-align: right; }
 

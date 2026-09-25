@@ -202,6 +202,7 @@ a { color: var(--lcd); }
   box-shadow: inset 1px 1px 0 var(--btn-light), inset -1px -1px 0 var(--btn-dark);
   color: var(--btn-text);
 }
+.title .play + .play { margin-left: 2px; }
 .title .play.on { color: var(--lcd); }
 :root[data-skin="classic"] .title .play.on { color: #087a12; }
 .logo { display: block; margin: 0 auto 8px; width: 32px; height: 32px; }

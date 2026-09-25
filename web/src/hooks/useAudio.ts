@@ -2,12 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const TRACKS = ["/audio/prove-it.mp3", "/audio/circuit-chase.mp3", "/audio/nullified.mp3"];
 
-/** Hidden player behind the title-bar LED: plays the three tracks in a loop, feeds the spectrum. */
+/** The title-bar player: three tracks in a loop, play/pause, next and previous, feeds the spectrum. */
 export function useAudio() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const contextRef = useRef<AudioContext | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [started, setStarted] = useState(false);
   const [track, setTrack] = useState(0);
 
   useEffect(() => {
@@ -23,23 +24,26 @@ export function useAudio() {
     };
   }, []);
 
-  // play the current track whenever it changes while playing
+  // play the current track whenever it changes while playing; a resume keeps its position
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !playing) return;
-    audio.src = TRACKS[track];
+    if (!audio.src.endsWith(TRACKS[track])) audio.src = TRACKS[track];
     audio.play().catch(() => setPlaying(false));
   }, [track, playing]);
+
+  const next = useCallback(() => setTrack((i) => (i + 1) % TRACKS.length), []);
+  const prev = useCallback(() => setTrack((i) => (i + TRACKS.length - 1) % TRACKS.length), []);
 
   const toggle = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
     if (playing) {
       audio.pause();
-      audio.currentTime = 0;
       setPlaying(false);
       return;
     }
+    setStarted(true);
     if (!contextRef.current) {
       const context = new AudioContext();
       const node = context.createAnalyser();
@@ -54,5 +58,5 @@ export function useAudio() {
     setPlaying(true);
   }, [playing]);
 
-  return { playing, analyser, toggle, track };
+  return { playing, started, analyser, toggle, next, prev, track };
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Close, Win } from "./Win";
 import { BATCH_MIN, EXPLORER_URL } from "@/config";
-import { fmt, mmss, nextBatchMs, payoutIfWins, short, type Market, type Position } from "@/lib/iknow";
+import { fmt, mmss, nextBatchMs, parseId, payoutIfWins, short, type Market, type Position } from "@/lib/iknow";
 import { useNow } from "@/hooks/useNow";
 
 const STATE_LABEL: Record<NonNullable<Position["state"]>, string> = {
@@ -13,7 +13,7 @@ const STATE_LABEL: Record<NonNullable<Position["state"]>, string> = {
   refund: "refund",
 };
 
-type Props = { positions: Position[]; markets: Market[]; onWithdraw: (p: Position) => Promise<void> };
+type Props = { positions: Position[]; markets: Market[]; onWithdraw: (p: Position) => Promise<void>; connected: boolean; guestId: string | null };
 type Group = { key: string; items: Position[]; state: NonNullable<Position["state"]> };
 
 /** Same pot, side and state gather into one line; pending ones stay apart (each can be withdrawn). */
@@ -32,13 +32,14 @@ function gather(ps: Position[]): Group[] {
 const when = (ms: number) => new Date(ms).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
 /** One row per topic; the detail view gathers that topic's predictions, each line opening its notes. */
-export function MyPredictions({ positions, markets, onWithdraw }: Props) {
+export function MyPredictions({ positions, markets, onWithdraw, connected, guestId }: Props) {
   const [open, setOpen] = useState<string | null>(null);
   const [more, setMore] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const now = useNow();
   const marketOf = (p: Position) => markets.find((m) => m.id === p.market);
+  const via = (p: Position) => (guestId && parseId(p.wallet).toString() === parseId(guestId).toString() ? "guest" : "Bread");
   const topicOf = (p: Position) => marketOf(p)?.topic ?? "…";
   const potIndex = (p: Position) => { const i = markets.findIndex((m) => m.id === p.market); return i < 0 ? markets.length : i; };
   // topics and pots in the order of the topics window
@@ -69,7 +70,7 @@ export function MyPredictions({ positions, markets, onWithdraw }: Props) {
     <Win title="My predictions">
       <div className="body">
         <div className="list">
-          {positions.length === 0 && <div className="empty">none yet</div>}
+          {positions.length === 0 && <div className="empty">{connected ? "none yet" : "connect to see your predictions"}</div>}
           {topics.map((topic) => {
             const ps = inTopic(topic);
             const pending = ps.filter((p) => (p.state ?? "pending") === "pending").length;
@@ -103,7 +104,7 @@ export function MyPredictions({ positions, markets, onWithdraw }: Props) {
                   )}
                   {more === g.key && g.items.map((p) => (
                     <div key={p.noteId} className="kv more">
-                      <span>{when(p.at)} · {fmt(p.units)} MIDEN</span>
+                      <span>{when(p.at)} · {fmt(p.units)} MIDEN · {via(p)}</span>
                       <span>
                         {p.txId && <><a href={`${EXPLORER_URL}/tx/${p.txId}`} target="_blank" rel="noreferrer">tx {short(p.txId)}</a> · </>}
                         <a href={`${EXPLORER_URL}/note/${p.noteId}`} target="_blank" rel="noreferrer">note {short(p.noteId)}</a>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMiden, useMidenClient } from "@miden-sdk/react";
 import { Player } from "@/components/Player";
 import { Pots } from "@/components/Pots";
@@ -10,7 +10,7 @@ import { useMarkets } from "@/hooks/useMarkets";
 import { useSession } from "@/hooks/useSession";
 import { usePrediction } from "@/hooks/usePrediction";
 import { useForwarding } from "@/hooks/useForwarding";
-import { loadPositions, positionStates, type Position } from "@/lib/iknow";
+import { loadPositions, parseId, positionStates, type Position } from "@/lib/iknow";
 
 /** useMidenClient throws until the client exists, so everything below waits for isReady. */
 export default function App() {
@@ -64,6 +64,14 @@ function Main() {
   // the guest wallet is run by the app: payouts are opened, and forwarded to Bread once linked
   const forwarding = useForwarding(session, prediction.relayOutputNote, prediction.status === "idle" && !saving && !connecting);
 
+  // the list follows the connected wallet: a guest sees its own, Bread sees its own plus the
+  // browser's guest (which it runs), nobody connected sees nothing
+  const mine = useMemo(() => {
+    if (!session.address) return [];
+    const wallets = [session.address, session.mode === "bread" ? session.guestId : null].filter((a): a is string => !!a).map((a) => parseId(a).toString());
+    return positions.filter((p) => wallets.includes(parseId(p.wallet).toString()));
+  }, [positions, session.address, session.mode, session.guestId]);
+
   const market = markets[selected] ?? null;
   return (
     <main className="stack">
@@ -80,7 +88,7 @@ function Main() {
         notice={forwarding.notice}
       />
       <Pots markets={markets} selected={selected} onSelect={setSelected} />
-      <MyPredictions positions={positions} markets={markets} onWithdraw={withdraw} />
+      <MyPredictions positions={mine} markets={markets} onWithdraw={withdraw} connected={!!session.address} guestId={session.guestId} />
       {admin && <Admin markets={markets} onChanged={refresh} />}
       {connecting && <ConnectDialog session={session} onClose={() => setConnecting(false)} />}
       {saving && <SaveDialog session={session} onSave={forwarding.forwardNow} onClose={() => setSaving(false)} />}

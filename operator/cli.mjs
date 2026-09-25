@@ -304,7 +304,7 @@ export const commands = {
       if (!f.handle) { report.push(`@? (${f.account}): no handle, not watched`); continue; }
       const { valueMs } = await readOracleEntry(c, state.oracle.id, potFeedKey(state.pots[f.pot]));
       if (valueMs) { report.push(`@${f.handle}: resolved already`); continue; }
-      const posts = (await fetchTimeline(f.handle)).filter((t) => snowflakeMs(t.id_str) >= f.sinceMs);
+      const posts = (await fetchTimeline(f.handle, f.account)).filter((t) => snowflakeMs(t.id_str) >= f.sinceMs);
       const hits = posts.map((t) => evaluate(t, { accountId: f.account, pattern: f.pattern })).filter((v) => v.qualifies).sort((a, b) => a.tsMs - b.tsMs);
       if (hits.length === 0) { report.push(`@${f.handle}: ${posts.length} posts since ${new Date(f.sinceMs).toISOString()}, no match`); continue; }
       const verdict = await commands["oracle resolve"](c, state, ["--pot", f.pot, "--post-id", hits[0].postId]);

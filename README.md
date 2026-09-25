@@ -38,7 +38,8 @@ X post id or URL, or override it ("announced now"). New pots are written to `web
 which the app reads.
 
 Resolution is automatic: the operator reads each watched profile's recent posts every two minutes
-(the public syndication timeline, no API key), and the earliest post since the topic's first pot
+(the X API v2 when `X_BEARER_TOKEN` is set, else the public syndication timeline, which rate-limits
+at a few reads per few minutes), and the earliest post since the topic's first pot
 that matches the topic's regex is published to the oracle. At every 10-minute mark the operator then
 settles every pot it can (a published post, or a deadline passed with a fresh heartbeat) and pays the
 winners out, so a matching post is money in wallets within about ten minutes.

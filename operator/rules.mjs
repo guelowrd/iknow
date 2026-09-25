@@ -37,9 +37,18 @@ export async function fetchPost(id) {
   return res.json();
 }
 
-/** Recent posts of a profile from the syndication timeline widget (no auth, unofficial), shaped like
- * tweet-result posts so `evaluate` applies. */
-export async function fetchTimeline(handle) {
+/** Recent posts of a profile, shaped like tweet-result posts so `evaluate` applies. With
+ * X_BEARER_TOKEN set, the X API v2 is used (metered, reliable); otherwise the syndication timeline
+ * widget (no auth, unofficial, answers 429 when read more than a few times in a few minutes). */
+export async function fetchTimeline(handle, accountId) {
+  const token = process.env.X_BEARER_TOKEN;
+  if (token && accountId) {
+    const url = `https://api.x.com/2/users/${accountId}/tweets?max_results=20&exclude=retweets&tweet.fields=created_at,in_reply_to_user_id,note_tweet`;
+    const res = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error(`x api ${res.status} for ${accountId}`);
+    const data = (await res.json()).data ?? [];
+    return data.map((t) => ({ id_str: t.id, text: t.text, note_tweet: t.note_tweet, user: { id_str: accountId }, in_reply_to_user_id_str: t.in_reply_to_user_id }));
+  }
   const res = await fetch(`https://syndication.twitter.com/srv/timeline-profile/screen-name/${encodeURIComponent(handle)}`, { headers: { "user-agent": "Mozilla/5.0" } });
   if (!res.ok) throw new Error(`timeline ${res.status} for @${handle}`);
   const m = (await res.text()).match(/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/s);

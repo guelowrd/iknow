@@ -1,11 +1,12 @@
 // Operator server: one process owning the operator store. Serves the admin API for the web app's
-// admin view (localhost only) and runs the schedule: batches on every pot at each 10-minute mark,
-// an oracle heartbeat at the top of each hour. Run: nohup node admin.mjs > admin.log 2>&1 &
+// admin view (localhost only) and runs the schedule: batches on every pot at each 10-minute mark
+// (earlier once BATCH_MIN notes wait, checked every minute), an oracle heartbeat at the top of each hour. Run: nohup node admin.mjs > admin.log 2>&1 &
 import http from "node:http";
 import { client, commands, loadState } from "./cli.mjs";
 
 const PORT = Number(process.env.IKNOW_ADMIN_PORT ?? 5181);
 const BATCH_MS = 10 * 60_000;
+const BATCH_MIN = 5; // web/src/config.ts BATCH_MIN shows the same number
 const c = await client();
 
 // commands share the client, so they run one at a time
@@ -26,14 +27,17 @@ async function state() {
     try { status = await run("pot status", ["--pot", id]); } catch (err) { status = { error: err.message ?? String(err) }; }
     pots.push({ id, label: p.label, question: p.question, deadlineMs: p.deadlineMs, lockHeight: p.lockHeight, account: p.account, pattern: p.pattern, feedKey: p.feedKey, status });
   }
-  return { oracle: s.oracle?.id, pots, nextBatchMs: nextBatch() };
+  return { oracle: s.oracle?.id, pots, nextBatchMs: nextBatch(), batchMin: BATCH_MIN };
 }
 
 const nextBatch = () => Math.ceil(Date.now() / BATCH_MS) * BATCH_MS;
 
-async function batchAll() {
+async function batchAll(min = 1) {
   for (const id of Object.keys(loadState().pots)) {
-    try { log("batch", id, await run("pot batch", ["--pot", id])); } catch (err) { log("batch failed", id, err.message ?? err); }
+    try {
+      const n = await run("pot batch", ["--pot", id, "--min", String(min)]);
+      if (n) log("batch", id, n);
+    } catch (err) { log("batch failed", id, err.message ?? err); }
   }
 }
 function schedule() {
@@ -41,6 +45,7 @@ function schedule() {
     await batchAll();
     if (new Date().getMinutes() < 10) { try { await run("oracle heartbeat"); } catch (err) { log("heartbeat failed", err.message ?? err); } }
     schedule();
+setInterval(() => batchAll(BATCH_MIN), 60_000);
   }, nextBatch() - Date.now() + 2_000);
 }
 
@@ -74,3 +79,4 @@ http.createServer(async (req, res) => {
   }
 }).listen(PORT, "127.0.0.1", () => log(`operator server on http://127.0.0.1:${PORT}, next batch ${new Date(nextBatch()).toISOString()}`));
 schedule();
+setInterval(() => batchAll(BATCH_MIN), 60_000);

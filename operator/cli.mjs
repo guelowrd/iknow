@@ -29,6 +29,8 @@ const ORACLE_SLOT = "oracle::oracle::entries";
 export const FEED_KEY_U64 = [0n, 0n, 0n, 100n];
 export const DEFAULT_ACCOUNT = "1468873289267171330"; // @0xMiden
 export const DEFAULT_PATTERN = "partner mainnet starts now";
+/** "Will X be announced before D?" → "X before D": the pot's short title. */
+export const shortTitle = (q) => q.replace(/^Will /, "").replace(/ be announced/, "").replace(/\?$/, "");
 const MARKETS_FILE = path.join(ROOT, "web", "public", "markets.json");
 const POLL_MS = 3_000;
 
@@ -289,10 +291,11 @@ export const commands = {
   },
   async "pot deploy"(c, state, args) {
     const deadlineMs = Date.parse(arg(args, "deadline"));
-    const label = arg(args, "label", new Date(deadlineMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }));
+    const date = new Date(deadlineMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
     const account = arg(args, "account", DEFAULT_ACCOUNT);
     const pattern = arg(args, "pattern", DEFAULT_PATTERN);
-    const question = arg(args, "question", `Will Miden Partner Mainnet be announced before ${label}?`);
+    const question = arg(args, "question", `Will Miden Partner Mainnet be announced before ${date}?`);
+    const label = arg(args, "label", shortTitle(question));
     const feedKey = account === DEFAULT_ACCOUNT && pattern === DEFAULT_PATTERN ? FEED_KEY_U64.map(String) : feedKeyFor(account, pattern);
     // Default lock height: the block expected at the deadline (testnet blocks every ~3 s).
     const height = await c.getSyncHeight();
@@ -330,10 +333,11 @@ export const commands = {
   },
   async "pot batch"(c, state, args) {
     const potId = arg(args, "pot");
+    const min = Number(arg(args, "min", 1)); // open only once this many notes wait
     await c.notes.fetchPrivate();
     await c.sync();
     const notes = await waitingNotes(c, potId);
-    if (notes.length === 0) { console.log("nothing to open"); return 0; }
+    if (notes.length < min) { console.log(notes.length ? `${notes.length} waiting, below ${min}` : "nothing to open"); return 0; }
     const unit = BigInt(state.pots[potId].unit);
     const ids = [];
     for (const record of notes) {

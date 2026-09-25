@@ -133,7 +133,7 @@
         "14258625366430178332"
       ],
       "asset": "0x18101fa522c174b165efd4f70a0385",
-      "label": "Oct 20, 2026",
+      "label": "Miden Partner Mainnet before Oct 20, 2026",
       "question": "Will Miden Partner Mainnet be announced before Oct 20, 2026?",
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
@@ -163,7 +163,7 @@
         "14258625366430178332"
       ],
       "asset": "0x18101fa522c174b165efd4f70a0385",
-      "label": "Oct 28, 2026",
+      "label": "Miden Partner Mainnet before Oct 28, 2026",
       "question": "Will Miden Partner Mainnet be announced before Oct 28, 2026?",
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
@@ -193,7 +193,7 @@
         "14258625366430178332"
       ],
       "asset": "0x18101fa522c174b165efd4f70a0385",
-      "label": "Nov 5, 2026",
+      "label": "Miden Partner Mainnet before Nov 5, 2026",
       "question": "Will Miden Partner Mainnet be announced before Nov 5, 2026?",
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",

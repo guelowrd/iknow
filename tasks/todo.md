@@ -33,7 +33,11 @@
       batch countdown + time to resolution, shaded windows, prediction details with withdraw (verified
       in Chrome: predict YES 1 then withdraw, row gone, note never opened), pots with their own
       question / X account / regex and feed key, operator server (API + schedule) driving the admin view
-- [ ] 8. Next: Bread end-to-end with a real user (predict, withdraw, SAVE), a real X post test from a
+- [x] 9. Bread fix + UI round (2026-09-25) → Gaylord's first Bread prediction failed at the Guardian
+      step (multisig needs a declared fee conversion salt): stake requests for Bread now carry one.
+      Connect dialog BREAD / GUEST, close crosses top left, batch countdown in prediction details,
+      operator opens a batch early once 5 predictions wait, pots carry short titles
+- [ ] 8. Next: Bread end-to-end with a real user (predict again after the salt fix, withdraw, SAVE), a real X post test from a
       personal account (create a pot with that account id + regex in Admin, then "resolve from post"),
       payout receipt in the app after a settlement, admin lockdown, hosting, mobile pass,
       stake-after-lock test

@@ -16,7 +16,7 @@ cd web && npm install && npm run dev        # http://localhost:5180
 Press **connect** and choose **Bread** (Chrome extension on testnet, recommended) or **guest**, a
 throwaway wallet funded from the testnet faucet in about a minute. Pick a pot, press **iKnow**, choose
 a stake in MIDEN, press **YES** or **NO**. The prediction lands in the next batch (the operator server
-opens waiting notes at every 10-minute mark), after which the totals and your position update. Click a
+opens waiting notes at every 10-minute mark, or as soon as 5 are waiting), after which the totals and your position update. Click a
 prediction for its details; a pending one can be withdrawn. Guests can move their MIDEN to Bread with
 the red **SAVE** button. Double-click a title bar to shade a window; the top-left LED plays music.
 
@@ -26,7 +26,7 @@ the red **SAVE** button. Double-click a title bar to shade a window; the top-lef
 cd operator && nohup node admin.mjs > admin.log 2>&1 &   # API on 127.0.0.1:5181 + batches + heartbeats
 ```
 
-There you can create a pot (date, label, question, X account id, regex), open batches, settle, pay
+There you can create a pot (date, short title, question, X account id, regex), open batches, settle, pay
 out, resolve a pot from an X post id or URL, or override it ("announced now"). New pots are written
 to `web/public/markets.json`, which the app reads.
 
@@ -139,8 +139,12 @@ in `operator/evidence/`. Contracts are read from `contracts/*/target/miden/relea
   proving is delegated to the testnet prover.
 - The dev server is pinned to port 5180: IndexedDB is per origin and another Miden app on 5173 would
   share the store.
-- The Bread path (`requestTransaction` with a custom note request) is written per the adapter API but
-  was not exercised end to end here: the extension cannot be driven by automation.
+- Bread with Guardian is a multisig: it reuses the fee conversion salt as its replay guard and fails
+  a custom request that declares none ("failed to execute transaction at anchor ... fee_conversion_salt"
+  at the Guardian step), so the stake request built for Bread carries `withFeeConversionSalt(random word)`.
+  Guests are single-sig and need none.
+- The Bread path (predict, withdraw, SAVE) is written per the adapter API but not exercised by
+  automation: the extension cannot be driven from here.
 
 ## SDK gotchas met on the way
 

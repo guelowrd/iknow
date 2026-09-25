@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useConsume, useMiden, useMidenClient } from "@miden-sdk/react";
-import * as sdk from "@miden-sdk/miden-sdk";
 import { Player } from "@/components/Player";
-import { Playlist } from "@/components/Playlist";
-import { MyBets } from "@/components/MyBets";
+import { Pots } from "@/components/Pots";
+import { MyPredictions } from "@/components/MyPredictions";
+import { SaveDialog } from "@/components/SaveDialog";
+import { ConnectDialog } from "@/components/ConnectDialog";
 import { Admin } from "@/components/Admin";
 import { useMarkets } from "@/hooks/useMarkets";
 import { useSession } from "@/hooks/useSession";
-import { useBet } from "@/hooks/useBet";
+import { usePrediction } from "@/hooks/usePrediction";
 import { loadPositions, parseId, positionStates, type Position } from "@/lib/iknow";
 
 /** useMidenClient throws until the client exists, so everything below waits for isReady. */
@@ -24,11 +25,11 @@ function Main() {
   const { markets, refresh, error } = useMarkets();
   const session = useSession();
   const consume = useConsume();
-  // QA handle: the client object, reachable from the browser console.
-  useEffect(() => { (window as unknown as { __iknow: unknown }).__iknow = { client, sdk }; }, [client]);
   const [selected, setSelected] = useState(0);
   const [positions, setPositions] = useState<Position[]>(loadPositions);
   const [admin, setAdmin] = useState(location.hash === "#admin");
+  const [saving, setSaving] = useState(false);
+  const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
     const onHash = () => setAdmin(location.hash === "#admin");
@@ -37,23 +38,28 @@ function Main() {
   }, []);
 
   const onPlaced = useCallback((p: Position) => setPositions((ps) => [p, ...ps]), []);
-  const bet = useBet(session, onPlaced);
+  const prediction = usePrediction(session, onPlaced);
 
-  // guest bets whose relay to the pot failed earlier: try again once the client is up
+  // guest predictions whose relay to the pot failed earlier: try again once the client is up
   useEffect(() => {
     if (!isReady || session.mode !== "guest" || !session.address) return;
     for (const p of loadPositions().filter((p) => p.wallet === session.address && !p.relayed)) {
-      bet.relayOutputNote(p.noteId, p.market).catch(() => undefined);
+      prediction.relayOutputNote(p.noteId, p.market).catch(() => undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, session.mode, session.address]);
 
   // refresh position states whenever the markets refresh
   useEffect(() => {
-    if (!isReady || markets.length === 0 || positions.length === 0) return;
+    if (!isReady || markets.length === 0 || loadPositions().length === 0) return;
     runExclusive(() => positionStates(client, loadPositions(), markets)).then(setPositions).catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markets, isReady]);
+
+  const withdraw = useCallback(async (p: Position) => {
+    await prediction.withdraw(p);
+    setPositions(loadPositions());
+  }, [prediction]);
 
   // guest wallets pull payout notes from the transport service and consume them
   const [collecting, setCollecting] = useState(false);
@@ -85,15 +91,19 @@ function Main() {
         index={selected}
         count={markets.length}
         session={session}
-        bet={bet}
+        prediction={prediction}
         onPrev={() => setSelected((i) => Math.max(0, i - 1))}
         onNext={() => setSelected((i) => Math.min(markets.length - 1, i + 1))}
+        onSave={() => setSaving(true)}
+        onConnect={() => setConnecting(true)}
       />
-      <Playlist markets={markets} selected={selected} onSelect={setSelected} />
-      <MyBets positions={positions} markets={markets} onCollect={session.mode === "guest" ? collect : undefined} collecting={collecting} />
-      {admin && <Admin markets={markets} />}
+      <Pots markets={markets} selected={selected} onSelect={setSelected} />
+      <MyPredictions positions={positions} markets={markets} onWithdraw={withdraw} onCollect={session.mode === "guest" ? collect : undefined} collecting={collecting} />
+      {admin && <Admin markets={markets} onChanged={refresh} />}
+      {connecting && <ConnectDialog session={session} onClose={() => setConnecting(false)} />}
+      {saving && <SaveDialog session={session} onSave={prediction.saveToBread} onClose={() => setSaving(false)} />}
       <div className="tiny">
-        {error ? `sync: ${error}` : "Miden testnet · private bets, public totals"}
+        {error ? `sync: ${error}` : "Miden testnet · private predictions, public totals"}
         {" · "}<a href="#admin" onClick={() => setTimeout(refresh, 0)}>admin</a>
         {" · "}<a href="https://github.com/guelowrd/iknow" target="_blank" rel="noreferrer">source</a>
       </div>

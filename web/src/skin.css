@@ -175,7 +175,9 @@ a { color: var(--lcd); }
 .btn.link { border: 0; box-shadow: none; text-decoration: underline; padding: 4px; color: var(--lcd-dim); }
 
 /* stake slider, Winamp volume style */
-.slider { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.cancel { margin-top: 8px; }
+.cancel .close { margin: 0; }
+.slider { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
 .slider input[type="range"] {
   -webkit-appearance: none; appearance: none; flex: 1; height: 10px; margin: 0;
   background: linear-gradient(90deg, var(--yes), var(--gold), var(--no));

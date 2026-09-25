@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Win } from "./Win";
+import { Close, Win } from "./Win";
 import { dateLabel, fmt, mmss, nextBatchMs, pct, remaining, short, type Market } from "@/lib/iknow";
 import type { Session } from "@/hooks/useSession";
 import type { PredictStatus } from "@/hooks/usePrediction";
@@ -134,12 +134,12 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
 
         {staking && market ? (
           <>
+            <div className="cancel"><Close onClick={() => { setStaking(false); prediction.reset(); }} /></div>
             <div className="slider">
               <input type="range" min={1} max={max} value={Math.min(units, max)} onChange={(e) => setUnits(Number(e.target.value))} disabled={busy} aria-label="stake in MIDEN" />
               <span className="amount">{fmt(Math.min(units, max))} MIDEN</span>
             </div>
             <div className="controls">
-              <button className="btn" onClick={() => { setStaking(false); prediction.reset(); }} disabled={busy} aria-label="cancel">✕</button>
               <button className="btn yes" onClick={() => prediction.predict(market, 1, Math.min(units, max))} disabled={busy || !canPredict}>YES</button>
               <button className="btn no" onClick={() => prediction.predict(market, 2, Math.min(units, max))} disabled={busy || !canPredict}>NO</button>
             </div>

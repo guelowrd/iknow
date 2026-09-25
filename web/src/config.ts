@@ -19,6 +19,8 @@ export const MARKETS = [
   { id: "0xfb13ce79ff4bb7d1310de3bc1c8d3b", topic: "When will Miden Partner Mainnet be announced?", short: "Miden Partner Mainnet", label: "before Nov 5, 2026", question: "Will Miden Partner Mainnet be announced before Nov 5, 2026?", deadlineMs: Date.parse("2026-11-05T00:00:00Z") },
 ];
 export const MARKETS_URL = "/markets.json";
+/** Wallets allowed to see the admin view (any address form the SDK parses). */
+export const ADMINS = ["mtst1aq583nd0nh9u0qtq6dru9d695v8gkt8y_qr7qqq9wr6w"];
 /** Operator server (admin view only; localhost). */
 export const ADMIN_URL = "http://127.0.0.1:5181";
 /** The operator opens waiting notes at every 10-minute mark, or as soon as BATCH_MIN wait. */

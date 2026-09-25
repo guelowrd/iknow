@@ -4,7 +4,7 @@ import { ADMIN_URL, EXPLORER_URL, ORACLE } from "@/config";
 import { fmt, OUTCOME, type Market } from "@/lib/iknow";
 
 type PotStatus = { yesUnits: number; noUnits: number; outcome: string; vault: string; waitingNotes: number; error?: string };
-type ServerPot = { id: string; topic: string; short: string; label: string; question: string; deadlineMs: number; lockHeight: number; account: string; pattern: string; status: PotStatus | null };
+type ServerPot = { id: string; topic: string; short: string; label: string; question: string; deadlineMs: number; lockHeight: number; handle?: string; account: string; pattern: string; status: PotStatus | null };
 type ServerState = { oracle: string; pots: ServerPot[]; nextBatchMs: number; batchMin?: number };
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
@@ -20,7 +20,7 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
   const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [log, setLog] = useState<string[]>([]);
-  const [form, setForm] = useState({ deadline: "", topic: "", short: "", stem: "", label: "", account: "", pattern: "" });
+  const [form, setForm] = useState({ deadline: "", topic: "", short: "", stem: "", label: "", handle: "", pattern: "" });
   const [resolve, setResolve] = useState({ pot: "", postId: "" });
 
   const refresh = useCallback(async () => {
@@ -51,7 +51,7 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
     }
   };
 
-  const pots = server?.pots ?? markets.map((m) => ({ id: m.id, topic: m.topic, short: m.short, label: m.label, question: m.question, deadlineMs: m.deadlineMs, lockHeight: m.lockHeight, account: "", pattern: "", status: { yesUnits: m.yes, noUnits: m.no, outcome: OUTCOME[m.outcome], vault: "", waitingNotes: 0 } }));
+  const pots = server?.pots ?? markets.map((m) => ({ id: m.id, topic: m.topic, short: m.short, label: m.label, question: m.question, handle: undefined as string | undefined, deadlineMs: m.deadlineMs, lockHeight: m.lockHeight, account: "", pattern: "", status: { yesUnits: m.yes, noUnits: m.no, outcome: OUTCOME[m.outcome], vault: "", waitingNotes: 0 } }));
 
   return (
     <Win title="Admin" className="admin">
@@ -62,7 +62,7 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
           <tbody>
             {pots.map((p) => (
               <tr key={p.id}>
-                <td><a href={`${EXPLORER_URL}/account/${p.id}`} target="_blank" rel="noreferrer" title={p.question}>{p.label}</a><div className="dim">{p.short}</div></td>
+                <td><a href={`${EXPLORER_URL}/account/${p.id}`} target="_blank" rel="noreferrer" title={p.question}>{p.label}</a><div className="dim">{p.short}{p.handle ? ` · @${p.handle}` : ""}</div></td>
                 <td>{fmt(p.status?.yesUnits ?? 0)}</td>
                 <td>{fmt(p.status?.noUnits ?? 0)}</td>
                 <td>{p.status?.waitingNotes ?? "·"}</td>
@@ -89,11 +89,11 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
               <label>short name<input placeholder="Miden Partner Mainnet" value={form.short} onChange={(e) => setForm({ ...form, short: e.target.value })} /></label>
               <label>stem<input placeholder="Will Miden Partner Mainnet be announced (from the topic if empty)" value={form.stem} onChange={(e) => setForm({ ...form, stem: e.target.value })} /></label>
               <label>label<input placeholder="before Oct 20, 2026 (from the date if empty)" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} /></label>
-              <label>X account id<input placeholder="1468873289267171330 (@0xMiden)" value={form.account} onChange={(e) => setForm({ ...form, account: e.target.value })} /></label>
+              <label>X handle<input placeholder="0xMiden" value={form.handle} onChange={(e) => setForm({ ...form, handle: e.target.value })} /></label>
               <label>regex<input placeholder="partner mainnet starts now" value={form.pattern} onChange={(e) => setForm({ ...form, pattern: e.target.value })} /></label>
               <button className="btn wide go" disabled={!!busy || !form.deadline} onClick={() => act("deploy", "/pots", {
                 deadline: new Date(form.deadline + "Z").toISOString(), topic: form.topic || undefined, short: form.short || undefined, stem: form.stem || undefined, label: form.label || undefined,
-                account: form.account || undefined, pattern: form.pattern || undefined,
+                handle: form.handle || undefined, pattern: form.pattern || undefined,
               })}>{busy === "deploy" ? "deploying…" : "create pot"}</button>
             </div>
 
@@ -105,6 +105,8 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
                 <button className="btn" disabled={!!busy || !resolve.pot || !resolve.postId} onClick={() => act("resolve", "/resolve", resolve)}>resolve from post</button>
                 <button className="btn" disabled={!!busy || !resolve.pot} onClick={() => act("override now", "/publish", { pot: resolve.pot, valueMs: Date.now() })}>announced now</button>
                 <button className="btn" disabled={!!busy} onClick={() => act("heartbeat", "/heartbeat")}>heartbeat</button>
+                <button className="btn" disabled={!!busy} onClick={() => act("watch X", "/watch")}>watch X now</button>
+                <button className="btn" disabled={!!busy} onClick={() => act("autosettle", "/autosettle")}>settle due</button>
               </div>
             </div>
           </>

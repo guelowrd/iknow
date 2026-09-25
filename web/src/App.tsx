@@ -10,6 +10,7 @@ import { useMarkets } from "@/hooks/useMarkets";
 import { useSession } from "@/hooks/useSession";
 import { usePrediction } from "@/hooks/usePrediction";
 import { useForwarding } from "@/hooks/useForwarding";
+import { ADMINS } from "@/config";
 import { loadPositions, parseId, positionStates, type Position } from "@/lib/iknow";
 
 /** useMidenClient throws until the client exists, so everything below waits for isReady. */
@@ -73,6 +74,8 @@ function Main() {
     return positions.filter((p) => wallets.includes(parseId(p.wallet).toString()));
   }, [positions, session.address, session.mode, session.guestId]);
 
+  const isAdmin = !!session.address && ADMINS.some((a) => parseId(a).toString() === parseId(session.address!).toString());
+
   const market = markets[selected] ?? null;
   return (
     <main className="stack">
@@ -90,12 +93,13 @@ function Main() {
       />
       <Pots markets={markets} selected={selected} onSelect={setSelected} />
       <MyPredictions positions={mine} markets={markets} onWithdraw={withdraw} connected={!!session.address} guestId={session.guestId} />
-      {admin && <Admin markets={markets} onChanged={refresh} />}
+      {admin && isAdmin && <Admin markets={markets} onChanged={refresh} />}
+      {admin && !isAdmin && <div className="tiny">admin: connect with an admin wallet</div>}
       {connecting && <ConnectDialog session={session} onClose={() => setConnecting(false)} />}
       {saving && <SaveDialog session={session} onSave={forwarding.forwardNow} onClose={() => setSaving(false)} />}
       <div className="tiny">
         {error ? `sync: ${error}` : "Miden testnet · private predictions, public totals"}
-        {" · "}<a href="#admin" onClick={() => setTimeout(refresh, 0)}>admin</a>
+        {isAdmin && <>{" · "}<a href="#admin" onClick={() => setTimeout(refresh, 0)}>admin</a></>}
         {" · "}<a href="https://github.com/guelowrd/iknow" target="_blank" rel="noreferrer">source</a>
       </div>
     </main>

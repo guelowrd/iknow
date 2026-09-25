@@ -40,7 +40,15 @@
 - [x] 10. Bread predict verified by Gaylord (2026-09-25, NO 8 MIDEN on the Oct 28 pot): the salt fix
       holds, Bread delivers the note itself, the app's own relay was a rejected duplicate and it ran
       before the position was saved (fixed: no relay for Bread, save first)
-- [ ] 8. Next: Bread withdraw and SAVE with a real user, recover-from-chain for positions the app lost, a real X post test from a
+- [x] 11. Guest upkeep + forwarding (2026-09-25): the app runs the browser's guest wallet (opens P2ID
+      notes every minute, never a stake note) and forwards its receipts to Bread whenever Bread is the
+      connected wallet; SAVE moves the balance right away. Topics: pots and predictions group by the
+      question stem, staked totals per topic; second topic live (zkGaylord "something stupid",
+      Sep 27 / Sep 30 pots). The pot's claim binds the
+      payout target to the staker, so re-routing on chain is impossible without a new pot version
+      (a stake note could name a payout account). Skins: lcd / classic / modern, iK logo cycles.
+- [ ] 8. Next: Bread withdraw and SAVE with a real user (SAVE now exercises the forwarding path),
+      recover-from-chain for positions the app lost, pending-prediction chain check in the details, a real X post test from a
       personal account (create a pot with that account id + regex in Admin, then "resolve from post"),
       payout receipt in the app after a settlement, admin lockdown, hosting, mobile pass,
       stake-after-lock test

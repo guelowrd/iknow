@@ -18,8 +18,13 @@ throwaway wallet funded from the testnet faucet in about a minute. Pick a pot, p
 a stake in MIDEN, press **YES** or **NO**. The prediction lands in the next batch (the operator server
 opens waiting notes at every 10-minute mark, or as soon as 5 are waiting), after which the totals and your position update. Click a
 prediction for its details; a pending one can be withdrawn. Guests can move their MIDEN to Bread with
-the red **SAVE** button. Double-click a title bar to shade a window. The iK logo at the top left switches between the two
-skins (dark iKnow, classic Winamp); the play button at the top right plays music.
+the red **SAVE** button. The app runs the guest wallet of the browser: it opens whatever that wallet
+receives (payouts, refunds) and, whenever Bread is the connected wallet, forwards it to Bread. The
+chain always pays the account that staked, so this is how a guest payout reaches Bread; the guest
+wallet has to survive in the browser until then. Pots are grouped by topic (the question stem) and a
+pot's label is its deadline. Double-click a title bar to shade a window. The iK logo at the top left
+cycles through the skins (dark iKnow, classic Winamp 2, Winamp Modern); the play button at the top
+right plays music.
 
 `#admin` at the end of the URL shows the operator view, live when the operator server runs:
 

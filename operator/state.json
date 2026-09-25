@@ -132,7 +132,17 @@
         "13485627950703404713",
         "14258625366430178332"
       ],
-      "asset": "0x18101fa522c174b165efd4f70a0385"
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "label": "Oct 20, 2026",
+      "question": "Will Miden Partner Mainnet be announced before Oct 20, 2026?",
+      "account": "1468873289267171330",
+      "pattern": "partner mainnet starts now",
+      "feedKey": [
+        "0",
+        "0",
+        "0",
+        "100"
+      ]
     },
     "0x1d20145e5360cfd10671e1f093e97c": {
       "deadlineMs": 1793145600000,
@@ -152,7 +162,17 @@
         "13485627950703404713",
         "14258625366430178332"
       ],
-      "asset": "0x18101fa522c174b165efd4f70a0385"
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "label": "Oct 28, 2026",
+      "question": "Will Miden Partner Mainnet be announced before Oct 28, 2026?",
+      "account": "1468873289267171330",
+      "pattern": "partner mainnet starts now",
+      "feedKey": [
+        "0",
+        "0",
+        "0",
+        "100"
+      ]
     },
     "0xfb13ce79ff4bb7d1310de3bc1c8d3b": {
       "deadlineMs": 1793836800000,
@@ -172,7 +192,17 @@
         "13485627950703404713",
         "14258625366430178332"
       ],
-      "asset": "0x18101fa522c174b165efd4f70a0385"
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "label": "Nov 5, 2026",
+      "question": "Will Miden Partner Mainnet be announced before Nov 5, 2026?",
+      "account": "1468873289267171330",
+      "pattern": "partner mainnet starts now",
+      "feedKey": [
+        "0",
+        "0",
+        "0",
+        "100"
+      ]
     }
   },
   "positions": [
@@ -230,6 +260,48 @@
         "982141887532769273"
       ],
       "noteId": "0xc7b5e03fbd585078979fbec4bcd7ce722a38703f8d587c9c3159fdbe4726f2ab",
+      "claimed": false
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x5b8646c8547062016335616de4741a",
+      "side": 2,
+      "units": 1,
+      "salt": [
+        "1682654650182396337",
+        "1472036242947087733",
+        "2384918979127540861",
+        "263716148831220145"
+      ],
+      "noteId": "0x6ae7b2d3a9136194bb422aac866352658d5fc36a0ecf15748a3211e85640a64f",
+      "claimed": false
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x5b8646c8547062016335616de4741a",
+      "side": 2,
+      "units": 6,
+      "salt": [
+        "2460682800517453983",
+        "1062734680536286515",
+        "3971826483424537209",
+        "486164532072097069"
+      ],
+      "noteId": "0xcdef3d535396f15817a93c280c284e47b7c9dc1afddce407ff3e9f19ca415c41",
+      "claimed": false
+    },
+    {
+      "pot": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
+      "wallet": "0x5b8646c8547062016335616de4741a",
+      "side": 1,
+      "units": 5,
+      "salt": [
+        "102179537721213587",
+        "2113272238195522031",
+        "4060621389656447608",
+        "435321270849451104"
+      ],
+      "noteId": "0x418f8761be68964d23b954af1a7fabca15b19622e51edc20bdf77ca3cf2bc272",
       "claimed": false
     }
   ]

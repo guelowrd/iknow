@@ -5,7 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { webcrypto as crypto } from "node:crypto";
+import { createHash, webcrypto as crypto } from "node:crypto";
 import {
   MidenClient, AccountBuilder, AccountComponent, AccountId, AccountStorageMode,
   AccountStorageRequirements, AuthSecretKey, Endpoint, Felt, FungibleAsset,
@@ -27,6 +27,9 @@ export async function commit(c) {
 const FAUCET_URL = "https://faucet-api.testnet.miden.io";
 const ORACLE_SLOT = "oracle::oracle::entries";
 export const FEED_KEY_U64 = [0n, 0n, 0n, 100n];
+export const DEFAULT_ACCOUNT = "1468873289267171330"; // @0xMiden
+export const DEFAULT_PATTERN = "partner mainnet starts now";
+const MARKETS_FILE = path.join(ROOT, "web", "public", "markets.json");
 const POLL_MS = 3_000;
 
 // ---------------------------------------------------------------------------------------------
@@ -37,7 +40,22 @@ export const loadState = () => (fs.existsSync(STATE_FILE) ? JSON.parse(fs.readFi
 export const saveState = (s) => fs.writeFileSync(STATE_FILE, JSON.stringify(s, null, 2) + "\n");
 export const felt = (n) => new Felt(BigInt(n));
 export const word = (a, b, c, d) => Word.newFromFelts([felt(a), felt(b), felt(c), felt(d)]);
-export const feedKey = () => word(...FEED_KEY_U64);
+export const feedKey = (key = FEED_KEY_U64) => word(...key);
+/** Feed key of a question: sha256(account | pattern) folded into four felts. */
+export function feedKeyFor(account, pattern) {
+  const hash = createHash("sha256").update(`${account}|${pattern}`).digest();
+  return Array.from({ length: 4 }, (_, i) => (hash.readBigUInt64LE(i * 8) >> 2n)).map(String);
+}
+/** Feed key of a pot as u64 strings (older pots share the default key). */
+const potFeedKey = (p) => (p.feedKey ?? FEED_KEY_U64.map(String)).map(BigInt);
+/** web/public/markets.json: what the app needs to show the pots. */
+export function writeMarkets(state) {
+  const markets = Object.entries(state.pots).map(([id, p]) => ({
+    id, label: p.label, question: p.question, deadlineMs: p.deadlineMs, account: p.account ?? DEFAULT_ACCOUNT,
+    pattern: p.pattern ?? DEFAULT_PATTERN, feedKey: potFeedKey(p).map(String),
+  }));
+  fs.writeFileSync(MARKETS_FILE, JSON.stringify({ oracle: state.oracle?.id, markets }, null, 2) + "\n");
+}
 export const id = (s) => (s.startsWith("0x") ? AccountId.fromHex(s) : AccountId.fromBech32(s));
 export const randomBytes = (n) => crypto.getRandomValues(new Uint8Array(n));
 export const randomWord = () => Word.newFromFelts(Array.from({ length: 4 }, () => felt(new DataView(randomBytes(8).buffer).getBigUint64(0) >> 2n)));
@@ -85,7 +103,7 @@ export function potComponent(p) {
     StorageSlot.fromValue("pot::pot::asset_id", rev(Word.newFromFelts(p.assetIdWord.map(felt)))),
     StorageSlot.fromValue("pot::pot::oracle", Word.newFromFelts([oracle.prefix(), oracle.suffix(), felt(0), felt(0)])),
     StorageSlot.fromValue("pot::pot::oracle_root", Word.newFromFelts(p.oracleRoot.map(felt))),
-    StorageSlot.fromValue("pot::pot::feed_key", feedKey()),
+    StorageSlot.fromValue("pot::pot::feed_key", feedKey(potFeedKey(p))),
     StorageSlot.fromValue("pot::pot::p2id_root", NoteScript.p2id().root()),
     StorageSlot.fromValue("pot::pot::totals", word(0, 0, 0, 0)),
     StorageSlot.fromValue("pot::pot::outcome", word(0, 0, 0, 0)),
@@ -180,22 +198,23 @@ export async function requestFaucetTokens(accountId) {
   return result.note_id;
 }
 
-export async function readOracleEntry(c, oracleId) {
+export async function readOracleEntry(c, oracleId, key = FEED_KEY_U64) {
   await c.accounts.getOrImport(id(oracleId));
   await c.sync();
   const { storage } = await c.accounts.getDetails(id(oracleId));
-  const w = storage.getMapItem(ORACLE_SLOT, feedKey());
+  const w = storage.getMapItem(ORACLE_SLOT, feedKey(key));
   const [, valueMs, , observedAt] = w ? u64s(w).map(Number) : [0, 0, 0, 0];
   return { valueMs, observedAt };
 }
 
-export async function publish(c, state, valueMs, observedAt) {
+export async function publish(c, state, valueMs, observedAt, key = FEED_KEY_U64) {
+  const [k0, k1, k2, k3] = key;
   const code = `use miden::core::sys
 
 @transaction_script
 pub proc main
     padw padw
-    push.${observedAt}.0.${valueMs}.0.100.0.0.0
+    push.${observedAt}.0.${valueMs}.0.${k3}.${k2}.${k1}.${k0}
     call.::"miden:oracle/oracle@0.1.0"::"publish-entry"
     dropw dropw dropw dropw
     exec.sys::truncate_stack
@@ -204,7 +223,7 @@ end
   const script = await c.compile.txScript({ code, libraries: [{ component: oracleComponent() }] });
   const r = await c.transactions.execute({ account: id(state.oracle.id), script, ...confirm });
     await commit(c);
-  console.log(`published value_ms=${valueMs} observed_at=${observedAt} tx ${tx(r)}`);
+  console.log(`published value_ms=${valueMs} observed_at=${observedAt} key ${key.join(",")} tx ${tx(r)}`);
 }
 
 export async function potDetails(c, potId) {
@@ -235,28 +254,46 @@ export const commands = {
     console.log(`oracle ${oracleId}`);
     await fund(c, oracleId, "oracle");
   },
+  /** Manual override of a pot's feed: value 0 = not announced yet. */
   async "oracle publish"(c, state, args) {
-    await publish(c, state, Number(arg(args, "value")), Number(arg(args, "observed", Math.floor(Date.now() / 1000))));
+    const key = potFeedKey(state.pots[arg(args, "pot")]);
+    await publish(c, state, Number(arg(args, "value")), Number(arg(args, "observed", Math.floor(Date.now() / 1000))), key);
   },
+  /** Heartbeat every distinct feed (keeps its value, moves observed_at forward). */
   async "oracle heartbeat"(c, state) {
-    const { valueMs } = await readOracleEntry(c, state.oracle.id);
-    await publish(c, state, valueMs, Math.floor(Date.now() / 1000));
+    const keys = new Map(Object.values(state.pots).map((p) => [potFeedKey(p).join(","), potFeedKey(p)]));
+    if (keys.size === 0) keys.set(FEED_KEY_U64.join(","), FEED_KEY_U64);
+    for (const key of keys.values()) {
+      const { valueMs } = await readOracleEntry(c, state.oracle.id, key);
+      await publish(c, state, valueMs, Math.floor(Date.now() / 1000), key);
+    }
   },
+  /** Fetches an X post, applies the pot's question (account + regex), publishes the timestamp. */
   async "oracle resolve"(c, state, args) {
-    const postId = arg(args, "post-id");
+    const potId = arg(args, "pot");
+    const p = state.pots[potId];
+    const postId = arg(args, "post-id").replace(/^.*\/status\//, "").replace(/\?.*$/, "");
     const post = await fetchPost(postId);
-    const verdict = evaluate(post, { accountId: arg(args, "account", undefined), pattern: arg(args, "pattern", undefined) });
+    const verdict = evaluate(post, { accountId: p.account ?? DEFAULT_ACCOUNT, pattern: p.pattern ?? DEFAULT_PATTERN });
     const file = path.join(ROOT, "operator", "evidence", `${postId}.json`);
-    fs.writeFileSync(file, JSON.stringify({ fetchedAt: new Date().toISOString(), verdict, post }, null, 2));
+    fs.writeFileSync(file, JSON.stringify({ fetchedAt: new Date().toISOString(), pot: potId, verdict, post }, null, 2));
     console.log(`evidence ${file}`, verdict);
-    if (!verdict.qualifies) return;
-    await publish(c, state, verdict.tsMs, Math.floor(Date.now() / 1000));
+    if (!verdict.qualifies) return verdict;
+    await publish(c, state, verdict.tsMs, Math.floor(Date.now() / 1000), potFeedKey(p));
+    return verdict;
   },
-  async "oracle read"(c, state) {
-    console.log(await readOracleEntry(c, state.oracle.id));
+  async "oracle read"(c, state, args) {
+    const potId = arg(args, "pot", undefined);
+    const key = potId ? potFeedKey(state.pots[potId]) : FEED_KEY_U64;
+    console.log(await readOracleEntry(c, state.oracle.id, key));
   },
   async "pot deploy"(c, state, args) {
     const deadlineMs = Date.parse(arg(args, "deadline"));
+    const label = arg(args, "label", new Date(deadlineMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }));
+    const account = arg(args, "account", DEFAULT_ACCOUNT);
+    const pattern = arg(args, "pattern", DEFAULT_PATTERN);
+    const question = arg(args, "question", `Will Miden Partner Mainnet be announced before ${label}?`);
+    const feedKey = account === DEFAULT_ACCOUNT && pattern === DEFAULT_PATTERN ? FEED_KEY_U64.map(String) : feedKeyFor(account, pattern);
     // Default lock height: the block expected at the deadline (testnet blocks every ~3 s).
     const height = await c.getSyncHeight();
     const lockHeight = Number(arg(args, "lock-height", height + Math.max(0, Math.floor((deadlineMs - Date.now()) / 3000))));
@@ -265,20 +302,24 @@ export const commands = {
     const asset = await feeFaucetId();
     const assetIdWord = u64s(new FungibleAsset(id(asset), 1n).vaultKey()).map(String);
     const oracleRoot = u64s(Word.fromHex(procedureHash(oracleComponent(), "get_entry"))).map(String);
-    const params = { deadlineMs, lockHeight, graceS, unit, assetIdWord, oracleId: state.oracle.id, oracleRoot, asset };
+    const params = { deadlineMs, lockHeight, graceS, unit, assetIdWord, oracleId: state.oracle.id, oracleRoot, asset, label, question, account, pattern, feedKey };
     const potId = await createContract(c, potComponent(params));
     state.pots[potId] = params;
     saveState(state);
-    console.log(`pot ${potId} deadline ${new Date(deadlineMs).toISOString()} lock ${lockHeight} (now ${height})`);
+    writeMarkets(state);
+    console.log(`pot ${potId} "${question}" deadline ${new Date(deadlineMs).toISOString()} lock ${lockHeight} (now ${height})`);
     await fund(c, potId, "pot");
+    return potId;
   },
   async "pot status"(c, state, args) {
     const potId = arg(args, "pot");
     const d = await potDetails(c, potId);
     const asset = state.pots[potId].asset;
     const waiting = (await waitingNotes(c, potId)).length;
-    console.log({ pot: potId, yesUnits: d.yes, noUnits: d.no, outcome: ["pending", "YES", "NO", "VOID"][d.outcome],
-      vault: d.account.vault().getBalance(id(asset)).toString(), waitingNotes: waiting, deadline: new Date(d.deadlineMs).toISOString() });
+    const status = { pot: potId, yesUnits: d.yes, noUnits: d.no, outcome: ["pending", "YES", "NO", "VOID"][d.outcome],
+      vault: d.account.vault().getBalance(id(asset)).toString(), waitingNotes: waiting, deadline: new Date(d.deadlineMs).toISOString() };
+    console.log(status);
+    return status;
   },
   async "pot inbox"(c, state, args) {
     const potId = arg(args, "pot");
@@ -311,6 +352,7 @@ export const commands = {
     await commit(c);
     saveState(state);
     console.log(`opened ${ids.length} note(s) tx ${tx(r)}`);
+    return ids.length;
   },
   async "pot settle"(c, state, args) {
     const potId = arg(args, "pot");
@@ -438,7 +480,7 @@ export async function waitingNotes(c, potId) {
     !r.isConsumed() && r.inclusionProof() && r.metadata()?.tag().asU32() === tag && r.toNote().script().root().toHex() !== p2id);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [a, b, ...rest] = process.argv.slice(2);
   const name = commands[`${a} ${b}`] ? `${a} ${b}` : commands[a] ? a : null;
   if (!name) {

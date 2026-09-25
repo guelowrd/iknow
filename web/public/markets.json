@@ -1,0 +1,47 @@
+{
+  "oracle": "0x91456cba0c509191225c89225c385a",
+  "markets": [
+    {
+      "id": "0x8eddfd14bf6626913cb31a58428793",
+      "label": "Oct 20, 2026",
+      "question": "Will Miden Partner Mainnet be announced before Oct 20, 2026?",
+      "deadlineMs": 1792454400000,
+      "account": "1468873289267171330",
+      "pattern": "partner mainnet starts now",
+      "feedKey": [
+        "0",
+        "0",
+        "0",
+        "100"
+      ]
+    },
+    {
+      "id": "0x1d20145e5360cfd10671e1f093e97c",
+      "label": "Oct 28, 2026",
+      "question": "Will Miden Partner Mainnet be announced before Oct 28, 2026?",
+      "deadlineMs": 1793145600000,
+      "account": "1468873289267171330",
+      "pattern": "partner mainnet starts now",
+      "feedKey": [
+        "0",
+        "0",
+        "0",
+        "100"
+      ]
+    },
+    {
+      "id": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
+      "label": "Nov 5, 2026",
+      "question": "Will Miden Partner Mainnet be announced before Nov 5, 2026?",
+      "deadlineMs": 1793836800000,
+      "account": "1468873289267171330",
+      "pattern": "partner mainnet starts now",
+      "feedKey": [
+        "0",
+        "0",
+        "0",
+        "100"
+      ]
+    }
+  ]
+}

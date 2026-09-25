@@ -46,13 +46,13 @@ export function SaveDialog({ session, onSave, onClose }: Props) {
           {step === "done" ? (
             <>
               <p className="lead">✓ {fmt(moved)} MIDEN moved to Bread {session.breadAddress ? short(session.breadAddress) : ""}</p>
-              <p className="small">Bread is now your wallet here. Predictions made as a guest pay out to the guest wallet: switch back to guest and save again once they resolve.</p>
+              <p className="small">Bread is your wallet here now. Payouts of predictions made as a guest follow to Bread on their own whenever you are connected with Bread in this browser.</p>
               <div className="controls"><button className="btn wide" onClick={onClose}>ok</button></div>
             </>
           ) : (
             <>
               <p className="lead">Move {fmt(amount)} MIDEN from this guest wallet to Bread.</p>
-              <p className="small">The guest wallet lives only in this browser. Bread keeps your keys safe on your device. Predictions already made pay out to the guest wallet: come back and save again after they resolve.</p>
+              <p className="small">Bread becomes your wallet here. Whatever this guest wallet receives later, like payouts of predictions made as a guest, follows to Bread on its own whenever you are connected with Bread in this browser.</p>
               {error && <div className="hint err">{error}</div>}
               <div className="controls">
                 {!session.breadInstalled && <a className="btn wide danger" href={BREAD_URL} target="_blank" rel="noreferrer">get Bread</a>}

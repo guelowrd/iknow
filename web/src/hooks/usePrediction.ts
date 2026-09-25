@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useCompile, useConsume, useMiden, useMidenClient, useSend, useTransaction } from "@miden-sdk/react";
+import { useCompile, useConsume, useMiden, useMidenClient, useTransaction } from "@miden-sdk/react";
 import { useMidenFiWallet } from "@miden-sdk/miden-wallet-adapter-react";
 import { Transaction } from "@miden-sdk/miden-wallet-adapter-base";
 import { Address, NetworkId } from "@miden-sdk/miden-sdk";
@@ -18,7 +18,6 @@ export function usePrediction(session: Session, onPlaced: (p: Position) => void)
   const compile = useCompile();
   const tx = useTransaction();
   const consume = useConsume();
-  const sendHook = useSend();
   const bread = useMidenFiWallet();
   const [status, setStatus] = useState<PredictStatus>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -99,25 +98,10 @@ export function usePrediction(session: Session, onPlaced: (p: Position) => void)
     [session, consume, bread, script],
   );
 
-  /** Moves the guest wallet's MIDEN to Bread (a private P2ID note relayed through the transport). */
-  const saveToBread = useCallback(
-    async (breadAddress: string) => {
-      if (session.mode !== "guest" || !session.address) throw new Error("no guest wallet");
-      const reserve = 50_000n; // 0.05 MIDEN kept for the fee
-      const amount = (session.balanceRaw ?? 0n) - reserve;
-      if (amount <= 0n) throw new Error("nothing to move");
-      const result = await sendHook.send({ from: session.address, to: breadAddress, assetId: MIDEN_FAUCET, amount, noteType: "private", returnNote: true });
-      if (result.note) await relayOutputNote(result.note.id().toString(), breadAddress);
-      session.refreshBalance().catch(() => undefined);
-      return amount;
-    },
-    [session, sendHook, relayOutputNote],
-  );
-
   const reset = useCallback(() => {
     setStatus("idle");
     setError(null);
   }, []);
 
-  return { predict, withdraw, saveToBread, status, error, reset, relayOutputNote };
+  return { predict, withdraw, status, error, reset, relayOutputNote };
 }

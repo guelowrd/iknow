@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useConsume, useMiden, useMidenClient } from "@miden-sdk/react";
+import { useMiden, useMidenClient } from "@miden-sdk/react";
 import { Player } from "@/components/Player";
 import { Pots } from "@/components/Pots";
 import { MyPredictions } from "@/components/MyPredictions";
@@ -9,7 +9,8 @@ import { Admin } from "@/components/Admin";
 import { useMarkets } from "@/hooks/useMarkets";
 import { useSession } from "@/hooks/useSession";
 import { usePrediction } from "@/hooks/usePrediction";
-import { loadPositions, parseId, positionStates, type Position } from "@/lib/iknow";
+import { useForwarding } from "@/hooks/useForwarding";
+import { loadPositions, positionStates, type Position } from "@/lib/iknow";
 
 /** useMidenClient throws until the client exists, so everything below waits for isReady. */
 export default function App() {
@@ -24,7 +25,6 @@ function Main() {
   const client = useMidenClient();
   const { markets, refresh, error } = useMarkets();
   const session = useSession();
-  const consume = useConsume();
   const [selected, setSelected] = useState(0);
   const [positions, setPositions] = useState<Position[]>(loadPositions);
   const [admin, setAdmin] = useState(location.hash === "#admin");
@@ -61,27 +61,8 @@ function Main() {
     setPositions(loadPositions());
   }, [prediction]);
 
-  // guest wallets pull payout notes from the transport service and consume them
-  const [collecting, setCollecting] = useState(false);
-  const collect = useCallback(async () => {
-    if (!session.address) return;
-    setCollecting(true);
-    try {
-      const address = session.address;
-      await runExclusive(async () => {
-        await client.fetchPrivateNotes();
-        await client.syncState();
-      });
-      const notes = await runExclusive(() => client.getConsumableNotes(parseId(address)));
-      const ids = notes.map((n) => n.inputNoteRecord().id()?.toString()).filter((x): x is string => !!x);
-      if (ids.length > 0) await consume.consume({ accountId: address, notes: ids });
-      await session.refreshBalance();
-    } catch (err) {
-      console.error("collect failed", err);
-    } finally {
-      setCollecting(false);
-    }
-  }, [session, runExclusive, client, consume]);
+  // the guest wallet is run by the app: payouts are opened, and forwarded to Bread once linked
+  const forwarding = useForwarding(session, prediction.relayOutputNote, prediction.status === "idle" && !saving && !connecting);
 
   const market = markets[selected] ?? null;
   return (
@@ -96,12 +77,13 @@ function Main() {
         onNext={() => setSelected((i) => Math.min(markets.length - 1, i + 1))}
         onSave={() => setSaving(true)}
         onConnect={() => setConnecting(true)}
+        notice={forwarding.notice}
       />
       <Pots markets={markets} selected={selected} onSelect={setSelected} />
-      <MyPredictions positions={positions} markets={markets} onWithdraw={withdraw} onCollect={session.mode === "guest" ? collect : undefined} collecting={collecting} />
+      <MyPredictions positions={positions} markets={markets} onWithdraw={withdraw} />
       {admin && <Admin markets={markets} onChanged={refresh} />}
       {connecting && <ConnectDialog session={session} onClose={() => setConnecting(false)} />}
-      {saving && <SaveDialog session={session} onSave={prediction.saveToBread} onClose={() => setSaving(false)} />}
+      {saving && <SaveDialog session={session} onSave={forwarding.forwardNow} onClose={() => setSaving(false)} />}
       <div className="tiny">
         {error ? `sync: ${error}` : "Miden testnet · private predictions, public totals"}
         {" · "}<a href="#admin" onClick={() => setTimeout(refresh, 0)}>admin</a>

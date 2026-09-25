@@ -17,6 +17,8 @@ type Props = {
   onNext: () => void;
   onSave: () => void;
   onConnect: () => void;
+  /** A line from the app, shown on the display when nothing else is going on. */
+  notice?: string | null;
 };
 
 const BARS = 24;
@@ -74,7 +76,7 @@ function WalletChip({ session, onSave, onConnect }: { session: Session; onSave: 
 const SkipBack = () => <svg viewBox="0 0 16 10" width="16" height="10" aria-hidden><rect x="0" y="0" width="2" height="10" fill="currentColor" /><path d="M9 0 L3 5 L9 10 Z M16 0 L10 5 L16 10 Z" fill="currentColor" /></svg>;
 const SkipForward = () => <svg viewBox="0 0 16 10" width="16" height="10" aria-hidden><path d="M0 0 L6 5 L0 10 Z M7 0 L13 5 L7 10 Z" fill="currentColor" /><rect x="14" y="0" width="2" height="10" fill="currentColor" /></svg>;
 
-export function Player({ market, index, count, session, prediction, onPrev, onNext, onSave, onConnect }: Props) {
+export function Player({ market, index, count, session, prediction, onPrev, onNext, onSave, onConnect, notice }: Props) {
   const [staking, setStaking] = useState(false);
   const [units, setUnits] = useState(1);
   const audio = useAudio();
@@ -100,6 +102,7 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
     if (prediction.status === "relaying") return <div className="hint">sending to pot…</div>;
     if (prediction.status === "sent") return <div className="hint">✓ in the next batch</div>;
     if (session.error) return <div className="hint err">{session.error}</div>;
+    if (notice) return <div className="hint">{notice}</div>;
     if (session.mode === "guest" && session.guestStep !== "ready") return <div className="hint">guest wallet: {session.guestStep}…</div>;
     if (!session.address) return <div className="hint">connect to play</div>;
     if (market?.outcome) return <div className="hint warn">closed · {["", "YES", "NO", "VOID"][market.outcome]}</div>;

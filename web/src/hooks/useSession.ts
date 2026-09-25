@@ -9,6 +9,8 @@ export type Session = {
   mode: "bread" | "guest" | null;
   /** Account address as the wallet reports it (bech32 for Bread, hex for guests). */
   address: string | null;
+  /** The guest wallet stored in this browser, whichever wallet is active. */
+  guestId: string | null;
   /** Whole MIDEN tokens available. */
   balance: number | null;
   /** Exact balance in base units. */
@@ -148,7 +150,7 @@ export function useSession(): Session {
   }, [mode, isReady, guest.sessionAccountId, guest.step]);
 
   return {
-    mode, address, balance, balanceRaw, breadInstalled,
+    mode, address, guestId: guest.sessionAccountId ?? null, balance, balanceRaw, breadInstalled,
     breadConnected: bread.connected, breadAddress: bread.address, breadConnecting: bread.connecting,
     guestStep: guest.step, error: error ?? guest.error?.message ?? null,
     connectBread, linkBread, useBread, startGuest, disconnect, refreshBalance,

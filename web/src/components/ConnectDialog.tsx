@@ -32,15 +32,15 @@ export function ConnectDialog({ session, onClose }: { session: Session; onClose:
         <div className="body">
           <div className="choice">
             {session.breadInstalled
-              ? <button className="btn wide" onClick={bread} disabled={busy}>{busy ? "waiting for Bread…" : "Bread"}</button>
-              : <a className="btn wide" href={BREAD_URL} target="_blank" rel="noreferrer">Bread</a>}
+              ? <button className="btn wide go" onClick={bread} disabled={busy}>{busy ? "waiting for Bread…" : "BREAD"}</button>
+              : <a className="btn wide go" href={BREAD_URL} target="_blank" rel="noreferrer">BREAD</a>}
             <p className="small">
               Recommended: your keys stay on your device, and so do your funds and predictions.
               {!session.breadInstalled && <> Not detected in this browser. Get it at <a href={BREAD_URL} target="_blank" rel="noreferrer">miden.xyz/bread</a>.</>}
             </p>
           </div>
           <div className="choice">
-            <button className="btn wide" onClick={guest} disabled={busy}>Guest</button>
+            <button className="btn wide go" onClick={guest} disabled={busy}>GUEST</button>
             <p className="small">A throwaway wallet in this browser. Temporary: it is lost when the browser data gets cleared. Move it to Bread anytime with SAVE.</p>
           </div>
           {error && <div className="hint err">{error}</div>}

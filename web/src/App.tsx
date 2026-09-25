@@ -38,6 +38,12 @@ function Main() {
     return () => removeEventListener("hashchange", onHash);
   }, []);
 
+  // open on the first live pot
+  useEffect(() => {
+    if (markets.length > 0 && markets[selected]?.outcome) { const i = markets.findIndex((m) => !m.outcome); if (i >= 0) setSelected(i); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [markets.length]);
+
   const onPlaced = useCallback((p: Position) => setPositions((ps) => [p, ...ps]), []);
   useEffect(() => { (window as unknown as { __iknow?: unknown }).__iknow = { positions }; }, [positions]); // QA handle
   const prediction = usePrediction(session, onPlaced);

@@ -47,8 +47,11 @@
       Sep 27 / Sep 30 pots). The pot's claim binds the
       payout target to the staker, so re-routing on chain is impossible without a new pot version
       (a stake note could name a payout account). Skins: lcd / classic / modern, iK logo cycles.
+- [x] 12. Deployed (2026-09-25) at https://iknow-xi.vercel.app; guest freeze fixed (client in the SDK
+      worker, faucet PoW in a worker with a sync SHA-256); play/pause + prev/next; three skins; topics
 - [ ] 8. Next: Bread withdraw and SAVE with a real user (SAVE now exercises the forwarding path),
-      recover-from-chain for positions the app lost, pending-prediction chain check in the details, a real X post test from a
+      recover-from-chain for positions the app lost, pending-prediction chain check in the details,
+      admin lockdown before sharing widely, hosting the operator somewhere that does not sleep, a real X post test from a
       personal account (create a pot with that account id + regex in Admin, then "resolve from post"),
       payout receipt in the app after a settlement, admin lockdown, hosting, mobile pass,
       stake-after-lock test

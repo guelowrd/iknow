@@ -140,8 +140,11 @@ export function draftOf(p: Position): StakeDraft | null {
   return p.serial ? { pot: p.market, sender: p.wallet, side: p.side, units: p.units, salt: p.salt, serial: p.serial } : null;
 }
 
-export function stakeRequest(note: Note) {
-  return new TransactionRequestBuilder().withOwnOutputNotes(new NoteArray([note])).build();
+/** A multisig (Bread with Guardian) reuses the fee conversion salt as its replay guard and
+ * rejects a request that declares none, so wallets that execute the request themselves get one. */
+export function stakeRequest(note: Note, salt?: Word) {
+  const builder = new TransactionRequestBuilder().withOwnOutputNotes(new NoteArray([note]));
+  return (salt ? builder.withFeeConversionSalt(salt) : builder).build();
 }
 
 export const potAddress = (pot: string) => Address.fromAccountId(parseId(pot));

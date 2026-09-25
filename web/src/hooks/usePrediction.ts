@@ -5,8 +5,8 @@ import { Transaction } from "@miden-sdk/miden-wallet-adapter-base";
 import { Address, NetworkId } from "@miden-sdk/miden-sdk";
 import { MIDEN_FAUCET, UNIT } from "@/config";
 import {
-  buildStakeNote, draftOf, markRelayed, newDraft, parseId, potAddress, potComponent, removePosition, savePosition,
-  stakeRequest, STAKE_MASM, type Market, type Position,
+  buildStakeNote, draftOf, markRelayed, newDraft, parseId, potAddress, potComponent, randomWord, removePosition,
+  savePosition, stakeRequest, STAKE_MASM, type Market, type Position,
 } from "@/lib/iknow";
 import type { Session } from "./useSession";
 
@@ -51,7 +51,7 @@ export function usePrediction(session: Session, onPlaced: (p: Position) => void)
         if (session.mode === "bread") {
           if (!bread.requestTransaction) throw new Error("Bread wallet does not expose requestTransaction");
           setStatus("signing");
-          const request = stakeRequest(buildStakeNote(noteScript, draft));
+          const request = stakeRequest(buildStakeNote(noteScript, draft), randomWord());
           const recipient = potAddress(market.id).toBech32(NetworkId.testnet());
           txId = await bread.requestTransaction(Transaction.createCustomTransaction(session.address, recipient, request));
           setStatus("relaying");

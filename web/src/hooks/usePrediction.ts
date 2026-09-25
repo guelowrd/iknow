@@ -53,14 +53,9 @@ export function usePrediction(session: Session, onPlaced: (p: Position) => void)
           setStatus("signing");
           const request = stakeRequest(buildStakeNote(noteScript, draft), randomWord());
           const recipient = potAddress(market.id).toBech32(NetworkId.testnet());
+          // Bread delivers its private output notes to the recipient itself; a second send from here is
+          // a duplicate the transport rejects (unique constraint, shown by grpc-web as "malformed response").
           txId = await bread.requestTransaction(Transaction.createCustomTransaction(session.address, recipient, request));
-          setStatus("relaying");
-          await bread.waitForTransaction?.(txId, 180_000).catch(() => undefined);
-          await runExclusive(async () => {
-            await client.syncState();
-            const height = await client.getSyncHeight();
-            await client.sendPrivateNote(buildStakeNote(noteScript, draft), potAddress(market.id), Math.max(0, height - 50));
-          });
         } else {
           setStatus("signing");
           // privateNoteTarget on tx.execute crashes in the SDK's commit wait (TransactionFilter.ids), so relay by hand.
@@ -83,7 +78,7 @@ export function usePrediction(session: Session, onPlaced: (p: Position) => void)
         setStatus("error");
       }
     },
-    [session, script, client, bread, tx, onPlaced, relayOutputNote, runExclusive],
+    [session, script, bread, tx, onPlaced, relayOutputNote],
   );
 
   /** Takes an unopened stake note back into the wallet that made it. */

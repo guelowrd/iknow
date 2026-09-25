@@ -29,7 +29,7 @@ right plays and pauses the music; previous and next track appear once it has pla
 `#admin` at the end of the URL shows the operator view, live when the operator server runs:
 
 ```
-cd operator && nohup node admin.mjs > admin.log 2>&1 &   # API on 127.0.0.1:5181 + batches + heartbeats
+cd operator && nohup node --env-file=.env admin.mjs > admin.log 2>&1 &   # API on 127.0.0.1:5181 + schedule; .env holds X_BEARER_TOKEN
 ```
 
 Only the wallets listed in `ADMINS` (`web/src/config.ts`) see it. There you can create a pot (date,

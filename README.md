@@ -24,7 +24,7 @@ chain always pays the account that staked, so this is how a guest payout reaches
 wallet has to survive in the browser until then. Pots are grouped by topic (the question stem) and a
 pot's label is its deadline. Double-click a title bar to shade a window. The iK logo at the top left
 cycles through the skins (dark iKnow, classic Winamp 2, Winamp Modern); the play button at the top
-right plays music.
+right plays and pauses the music; previous and next track appear once it has played.
 
 `#admin` at the end of the URL shows the operator view, live when the operator server runs:
 
@@ -154,8 +154,14 @@ in `operator/evidence/`. Contracts are read from `contracts/*/target/miden/relea
   `client.sendPrivateOutputNote` after the transaction.
 - `useSessionAccount` must get `authScheme: 2` (numeric Falcon): the SDK's default enum value makes
   `newWallet` hang and every later client call queue behind it.
-- With `useWorker: false` the page freezes for a few seconds while a transaction executes locally;
-  proving is delegated to the testnet prover.
+- The client runs in a Web Worker (`useWorker: true`, the SDK's guidance): with it on the main
+  thread the page froze for a minute and more while a guest wallet was set up. Reading storage maps of
+  imported public accounts works through the worker. Proving is delegated to the testnet prover.
+- The faucet proof of work (about 262,000 SHA-256 tries at difficulty 131072) runs in a small worker
+  with a synchronous SHA-256 (`web/src/lib/sha256.ts`): awaited `crypto.subtle` calls on the main
+  thread took a minute. A guest wallet is still about two minutes from click to ready, mostly the
+  faucet note being consumed and committed; the display says so.
+- `window.__iknow.positions` exposes the computed position states for QA.
 - The dev server is pinned to port 5180: IndexedDB is per origin and another Miden app on 5173 would
   share the store.
 - Bread with Guardian is a multisig: it reuses the fee conversion salt as its replay guard and fails

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Close, Win } from "./Win";
-import { BATCH_MIN, EXPLORER_URL } from "@/config";
-import { fmt, mmss, nextBatchMs, payoutIfWins, short, type Market, type Position } from "@/lib/iknow";
+import { BATCH_MIN } from "@/config";
+import { fmt, mmss, nextBatchMs, payoutIfWins, type Market, type Position } from "@/lib/iknow";
 import { useNow } from "@/hooks/useNow";
 
 const STATE_LABEL: Record<NonNullable<Position["state"]>, string> = {
@@ -13,34 +13,37 @@ const STATE_LABEL: Record<NonNullable<Position["state"]>, string> = {
   refund: "refund",
 };
 
-type Props = {
-  positions: Position[];
-  markets: Market[];
-  onWithdraw: (p: Position) => Promise<void>;
-  onCollect?: () => void;
-  collecting?: boolean;
-};
+type Props = { positions: Position[]; markets: Market[]; onWithdraw: (p: Position) => Promise<void> };
 
-export function MyPredictions({ positions, markets, onWithdraw, onCollect, collecting }: Props) {
+/** One row per topic; the individual predictions live in the detail view. */
+export function MyPredictions({ positions, markets, onWithdraw }: Props) {
   const [open, setOpen] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const now = useNow();
   const marketOf = (p: Position) => markets.find((m) => m.id === p.market);
-  const paid = positions.some((p) => p.state === "paid" || p.state === "refund");
-  const current = positions.find((p) => p.noteId === open);
+  const topicOf = (p: Position) => marketOf(p)?.topic ?? "…";
+  const topics = [...new Set(positions.map(topicOf))];
+  const inTopic = (topic: string) => positions.filter((p) => topicOf(p) === topic);
 
   const withdraw = async (p: Position) => {
-    setBusy(true);
+    setBusy(p.noteId);
     setError(null);
     try {
       await onWithdraw(p);
-      setOpen(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
+  };
+
+  const right = (p: Position) => {
+    const m = marketOf(p);
+    const state = p.state ?? "pending";
+    if (state === "in" && m) return `${STATE_LABEL.in} · pays ${fmt(payoutIfWins(p, m))} if it wins`;
+    if ((state === "won" || state === "paid") && m) return `${STATE_LABEL[state]} · ${fmt(payoutIfWins(p, m))} MIDEN`;
+    return STATE_LABEL[state];
   };
 
   return (
@@ -48,38 +51,38 @@ export function MyPredictions({ positions, markets, onWithdraw, onCollect, colle
       <div className="body">
         <div className="list">
           {positions.length === 0 && <div className="empty">none yet</div>}
-          {positions.map((p) => (
-            <div key={p.noteId} className={`row${open === p.noteId ? " sel" : ""}`} onClick={() => setOpen(open === p.noteId ? null : p.noteId)}>
-              <span><i className={`led ${p.state ?? "pending"}`} /></span>
-              <span>{marketOf(p)?.label ?? "?"} · {p.side === 1 ? "YES" : "NO"}</span>
-              <span className="right hide-sm">{STATE_LABEL[p.state ?? "pending"]}</span>
-              <span className="right">{fmt(p.units)}</span>
-            </div>
-          ))}
+          {topics.map((topic) => {
+            const ps = inTopic(topic);
+            const pending = ps.filter((p) => (p.state ?? "pending") === "pending").length;
+            return (
+              <div key={topic} className={`row${open === topic ? " sel" : ""}`} onClick={() => setOpen(open === topic ? null : topic)}>
+                <span><i className={`led ${pending ? "pending" : "in"}`} /></span>
+                <span>{topic}</span>
+                <span className="right hide-sm">{ps.length} prediction{ps.length > 1 ? "s" : ""}{pending ? ` · ${pending} pending` : ""}</span>
+                <span className="right">{fmt(ps.reduce((s, p) => s + p.units, 0))}</span>
+              </div>
+            );
+          })}
         </div>
-        {current && (() => {
-          const m = marketOf(current);
-          const state = current.state ?? "pending";
-          return (
-            <div className="detail">
-              <div className="q"><Close onClick={() => setOpen(null)} />{m?.question ?? current.market}</div>
-              <div className="kv"><span>{current.side === 1 ? "YES" : "NO"} · {fmt(current.units)} MIDEN</span><span>{STATE_LABEL[state]}</span></div>
-              {state === "pending" && current.relayed === false && <div className="kv"><span>not sent to the pot yet</span><span>retrying</span></div>}
-              {state === "pending" && current.relayed !== false && <div className="kv"><span>in the pot in {mmss(nextBatchMs() - now)} at most</span><span>sooner once {BATCH_MIN} wait</span></div>}
-              {state === "in" && m && <div className="kv"><span>pays {fmt(payoutIfWins(current, m))} MIDEN if it wins today</span><span>to {short(current.wallet)}</span></div>}
-              {(state === "won" || state === "paid") && m && <div className="kv"><span>won · {fmt(payoutIfWins(current, m))} MIDEN</span><span>{state === "paid" ? "sent" : "payout pending"}</span></div>}
-              {state === "lost" && <div className="kv"><span>lost</span><span /></div>}
-              {state === "refund" && <div className="kv"><span>void · stake refunded</span><span /></div>}
-              <div className="kv"><span><a href={`${EXPLORER_URL}/account/${current.market}`} target="_blank" rel="noreferrer">pot on chain</a></span><span>note {short(current.noteId)}</span></div>
-              {error && <div className="hint err">{error}</div>}
-              {state === "pending" && (
-                <div className="controls"><button className="btn wide danger" onClick={() => withdraw(current)} disabled={busy}>{busy ? "withdrawing…" : "withdraw"}</button></div>
-              )}
-            </div>
-          );
-        })()}
-        {paid && onCollect && (
-          <div className="footer"><span>payout sent to your wallet</span><button className="btn link" onClick={onCollect} disabled={collecting}>{collecting ? "collecting…" : "collect"}</button></div>
+        {open && (
+          <div className="detail">
+            <div className="q"><Close onClick={() => setOpen(null)} />{open}</div>
+            {inTopic(open).map((p) => {
+              const state = p.state ?? "pending";
+              return (
+                <div key={p.noteId} className="item">
+                  <div className="kv"><span>{marketOf(p)?.label ?? p.market} · {p.side === 1 ? "YES" : "NO"} {fmt(p.units)}</span><span>{right(p)}</span></div>
+                  {state === "pending" && (
+                    <div className="kv sub">
+                      <span>{p.relayed === false ? "not sent to the pot yet, retrying" : `in the pot in ${mmss(nextBatchMs() - now)} at most, sooner once ${BATCH_MIN} wait`}</span>
+                      <button className="btn small danger" onClick={() => withdraw(p)} disabled={busy === p.noteId}>{busy === p.noteId ? "withdrawing…" : "withdraw"}</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {error && <div className="hint err">{error}</div>}
+          </div>
         )}
       </div>
     </Win>

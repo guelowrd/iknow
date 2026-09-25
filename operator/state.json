@@ -133,7 +133,7 @@
         "14258625366430178332"
       ],
       "asset": "0x18101fa522c174b165efd4f70a0385",
-      "label": "Miden Partner Mainnet before Oct 20, 2026",
+      "label": "before Oct 20, 2026",
       "question": "Will Miden Partner Mainnet be announced before Oct 20, 2026?",
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
@@ -142,7 +142,8 @@
         "0",
         "0",
         "100"
-      ]
+      ],
+      "topic": "Will Miden Partner Mainnet be announced"
     },
     "0x1d20145e5360cfd10671e1f093e97c": {
       "deadlineMs": 1793145600000,
@@ -163,7 +164,7 @@
         "14258625366430178332"
       ],
       "asset": "0x18101fa522c174b165efd4f70a0385",
-      "label": "Miden Partner Mainnet before Oct 28, 2026",
+      "label": "before Oct 28, 2026",
       "question": "Will Miden Partner Mainnet be announced before Oct 28, 2026?",
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
@@ -172,7 +173,8 @@
         "0",
         "0",
         "100"
-      ]
+      ],
+      "topic": "Will Miden Partner Mainnet be announced"
     },
     "0xfb13ce79ff4bb7d1310de3bc1c8d3b": {
       "deadlineMs": 1793836800000,
@@ -193,7 +195,7 @@
         "14258625366430178332"
       ],
       "asset": "0x18101fa522c174b165efd4f70a0385",
-      "label": "Miden Partner Mainnet before Nov 5, 2026",
+      "label": "before Nov 5, 2026",
       "question": "Will Miden Partner Mainnet be announced before Nov 5, 2026?",
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
@@ -202,6 +204,69 @@
         "0",
         "0",
         "100"
+      ],
+      "topic": "Will Miden Partner Mainnet be announced"
+    },
+    "0x98a2db3dc85f4c116e4a86c7bec89a": {
+      "deadlineMs": 1790467200000,
+      "lockHeight": 504746,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "Will zkGaylord publish \"something stupid\"",
+      "label": "before Sep 27, 2026",
+      "question": "Will zkGaylord publish \"something stupid\" before Sep 27, 2026?",
+      "account": "1811045655449899008",
+      "pattern": "something stupid",
+      "feedKey": [
+        "2686219281000839191",
+        "1191374127129098808",
+        "3502117837801013956",
+        "211193247500497504"
+      ]
+    },
+    "0x44d3a0f21e3863d1629649fe54f436": {
+      "deadlineMs": 1790726400000,
+      "lockHeight": 591147,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "Will zkGaylord publish \"something stupid\"",
+      "label": "before Sep 30, 2026",
+      "question": "Will zkGaylord publish \"something stupid\" before Sep 30, 2026?",
+      "account": "1811045655449899008",
+      "pattern": "something stupid",
+      "feedKey": [
+        "2686219281000839191",
+        "1191374127129098808",
+        "3502117837801013956",
+        "211193247500497504"
       ]
     }
   },
@@ -330,6 +395,20 @@
         "2217393000642925816"
       ],
       "noteId": "0xab18358d253476dfd2949cd4eb410ca89fac43c04bec80ebb8bfb025ddd2c165",
+      "claimed": false
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 2,
+      "units": 12,
+      "salt": [
+        "3025690179717318586",
+        "4067805528098685381",
+        "3134222960305236719",
+        "312439797958188023"
+      ],
+      "noteId": "0xa28faf3f53acf65cc0defd8a926984c3a7024b6ec8bba93d964fb852ecb4e037",
       "claimed": false
     }
   ]

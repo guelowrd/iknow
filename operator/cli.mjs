@@ -29,8 +29,8 @@ const ORACLE_SLOT = "oracle::oracle::entries";
 export const FEED_KEY_U64 = [0n, 0n, 0n, 100n];
 export const DEFAULT_ACCOUNT = "1468873289267171330"; // @0xMiden
 export const DEFAULT_PATTERN = "partner mainnet starts now";
-/** "Will X be announced before D?" → "X before D": the pot's short title. */
-export const shortTitle = (q) => q.replace(/^Will /, "").replace(/ be announced/, "").replace(/\?$/, "");
+/** Pots group by topic, the question stem; a pot's label is its deadline: "before Oct 20, 2026". */
+export const DEFAULT_TOPIC = "Will Miden Partner Mainnet be announced";
 const MARKETS_FILE = path.join(ROOT, "web", "public", "markets.json");
 const POLL_MS = 3_000;
 
@@ -53,7 +53,7 @@ const potFeedKey = (p) => (p.feedKey ?? FEED_KEY_U64.map(String)).map(BigInt);
 /** web/public/markets.json: what the app needs to show the pots. */
 export function writeMarkets(state) {
   const markets = Object.entries(state.pots).map(([id, p]) => ({
-    id, label: p.label, question: p.question, deadlineMs: p.deadlineMs, account: p.account ?? DEFAULT_ACCOUNT,
+    id, topic: p.topic ?? DEFAULT_TOPIC, label: p.label, question: p.question, deadlineMs: p.deadlineMs, account: p.account ?? DEFAULT_ACCOUNT,
     pattern: p.pattern ?? DEFAULT_PATTERN, feedKey: potFeedKey(p).map(String),
   }));
   fs.writeFileSync(MARKETS_FILE, JSON.stringify({ oracle: state.oracle?.id, markets }, null, 2) + "\n");
@@ -294,8 +294,9 @@ export const commands = {
     const date = new Date(deadlineMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
     const account = arg(args, "account", DEFAULT_ACCOUNT);
     const pattern = arg(args, "pattern", DEFAULT_PATTERN);
-    const question = arg(args, "question", `Will Miden Partner Mainnet be announced before ${date}?`);
-    const label = arg(args, "label", shortTitle(question));
+    const topic = arg(args, "topic", DEFAULT_TOPIC);
+    const label = arg(args, "label", `before ${date}`);
+    const question = `${topic} ${label}?`;
     const feedKey = account === DEFAULT_ACCOUNT && pattern === DEFAULT_PATTERN ? FEED_KEY_U64.map(String) : feedKeyFor(account, pattern);
     // Default lock height: the block expected at the deadline (testnet blocks every ~3 s).
     const height = await c.getSyncHeight();
@@ -305,7 +306,7 @@ export const commands = {
     const asset = await feeFaucetId();
     const assetIdWord = u64s(new FungibleAsset(id(asset), 1n).vaultKey()).map(String);
     const oracleRoot = u64s(Word.fromHex(procedureHash(oracleComponent(), "get_entry"))).map(String);
-    const params = { deadlineMs, lockHeight, graceS, unit, assetIdWord, oracleId: state.oracle.id, oracleRoot, asset, label, question, account, pattern, feedKey };
+    const params = { deadlineMs, lockHeight, graceS, unit, assetIdWord, oracleId: state.oracle.id, oracleRoot, asset, topic, label, question, account, pattern, feedKey };
     const potId = await createContract(c, potComponent(params));
     state.pots[potId] = params;
     saveState(state);

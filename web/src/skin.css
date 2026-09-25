@@ -347,6 +347,9 @@ a { color: var(--lcd); }
 .row .led.lost { background: #555; box-shadow: none; }
 .row .led.paid { background: #fff; box-shadow: 0 0 6px #fff; }
 .list .empty { padding: 8px; color: var(--lcd-dim); }
+.list .head { display: flex; justify-content: space-between; gap: 10px; padding: 5px 8px 2px; font-size: 16px; }
+.list .head .right { color: var(--lcd-dim); white-space: nowrap; }
+.list .group + .group .head { border-top: 1px solid var(--chrome-dark); margin-top: 4px; }
 .footer { display: flex; justify-content: space-between; padding: 4px 8px; font-family: var(--font-lcd); font-size: 16px; color: var(--lcd-dim); }
 
 /* wallet chip in the title bar */
@@ -377,6 +380,11 @@ a { color: var(--lcd); }
 .detail .kv { display: flex; justify-content: space-between; gap: 12px; color: var(--lcd-dim); }
 .detail .kv span:first-child { color: var(--lcd); }
 .detail .controls { margin-top: 8px; }
+.detail .item { padding: 3px 0; }
+.detail .item + .item { border-top: 1px dotted var(--chrome-dark); }
+.detail .kv.sub { align-items: center; font-size: 16px; }
+.detail .btn.small { padding: 2px 8px; min-width: 0; font-size: 9px; }
+.admin td .dim { font-size: 14px; color: var(--lcd-dim); }
 
 .admin h4 { margin: 12px 0 4px; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--lcd-dim); }
 .admin .form { display: grid; gap: 4px; }

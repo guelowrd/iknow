@@ -3,7 +3,8 @@
   "markets": [
     {
       "id": "0x8eddfd14bf6626913cb31a58428793",
-      "label": "Miden Partner Mainnet before Oct 20, 2026",
+      "topic": "Will Miden Partner Mainnet be announced",
+      "label": "before Oct 20, 2026",
       "question": "Will Miden Partner Mainnet be announced before Oct 20, 2026?",
       "deadlineMs": 1792454400000,
       "account": "1468873289267171330",
@@ -17,7 +18,8 @@
     },
     {
       "id": "0x1d20145e5360cfd10671e1f093e97c",
-      "label": "Miden Partner Mainnet before Oct 28, 2026",
+      "topic": "Will Miden Partner Mainnet be announced",
+      "label": "before Oct 28, 2026",
       "question": "Will Miden Partner Mainnet be announced before Oct 28, 2026?",
       "deadlineMs": 1793145600000,
       "account": "1468873289267171330",
@@ -31,7 +33,8 @@
     },
     {
       "id": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
-      "label": "Miden Partner Mainnet before Nov 5, 2026",
+      "topic": "Will Miden Partner Mainnet be announced",
+      "label": "before Nov 5, 2026",
       "question": "Will Miden Partner Mainnet be announced before Nov 5, 2026?",
       "deadlineMs": 1793836800000,
       "account": "1468873289267171330",
@@ -41,6 +44,36 @@
         "0",
         "0",
         "100"
+      ]
+    },
+    {
+      "id": "0x98a2db3dc85f4c116e4a86c7bec89a",
+      "topic": "Will zkGaylord publish \"something stupid\"",
+      "label": "before Sep 27, 2026",
+      "question": "Will zkGaylord publish \"something stupid\" before Sep 27, 2026?",
+      "deadlineMs": 1790467200000,
+      "account": "1811045655449899008",
+      "pattern": "something stupid",
+      "feedKey": [
+        "2686219281000839191",
+        "1191374127129098808",
+        "3502117837801013956",
+        "211193247500497504"
+      ]
+    },
+    {
+      "id": "0x44d3a0f21e3863d1629649fe54f436",
+      "topic": "Will zkGaylord publish \"something stupid\"",
+      "label": "before Sep 30, 2026",
+      "question": "Will zkGaylord publish \"something stupid\" before Sep 30, 2026?",
+      "deadlineMs": 1790726400000,
+      "account": "1811045655449899008",
+      "pattern": "something stupid",
+      "feedKey": [
+        "2686219281000839191",
+        "1191374127129098808",
+        "3502117837801013956",
+        "211193247500497504"
       ]
     }
   ]

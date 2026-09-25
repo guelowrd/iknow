@@ -6,7 +6,8 @@ import {
 import { BATCH_MS, FAUCET_URL, MARKETS, MARKETS_URL, MIDEN_FAUCET, POT_PACKAGE_URL, UNIT } from "@/config";
 import stakeMasm from "../../../contracts/stake-note.masm?raw";
 
-export type MarketDef = { id: string; label: string; question: string; deadlineMs: number };
+/** topic = the question stem ("Will X be announced"), label = the deadline ("before Oct 20, 2026"). */
+export type MarketDef = { id: string; topic: string; label: string; question: string; deadlineMs: number };
 export type Market = MarketDef & { yes: number; no: number; outcome: 0 | 1 | 2 | 3; lockHeight: number };
 export type Position = {
   market: string;

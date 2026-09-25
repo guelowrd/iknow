@@ -46,6 +46,19 @@ heartbeat past the date with no post), the pot settles and pays winners pro rata
 The oracle is a mock with the same read interface as Pragma's Miden publisher, so switching to Pragma is a
 config change on new pots.
 
+## Deploy (Vercel)
+
+`vercel.json` at the repository root builds `web/` (the stake note script is imported from
+`contracts/`, so the project root stays the repository root) and sets the cross-origin isolation
+headers the SDK needs. Import the GitHub repository in Vercel with the default settings; every push
+to `main` redeploys. The pot list ships with the build (`web/public/markets.json`, written by the
+operator), so a new pot is a commit and a push. The admin view of a deployment talks to the operator
+server on your machine only if that server allows the origin:
+
+```
+IKNOW_ADMIN_ORIGINS=https://<project>.vercel.app nohup node admin.mjs > admin.log 2>&1 &
+```
+
 ## Layout
 
 ```

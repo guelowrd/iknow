@@ -5,6 +5,8 @@ import http from "node:http";
 import { client, commands, loadState } from "./cli.mjs";
 
 const PORT = Number(process.env.IKNOW_ADMIN_PORT ?? 5181);
+// browser origins allowed to talk to this server, e.g. the Vercel deployment: IKNOW_ADMIN_ORIGINS=https://iknow.vercel.app
+const ORIGINS = (process.env.IKNOW_ADMIN_ORIGINS ?? "").split(",").map((o) => o.trim()).filter(Boolean);
 const BATCH_MS = 10 * 60_000;
 const BATCH_MIN = 5; // web/src/config.ts BATCH_MIN shows the same number
 const c = await client();
@@ -62,7 +64,8 @@ const routes = {
 
 http.createServer(async (req, res) => {
   const origin = req.headers.origin ?? "";
-  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": /^http:\/\/localhost(:\d+)?$/.test(origin) ? origin : "null", "Access-Control-Allow-Headers": "content-type", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
+  const allowed = /^http:\/\/localhost(:\d+)?$/.test(origin) || ORIGINS.includes(origin);
+  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": allowed ? origin : "null", "Access-Control-Allow-Headers": "content-type", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
   if (req.method === "OPTIONS") { res.writeHead(204, headers); return res.end(); }
   const route = routes[`${req.method} ${req.url.split("?")[0]}`];
   if (!route) { res.writeHead(404, headers); return res.end(JSON.stringify({ error: "no such route" })); }

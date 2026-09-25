@@ -13,11 +13,22 @@ running batches in a loop. Spec in [docs/feasibility.md](docs/feasibility.md), p
 cd web && npm install && npm run dev        # http://localhost:5180
 ```
 
-Connect with **Bread** (Chrome extension on testnet) or click **guest** for a throwaway wallet funded
-from the testnet faucet (takes about a minute). Pick a date in the playlist, press **iKnow**, choose a
-stake in MIDEN, press **YES** or **NO**. The bet lands in the next batch (the operator loop opens waiting
-notes every 10 minutes), after which the totals and your position update. `#admin` at the end of the
-URL shows the pots and the CLI commands.
+Press **connect** and choose **Bread** (Chrome extension on testnet, recommended) or **guest**, a
+throwaway wallet funded from the testnet faucet in about a minute. Pick a pot, press **iKnow**, choose
+a stake in MIDEN, press **YES** or **NO**. The prediction lands in the next batch (the operator server
+opens waiting notes at every 10-minute mark), after which the totals and your position update. Click a
+prediction for its details; a pending one can be withdrawn. Guests can move their MIDEN to Bread with
+the red **SAVE** button. Double-click a title bar to shade a window; the top-left LED plays music.
+
+`#admin` at the end of the URL shows the operator view, live when the operator server runs:
+
+```
+cd operator && nohup node admin.mjs > admin.log 2>&1 &   # API on 127.0.0.1:5181 + batches + heartbeats
+```
+
+There you can create a pot (date, label, question, X account id, regex), open batches, settle, pay
+out, resolve a pot from an X post id or URL, or override it ("announced now"). New pots are written
+to `web/public/markets.json`, which the app reads.
 
 Live markets: oracle `0x91456cba0c509191225c89225c385a`, pots `0x8eddfd14bf6626913cb31a58428793`
 (Oct 20), `0x1d20145e5360cfd10671e1f093e97c` (Oct 28), `0xfb13ce79ff4bb7d1310de3bc1c8d3b` (Nov 5).
@@ -88,15 +99,18 @@ node cli.mjs wallet new                         # a funded test bettor
 node cli.mjs bet --wallet <id> --pot <id> --side yes|no --units 3
 node cli.mjs pot inbox|batch|status|settle|payout --pot <id>
 node cli.mjs wallet claim --wallet <id>         # winner consumes the payout note
-node cli.mjs oracle resolve --post-id <id> [--account <x user id>] [--pattern <regex>]
+node cli.mjs pot deploy --deadline <iso> [--label ..] [--question ..] [--account <x id>] [--pattern <regex>]
+node cli.mjs oracle resolve --pot <id> --post-id <id or url>   # the pot's account + regex
+node cli.mjs oracle publish --pot <id> --value <post ms>       # manual override, 0 = not yet
 IKNOW_MOCK=1 node mock-cycle.mjs                # the same commands end to end on the SDK's mock chain
-nohup sh operator/loop.sh > operator/loop.log & # batches every 10 min, heartbeat hourly
+node admin.mjs                                  # operator server: API + schedule (replaces loop.sh)
 ```
 
-`oracle resolve` evaluates "a post by account X whose normalized text matches this regex" and
-publishes the post's snowflake timestamp; defaults are @0xMiden and the exact phrase. The oracle is
-a mock: the admin can publish or override values by hand with `oracle publish`. `pot payout` relays
-each payout note to its target through the transport service, so Bread and guest wallets receive it.
+Each pot has a question: "a post by X account `account` whose normalized text matches `pattern`
+before the date". The oracle feed key derives from account + pattern, so pots with different
+questions resolve independently; `oracle heartbeat` covers every feed. The oracle is a mock: the admin
+publishes or overrides values by hand. `pot payout` relays each payout note to its target through the
+transport service, so Bread and guest wallets receive it.
 
 State (account ids, positions learned from opened notes) lives in `operator/state.json`; raw X responses
 in `operator/evidence/`. Contracts are read from `contracts/*/target/miden/release`, so build them first.

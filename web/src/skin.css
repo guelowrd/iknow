@@ -347,7 +347,8 @@ a { color: var(--lcd); }
 .row .led.lost { background: #555; box-shadow: none; }
 .row .led.paid { background: #fff; box-shadow: 0 0 6px #fff; }
 .list .empty { padding: 8px; color: var(--lcd-dim); }
-.list .head { display: flex; justify-content: space-between; gap: 10px; padding: 5px 8px 2px; font-size: 16px; }
+.list .head { display: flex; justify-content: space-between; gap: 10px; padding: 5px 8px 2px; font-size: 16px; cursor: pointer; }
+.list .head svg { margin-right: 4px; vertical-align: 0; }
 .list .head .right { color: var(--lcd-dim); white-space: nowrap; }
 .list .group + .group .head { border-top: 1px solid var(--chrome-dark); margin-top: 4px; }
 .footer { display: flex; justify-content: space-between; padding: 4px 8px; font-family: var(--font-lcd); font-size: 16px; color: var(--lcd-dim); }

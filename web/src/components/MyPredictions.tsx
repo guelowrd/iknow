@@ -40,8 +40,10 @@ export function MyPredictions({ positions, markets, onWithdraw }: Props) {
   const now = useNow();
   const marketOf = (p: Position) => markets.find((m) => m.id === p.market);
   const topicOf = (p: Position) => marketOf(p)?.topic ?? "…";
-  const topics = [...new Set(positions.map(topicOf))];
-  const inTopic = (topic: string) => positions.filter((p) => topicOf(p) === topic);
+  const potIndex = (p: Position) => { const i = markets.findIndex((m) => m.id === p.market); return i < 0 ? markets.length : i; };
+  // topics and pots in the order of the topics window
+  const topics = [...new Set(positions.map(topicOf))].sort((a, b) => markets.findIndex((m) => m.topic === a) - markets.findIndex((m) => m.topic === b));
+  const inTopic = (topic: string) => positions.filter((p) => topicOf(p) === topic).sort((a, b) => potIndex(a) - potIndex(b) || a.side - b.side || b.at - a.at);
 
   const withdraw = async (p: Position) => {
     setBusy(p.noteId);

@@ -303,6 +303,20 @@
       ],
       "noteId": "0x418f8761be68964d23b954af1a7fabca15b19622e51edc20bdf77ca3cf2bc272",
       "claimed": false
+    },
+    {
+      "pot": "0x1d20145e5360cfd10671e1f093e97c",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 2,
+      "units": 8,
+      "salt": [
+        "1608337184235059080",
+        "2536572614405356924",
+        "2157377944274946285",
+        "1688984771056850253"
+      ],
+      "noteId": "0x8ba034d760413f7413db7cc8cedb71510a3ed8c536a85a4f9b3b32ce66eb05ad",
+      "claimed": false
     }
   ]
 }

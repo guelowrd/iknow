@@ -28,8 +28,15 @@
       bet placed from the browser, relayed, opened by the operator batch, totals and position state
       updated on screen. Bread path written, not exercised (extension cannot be automated)
 - [x] 6. First testable version → three live markets, operator loop, README "Try it"
-- [ ] 7. Next: Bread end-to-end check with a real user, payout receipt in the app after a settlement,
-      hosting (no Vercel CLI on this machine), mobile pass, stake-after-lock test
+- [x] 7. Second round (2026-09-25) → connect chooser (Bread recommended / guest), red SAVE moving
+      guest MIDEN to Bread, "prediction" wording everywhere, full question on the display, ticker with
+      batch countdown + time to resolution, shaded windows, prediction details with withdraw (verified
+      in Chrome: predict YES 1 then withdraw, row gone, note never opened), pots with their own
+      question / X account / regex and feed key, operator server (API + schedule) driving the admin view
+- [ ] 8. Next: Bread end-to-end with a real user (predict, withdraw, SAVE), a real X post test from a
+      personal account (create a pot with that account id + regex in Admin, then "resolve from post"),
+      payout receipt in the app after a settlement, admin lockdown, hosting, mobile pass,
+      stake-after-lock test
 
 ## Review (Phase 0)
 

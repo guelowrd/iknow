@@ -333,7 +333,7 @@ export const commands = {
     await c.notes.fetchPrivate();
     await c.sync();
     const notes = await waitingNotes(c, potId);
-    if (notes.length === 0) return console.log("nothing to open");
+    if (notes.length === 0) { console.log("nothing to open"); return 0; }
     const unit = BigInt(state.pots[potId].unit);
     const ids = [];
     for (const record of notes) {

@@ -1,5 +1,5 @@
 import { EXPLORER_URL, ORACLE } from "@/config";
-import { fmt, type Market } from "@/lib/iknow";
+import { fmt, marketTitle, type Market } from "@/lib/iknow";
 
 export function Admin({ markets }: { markets: Market[] }) {
   return (
@@ -11,7 +11,7 @@ export function Admin({ markets }: { markets: Market[] }) {
           <tbody>
             {markets.map((m) => (
               <tr key={m.id}>
-                <td><a href={`${EXPLORER_URL}/account/${m.id}`} target="_blank" rel="noreferrer">{m.label}</a></td>
+                <td><a href={`${EXPLORER_URL}/account/${m.id}`} target="_blank" rel="noreferrer">{marketTitle(m)}</a></td>
                 <td>{fmt(m.yes)}</td><td>{fmt(m.no)}</td>
                 <td>{["pending", "YES", "NO", "VOID"][m.outcome]}</td>
                 <td>{m.lockHeight}</td>

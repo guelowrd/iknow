@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { QUESTION, X_ACCOUNT } from "@/config";
-import { fmt, pct, short, type Market } from "@/lib/iknow";
+import { useEffect, useRef, useState } from "react";
+import { fmt, marketTitle, pct, short, type Market } from "@/lib/iknow";
 import type { Session } from "@/hooks/useSession";
 import type { BetStatus } from "@/hooks/useBet";
+import { useAudio } from "@/hooks/useAudio";
 
 type Props = {
   market: Market | null;
@@ -14,6 +14,8 @@ type Props = {
   onNext: () => void;
 };
 
+const BARS = 24;
+
 function countdown(ms: number) {
   const s = Math.max(0, Math.floor((ms - Date.now()) / 1000));
   const d = Math.floor(s / 86_400);
@@ -22,25 +24,38 @@ function countdown(ms: number) {
   return d > 0 ? `${d}d ${String(h).padStart(2, "0")}h` : `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-function Spectrum({ yes, no }: { yes: number; no: number }) {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setTick((x) => x + 1), 380);
-    return () => clearInterval(t);
-  }, []);
+/** Bars split by the YES / NO share: still when silent, driven by the music when playing. */
+function Spectrum({ yes, no, analyser, playing }: { yes: number; no: number; analyser: AnalyserNode | null; playing: boolean }) {
+  const refs = useRef<(HTMLElement | null)[]>([]);
   const share = pct(yes, no) / 100;
-  const bars = useMemo(() => {
-    const total = yes + no;
-    return Array.from({ length: 24 }, (_, i) => {
-      const isYes = i < Math.round(24 * share);
-      const base = total === 0 ? 0.15 : isYes ? 0.35 + 0.6 * share : 0.35 + 0.6 * (1 - share);
-      const jitter = ((Math.sin((i + 1) * 12.9898 + tick * 1.7) + 1) / 2) * 0.35;
-      return { h: Math.min(1, base * (0.65 + jitter)), isYes };
-    });
-  }, [yes, no, share, tick]);
+  const yesBars = Math.round(BARS * share);
+  useEffect(() => {
+    if (!playing || !analyser) {
+      refs.current.forEach((el, i) => {
+        if (!el) return;
+        const isYes = i < yesBars;
+        const h = yes + no === 0 ? 12 : isYes ? 30 + 70 * share : 30 + 70 * (1 - share);
+        el.style.height = `${Math.round(h)}%`;
+      });
+      return;
+    }
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    let frame = 0;
+    const draw = () => {
+      analyser.getByteFrequencyData(data);
+      refs.current.forEach((el, i) => {
+        if (!el) return;
+        const v = data[Math.min(data.length - 1, i)] / 255;
+        el.style.height = `${Math.max(4, Math.round(v * 100))}%`;
+      });
+      frame = requestAnimationFrame(draw);
+    };
+    frame = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(frame);
+  }, [playing, analyser, yes, no, share, yesBars]);
   return (
     <div className="spectrum" aria-hidden>
-      {bars.map((b, i) => <i key={i} className={b.isYes ? "y" : "n"} style={{ height: `${Math.round(b.h * 100)}%` }} />)}
+      {Array.from({ length: BARS }, (_, i) => <i key={i} ref={(el) => { refs.current[i] = el; }} className={i < yesBars ? "y" : "n"} />)}
     </div>
   );
 }
@@ -51,7 +66,7 @@ function WalletChip({ session }: { session: Session }) {
   return (
     <span className="chip">
       {session.breadInstalled
-        ? <button onClick={session.connectBread} disabled={session.breadConnecting}>{session.breadConnecting ? "…" : "Bread"}</button>
+        ? <button onClick={session.connectBread} disabled={session.breadConnecting}>{session.breadConnecting ? "…" : "connect Bread"}</button>
         : <a href="https://www.miden.xyz/wallet" target="_blank" rel="noreferrer">get Bread</a>}
       <span>·</span>
       <button onClick={session.startGuest}>guest</button>
@@ -59,9 +74,13 @@ function WalletChip({ session }: { session: Session }) {
   );
 }
 
+const SkipBack = () => <svg viewBox="0 0 16 10" width="16" height="10" aria-hidden><rect x="0" y="0" width="2" height="10" fill="currentColor" /><path d="M9 0 L3 5 L9 10 Z M16 0 L10 5 L16 10 Z" fill="currentColor" /></svg>;
+const SkipForward = () => <svg viewBox="0 0 16 10" width="16" height="10" aria-hidden><path d="M0 0 L6 5 L0 10 Z M7 0 L13 5 L7 10 Z" fill="currentColor" /><rect x="14" y="0" width="2" height="10" fill="currentColor" /></svg>;
+
 export function Player({ market, index, count, session, bet, onPrev, onNext }: Props) {
   const [staking, setStaking] = useState(false);
   const [units, setUnits] = useState(1);
+  const audio = useAudio();
   const max = Math.max(1, Math.min(session.balance ?? 1, 1000));
   const canBet = !!market && !market.outcome && !!session.address && (session.balance ?? 0) >= 1;
   const [, force] = useState(0);
@@ -77,6 +96,7 @@ export function Player({ market, index, count, session, bet, onPrev, onNext }: P
   }, [bet.status, bet]);
 
   const busy = bet.status === "building" || bet.status === "signing" || bet.status === "relaying";
+  const title = market ? marketTitle(market) : "…";
   const hint = (() => {
     if (bet.status === "error") return <div className="hint err">{bet.error}</div>;
     if (bet.status === "building") return <div className="hint">building note…</div>;
@@ -94,13 +114,13 @@ export function Player({ market, index, count, session, bet, onPrev, onNext }: P
   return (
     <section className="win">
       <div className="title">
-        <span className="dot on" />
-        <span className="name">iKnow</span>
-        <WalletChip session={session} />
+        <button className={`dot play${audio.playing ? " on" : ""}`} onClick={audio.toggle} aria-label={audio.playing ? "stop music" : "play music"} title={audio.playing ? "stop" : "play"} />
+        <span className="name"><WalletChip session={session} /></span>
+        <span className="dot" />
       </div>
       <div className="body">
         <div className="lcd" aria-live="polite">
-          <div className="marquee"><span>{[0, 1].map((i) => <span key={i}>{X_ACCOUNT} posts “{QUESTION}” before {market?.label ?? "…"}?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>)}</span></div>
+          <div className="marquee"><span>{[0, 1].map((i) => <span key={i}>{title}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>)}</span></div>
           {staking && market ? (
             <>
               <div className="big">{fmt(units)}<small>MIDEN</small></div>
@@ -116,7 +136,7 @@ export function Player({ market, index, count, session, bet, onPrev, onNext }: P
               </div>
             </>
           )}
-          {market && <Spectrum yes={market.yes} no={market.no} />}
+          <Spectrum yes={market?.yes ?? 0} no={market?.no ?? 0} analyser={audio.analyser} playing={audio.playing} />
           {hint}
         </div>
 
@@ -134,9 +154,9 @@ export function Player({ market, index, count, session, bet, onPrev, onNext }: P
           </>
         ) : (
           <div className="controls">
-            <button className="btn" onClick={onPrev} disabled={index <= 0} aria-label="previous market">◀◀</button>
+            <button className="btn" onClick={onPrev} disabled={index <= 0} aria-label="previous market"><SkipBack /></button>
             <button className="btn wide go" onClick={() => setStaking(true)} disabled={!canBet}>iKnow</button>
-            <button className="btn" onClick={onNext} disabled={index >= count - 1} aria-label="next market">▶▶</button>
+            <button className="btn" onClick={onNext} disabled={index >= count - 1} aria-label="next market"><SkipForward /></button>
           </div>
         )}
       </div>

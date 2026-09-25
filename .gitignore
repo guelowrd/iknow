@@ -14,5 +14,6 @@ operator/state.mock.json
 store.sqlite3
 store.sqlite3*
 target/
+temp/
 web/dist/
 web/node_modules/

@@ -3,7 +3,7 @@ import {
   NoteRecipient, NoteScript, NoteStorage, NoteTag, NoteType, Package, Poseidon2, StorageMap, StorageSlot,
   StorageSlotArray, TransactionRequestBuilder, Word, type Account, type WebClient,
 } from "@miden-sdk/miden-sdk";
-import { FAUCET_URL, MARKETS, MIDEN_FAUCET, POT_PACKAGE_URL, UNIT } from "@/config";
+import { FAUCET_URL, MARKET_SUBJECT, MARKETS, MIDEN_FAUCET, POT_PACKAGE_URL, UNIT } from "@/config";
 import stakeMasm from "../../../contracts/stake-note.masm?raw";
 
 export type Market = (typeof MARKETS)[number] & { yes: number; no: number; outcome: 0 | 1 | 2 | 3; lockHeight: number };
@@ -28,6 +28,7 @@ export const pct = (yes: number, no: number) => (yes + no === 0 ? 50 : Math.roun
 export const randomWord = () =>
   Word.newFromFelts(Array.from({ length: 4 }, () => felt(new DataView(crypto.getRandomValues(new Uint8Array(8)).buffer).getBigUint64(0) >> 2n)));
 export const short = (s: string) => `${s.slice(0, 6)}…${s.slice(-4)}`;
+export const marketTitle = (m: { label: string }) => `${MARKET_SUBJECT} before ${m.label}`;
 
 // ---------------------------------------------------------------------------------------------
 // reading pots (public accounts imported into the local client)

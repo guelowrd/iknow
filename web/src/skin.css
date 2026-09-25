@@ -64,18 +64,14 @@ a { color: var(--lcd); }
 }
 .title .name {
   flex: 1;
-  text-align: center;
-  text-transform: none;
-  /* Silkscreen has no lowercase: the brand keeps its case in the LCD face */
-  font-family: var(--font-lcd);
-  font-size: 15px;
-  background: var(--chrome);
-  padding: 2px 8px;
+  display: flex;
+  justify-content: center;
   margin: 0 6px;
-  text-shadow: 0 0 6px rgba(53,255,90,0.35);
 }
-.title .dot { width: 8px; height: 8px; border: 1px solid var(--chrome-light); background: var(--chrome-dark); }
+.title .dot { width: 8px; height: 8px; border: 1px solid var(--chrome-light); background: var(--chrome-dark); padding: 0; }
 .title .dot.on { background: var(--lcd); box-shadow: 0 0 6px var(--lcd); }
+.title .dot.play { width: 12px; height: 12px; cursor: pointer; }
+.title .dot.play:hover { border-color: var(--lcd); }
 .body { padding: 8px; }
 
 /* LCD display */
@@ -96,7 +92,7 @@ a { color: var(--lcd); }
   grid-column: 1 / -1;
   overflow: hidden;
   white-space: nowrap;
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
   mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
 }
@@ -132,11 +128,9 @@ a { color: var(--lcd); }
 }
 .spectrum i {
   display: block;
-  background: linear-gradient(180deg, var(--no) 0%, var(--gold) 45%, var(--yes) 100%);
-  background-size: 100% 44px;
-  background-position: bottom;
   min-height: 2px;
-  transition: height 320ms ease;
+  height: 12%;
+  transition: height 80ms linear;
 }
 .spectrum i.n { background: linear-gradient(180deg, var(--no), #7a1010); }
 .spectrum i.y { background: linear-gradient(180deg, var(--yes), #0f6a24); }
@@ -144,6 +138,7 @@ a { color: var(--lcd); }
 /* controls */
 .controls { display: flex; gap: 4px; margin-top: 6px; align-items: stretch; }
 .btn {
+  display: inline-flex; align-items: center; justify-content: center;
   background: var(--chrome);
   border: 1px solid var(--chrome-dark);
   box-shadow: inset 1px 1px 0 var(--chrome-light), inset -1px -1px 0 var(--chrome-dark);

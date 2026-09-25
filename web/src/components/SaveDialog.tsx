@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Win } from "./Win";
 import { BREAD_URL, UNIT } from "@/config";
 import { fmt, short } from "@/lib/iknow";
 import type { Session } from "@/hooks/useSession";
@@ -40,8 +41,7 @@ export function SaveDialog({ session, onSave, onClose }: Props) {
 
   return (
     <div className="overlay" role="dialog" aria-modal="true" aria-label="save to Bread">
-      <section className="win dialog">
-        <div className="title"><span className="name">Save to Bread</span></div>
+      <Win title="Save to Bread" className="dialog" onClose={onClose}>
         <div className="body">
           {step === "done" ? (
             <>
@@ -55,7 +55,6 @@ export function SaveDialog({ session, onSave, onClose }: Props) {
               <p className="small">The guest wallet lives only in this browser. Bread keeps your keys safe on your device. Predictions already made pay out to the guest wallet: come back and save again after they resolve.</p>
               {error && <div className="hint err">{error}</div>}
               <div className="controls">
-                <button className="btn" onClick={onClose} disabled={step === "moving"}>later</button>
                 {!session.breadInstalled && <a className="btn wide danger" href={BREAD_URL} target="_blank" rel="noreferrer">get Bread</a>}
                 {session.breadInstalled && !session.breadConnected && <button className="btn wide danger" onClick={connect} disabled={step === "connecting"}>{step === "connecting" ? "connecting…" : "connect Bread"}</button>}
                 {session.breadInstalled && session.breadConnected && <button className="btn wide danger" onClick={move} disabled={step === "moving" || amount < 1}>{step === "moving" ? "moving…" : `move to ${session.breadAddress ? short(session.breadAddress) : "Bread"}`}</button>}
@@ -63,7 +62,7 @@ export function SaveDialog({ session, onSave, onClose }: Props) {
             </>
           )}
         </div>
-      </section>
+      </Win>
     </div>
   );
 }

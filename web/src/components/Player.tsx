@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Win } from "./Win";
-import { fmt, nextBatchMs, pct, short, type Market } from "@/lib/iknow";
+import { dateLabel, fmt, mmss, nextBatchMs, pct, remaining, short, type Market } from "@/lib/iknow";
 import type { Session } from "@/hooks/useSession";
 import type { PredictStatus } from "@/hooks/usePrediction";
 import { useAudio } from "@/hooks/useAudio";
+import { useNow } from "@/hooks/useNow";
 
 type Props = {
   market: Market | null;
@@ -18,18 +19,6 @@ type Props = {
 };
 
 const BARS = 24;
-
-function remaining(ms: number) {
-  const s = Math.max(0, Math.floor((ms - Date.now()) / 1000));
-  const d = Math.floor(s / 86_400);
-  const h = Math.floor((s % 86_400) / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
-}
-function mmss(ms: number) {
-  const s = Math.max(0, Math.floor((ms - Date.now()) / 1000));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-}
 
 /** Bars split by the YES / NO share: still when silent, driven by the music when playing. */
 function Spectrum({ yes, no, analyser, playing }: { yes: number; no: number; analyser: AnalyserNode | null; playing: boolean }) {
@@ -90,11 +79,7 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
   const audio = useAudio();
   const max = Math.max(1, Math.min(session.balance ?? 1, 1000));
   const canPredict = !!market && !market.outcome && !!session.address && (session.balance ?? 0) >= 1;
-  const [, tick] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => tick((x) => x + 1), 1_000);
-    return () => clearInterval(t);
-  }, []);
+  const now = useNow();
   useEffect(() => {
     if (prediction.status === "sent") {
       const t = setTimeout(() => { setStaking(false); prediction.reset(); }, 4_000);
@@ -104,7 +89,7 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
 
   const busy = prediction.status === "building" || prediction.status === "signing" || prediction.status === "relaying";
   const ticker = market
-    ? `next batch in ${mmss(nextBatchMs())}  ·  ${market.outcome ? `resolved ${["", "YES", "NO", "VOID"][market.outcome]}` : `resolves by ${market.label}, ${remaining(market.deadlineMs)} at most`}`
+    ? `next batch in ${mmss(nextBatchMs() - now)}  ·  ${market.outcome ? `resolved ${["", "YES", "NO", "VOID"][market.outcome]}` : `resolves by ${dateLabel(market.deadlineMs)}, ${remaining(market.deadlineMs - now)} at most`}`
     : "…";
   const hint = (() => {
     if (prediction.status === "error") return <div className="hint err">{prediction.error}</div>;

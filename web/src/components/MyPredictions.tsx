@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Win } from "./Win";
-import { EXPLORER_URL } from "@/config";
-import { fmt, payoutIfWins, short, type Market, type Position } from "@/lib/iknow";
+import { Close, Win } from "./Win";
+import { BATCH_MIN, EXPLORER_URL } from "@/config";
+import { fmt, mmss, nextBatchMs, payoutIfWins, short, type Market, type Position } from "@/lib/iknow";
+import { useNow } from "@/hooks/useNow";
 
 const STATE_LABEL: Record<NonNullable<Position["state"]>, string> = {
   pending: "next batch",
@@ -24,6 +25,7 @@ export function MyPredictions({ positions, markets, onWithdraw, onCollect, colle
   const [open, setOpen] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const now = useNow();
   const marketOf = (p: Position) => markets.find((m) => m.id === p.market);
   const paid = positions.some((p) => p.state === "paid" || p.state === "refund");
   const current = positions.find((p) => p.noteId === open);
@@ -60,19 +62,19 @@ export function MyPredictions({ positions, markets, onWithdraw, onCollect, colle
           const state = current.state ?? "pending";
           return (
             <div className="detail">
-              <div className="q">{m?.question ?? current.market}</div>
+              <div className="q"><Close onClick={() => setOpen(null)} />{m?.question ?? current.market}</div>
               <div className="kv"><span>{current.side === 1 ? "YES" : "NO"} · {fmt(current.units)} MIDEN</span><span>{STATE_LABEL[state]}</span></div>
-              {state === "pending" && <div className="kv"><span>not in the pot yet</span><span>{current.relayed === false ? "relay pending" : ""}</span></div>}
+              {state === "pending" && current.relayed === false && <div className="kv"><span>not sent to the pot yet</span><span>retrying</span></div>}
+              {state === "pending" && current.relayed !== false && <div className="kv"><span>in the pot in {mmss(nextBatchMs() - now)} at most</span><span>sooner once {BATCH_MIN} wait</span></div>}
               {state === "in" && m && <div className="kv"><span>pays {fmt(payoutIfWins(current, m))} MIDEN if it wins today</span><span>to {short(current.wallet)}</span></div>}
               {(state === "won" || state === "paid") && m && <div className="kv"><span>won · {fmt(payoutIfWins(current, m))} MIDEN</span><span>{state === "paid" ? "sent" : "payout pending"}</span></div>}
               {state === "lost" && <div className="kv"><span>lost</span><span /></div>}
               {state === "refund" && <div className="kv"><span>void · stake refunded</span><span /></div>}
               <div className="kv"><span><a href={`${EXPLORER_URL}/account/${current.market}`} target="_blank" rel="noreferrer">pot on chain</a></span><span>note {short(current.noteId)}</span></div>
               {error && <div className="hint err">{error}</div>}
-              <div className="controls">
-                <button className="btn" onClick={() => setOpen(null)}>close</button>
-                {state === "pending" && <button className="btn wide danger" onClick={() => withdraw(current)} disabled={busy}>{busy ? "withdrawing…" : "withdraw"}</button>}
-              </div>
+              {state === "pending" && (
+                <div className="controls"><button className="btn wide danger" onClick={() => withdraw(current)} disabled={busy}>{busy ? "withdrawing…" : "withdraw"}</button></div>
+              )}
             </div>
           );
         })()}

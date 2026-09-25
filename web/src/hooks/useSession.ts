@@ -88,6 +88,8 @@ export function useSession(): Session {
   const linkBread = useCallback(async () => {
     setError(null);
     if (!bread.connected) await bread.connect();
+    // the provider's connect() silently returns while an earlier attempt is still marked in flight
+    if (!bread.wallet?.adapter.connected) throw new Error("Bread did not connect. Open the Bread extension, then try again.");
   }, [bread]);
 
   const useBread = useCallback(() => {

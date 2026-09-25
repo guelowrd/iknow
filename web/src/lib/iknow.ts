@@ -33,8 +33,16 @@ export const randomWord = () =>
 export const short = (s: string) => `${s.slice(0, 6)}…${s.slice(-4)}`;
 export const nextBatchMs = () => Math.ceil(Date.now() / BATCH_MS) * BATCH_MS;
 export const OUTCOME = ["pending", "YES", "NO", "VOID"] as const;
-/** "Will X be announced before D?" → "X before D" for list rows; other questions stay as they are. */
-export const shortTitle = (q: string) => q.replace(/^Will /, "").replace(/ be announced/, "").replace(/\?$/, "");
+export const dateLabel = (ms: number) => new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+/** Durations for the display: "m:ss", and "2d 4h" / "4h 12m" / "12m". */
+export const mmss = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+export function remaining(ms: number) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(s / 86_400);
+  const h = Math.floor((s % 86_400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
 
 /** What a position pays if its side wins with today's totals (whole tokens). */
 export function payoutIfWins(p: Position, m: Market) {

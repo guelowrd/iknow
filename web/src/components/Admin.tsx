@@ -5,7 +5,7 @@ import { fmt, OUTCOME, type Market } from "@/lib/iknow";
 
 type PotStatus = { yesUnits: number; noUnits: number; outcome: string; vault: string; waitingNotes: number; error?: string };
 type ServerPot = { id: string; label: string; question: string; deadlineMs: number; lockHeight: number; account: string; pattern: string; status: PotStatus | null };
-type ServerState = { oracle: string; pots: ServerPot[]; nextBatchMs: number };
+type ServerState = { oracle: string; pots: ServerPot[]; nextBatchMs: number; batchMin?: number };
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
   const res = await fetch(`${ADMIN_URL}${path}`, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : undefined);
@@ -62,7 +62,7 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
           <tbody>
             {pots.map((p) => (
               <tr key={p.id}>
-                <td><a href={`${EXPLORER_URL}/account/${p.id}`} target="_blank" rel="noreferrer">{p.question}</a></td>
+                <td><a href={`${EXPLORER_URL}/account/${p.id}`} target="_blank" rel="noreferrer" title={p.question}>{p.label}</a></td>
                 <td>{fmt(p.status?.yesUnits ?? 0)}</td>
                 <td>{fmt(p.status?.noUnits ?? 0)}</td>
                 <td>{p.status?.waitingNotes ?? "·"}</td>
@@ -78,14 +78,14 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
             ))}
           </tbody>
         </table>
-        <p>oracle <a href={`${EXPLORER_URL}/account/${server?.oracle ?? ORACLE}`} target="_blank" rel="noreferrer">{server?.oracle ?? ORACLE}</a>{server && ` · next batch ${new Date(server.nextBatchMs).toLocaleTimeString()}`}</p>
+        <p>oracle <a href={`${EXPLORER_URL}/account/${server?.oracle ?? ORACLE}`} target="_blank" rel="noreferrer">{server?.oracle ?? ORACLE}</a>{server && ` · next batch ${new Date(server.nextBatchMs).toLocaleTimeString()}${server.batchMin ? `, sooner once ${server.batchMin} wait` : ""}`}</p>
 
         {!offline && (
           <>
             <h4>New prediction pot</h4>
             <div className="form">
               <label>closes (UTC)<input type="datetime-local" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} /></label>
-              <label>label<input placeholder="Oct 20, 2026" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} /></label>
+              <label>short title<input placeholder="from the question if empty" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} /></label>
               <label>question<input placeholder="Will Miden Partner Mainnet be announced before …?" value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} /></label>
               <label>X account id<input placeholder="1468873289267171330 (@0xMiden)" value={form.account} onChange={(e) => setForm({ ...form, account: e.target.value })} /></label>
               <label>regex<input placeholder="partner mainnet starts now" value={form.pattern} onChange={(e) => setForm({ ...form, pattern: e.target.value })} /></label>

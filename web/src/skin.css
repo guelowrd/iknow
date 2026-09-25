@@ -73,6 +73,15 @@ a { color: var(--lcd); }
 .title .dot.play { width: 12px; height: 12px; cursor: pointer; }
 .title .dot.play:hover { border-color: var(--lcd); }
 .title .spacer { width: 12px; }
+.close {
+  flex: none; width: 14px; height: 14px; padding: 0; margin-right: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--chrome); border: 1px solid var(--chrome-dark);
+  box-shadow: inset 1px 1px 0 var(--chrome-light), inset -1px -1px 0 var(--chrome-dark);
+  color: var(--chrome-text);
+}
+.close:hover { color: var(--no); }
+.close:active { box-shadow: inset -1px -1px 0 var(--chrome-light), inset 1px 1px 0 var(--chrome-dark); }
 .win.shade .title { border-bottom: 0; }
 .body { padding: 8px; }
 
@@ -192,6 +201,7 @@ a { color: var(--lcd); }
 }
 .row.sel { background: var(--select); color: #fff; }
 .row .right { text-align: right; font-variant-numeric: tabular-nums; }
+.row > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row .led { width: 8px; height: 8px; display: inline-block; margin-right: 6px; background: var(--gold); box-shadow: 0 0 6px var(--gold); }
 .row .led.in { background: var(--lcd); box-shadow: 0 0 6px var(--lcd); }
 .row .led.won { background: var(--gold); }
@@ -220,9 +230,11 @@ a { color: var(--lcd); }
 .dialog .choice { margin-bottom: 10px; }
 .dialog .choice .btn { width: 100%; font-size: 18px; padding: 10px; }
 .dialog .choice .small { margin: 6px 2px 0; }
+.dialog .hint { font-family: var(--font-lcd); }
 
 .detail { border-top: 1px solid var(--chrome-dark); margin-top: 6px; padding-top: 6px; font-family: var(--font-lcd); font-size: 18px; color: var(--lcd); }
-.detail .q { font-size: 20px; margin-bottom: 4px; }
+.detail .q { font-size: 20px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.detail .close { margin: 0; }
 .detail .kv { display: flex; justify-content: space-between; gap: 12px; color: var(--lcd-dim); }
 .detail .kv span:first-child { color: var(--lcd); }
 .detail .controls { margin-top: 8px; }
@@ -248,4 +260,5 @@ a { color: var(--lcd); }
   .marquee { font-size: 18px; }
   .row { grid-template-columns: 20px 1fr auto; }
   .row .hide-sm { display: none; }
+  .row > span:nth-child(2) { white-space: normal; line-height: 1.1; } /* keep the date visible */
 }

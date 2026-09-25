@@ -77,6 +77,7 @@ const routes = {
   "POST /heartbeat": () => run("oracle heartbeat"),
   "POST /publish": (b) => run("oracle publish", ["--pot", b.pot, "--value", String(b.valueMs)]),
   "POST /resolve": (b) => run("oracle resolve", ["--pot", b.pot, "--post-id", String(b.postId)]),
+  "POST /relay": (b) => run("pot relay", ["--pot", b.pot]),
   "POST /watch": () => run("oracle watch"),
   "POST /autosettle": () => run("pot autosettle"),
 };

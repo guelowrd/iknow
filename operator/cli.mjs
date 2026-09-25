@@ -467,7 +467,7 @@ export const commands = {
       const note = out.intoFull();
       if (!note) continue;
       const [suffix, prefix] = note.recipient().storage().items();
-      const target = new AccountId(prefix, suffix).toString();
+      const target = AccountId.fromPrefixSuffix(prefix, suffix).toString();
       try {
         await c.notes.sendPrivateOutput({ noteId: note.id().toString(), to: id(target) });
         console.log(`relayed payout ${note.id().toString().slice(0, 12)} to ${target}`);
@@ -475,6 +475,22 @@ export const commands = {
         console.log(`relay to ${target} skipped: ${err.message ?? err}`);
       }
     }
+  },
+  /** Sends the pot's unconsumed payout notes to their wallets again (a relay that failed earlier). */
+  async "pot relay"(c, state, args) {
+    const potId = arg(args, "pot");
+    const sent = await c.notes.listSent();
+    const report = [];
+    for (const wallet of new Set(state.positions.filter((p) => p.pot === potId && p.claimed).map((p) => p.wallet))) {
+      const tag = NoteTag.withAccountTarget(id(wallet)).asU32();
+      for (const r of sent) {
+        if (r.isConsumed() || r.metadata().tag().asU32() !== tag || r.metadata().sender().toString() !== potId) continue;
+        try { await c.notes.sendPrivateOutput({ noteId: r.id().toString(), to: id(wallet) }); report.push(`${r.id().toString().slice(0, 12)} → ${wallet.slice(0, 10)}: sent`); }
+        catch (err) { report.push(`${r.id().toString().slice(0, 12)} → ${wallet.slice(0, 10)}: ${String(err.message ?? err).slice(0, 80)}`); }
+      }
+    }
+    console.log(report.join("\n") || "nothing to relay");
+    return report;
   },
   async "fund"(c, state, args) {
     const account = arg(args, "account");

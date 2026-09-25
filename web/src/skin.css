@@ -1,4 +1,7 @@
 /* iKnow skin: classic Winamp chrome, LCD green display, playlist black/green. */
+/* Self-hosted (SIL OFL) so the look never depends on a font CDN: a failed request used to swap in Courier New. */
+@font-face { font-family: "Silkscreen"; src: url(/fonts/silkscreen.woff2) format("woff2"); font-display: block; }
+@font-face { font-family: "VT323"; src: url(/fonts/vt323.woff2) format("woff2"); font-display: block; }
 :root {
   --chrome: #22222a;
   --chrome-light: #4c4c5a;

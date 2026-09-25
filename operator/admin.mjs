@@ -46,7 +46,7 @@ function schedule() {
   setTimeout(async () => {
     await batchAll();
     if (new Date().getMinutes() < 10) { try { await run("oracle heartbeat"); } catch (err) { log("heartbeat failed", err.message ?? err); } }
-    try { const r = await run("pot autosettle"); const done = r.filter((x) => !/: open$/.test(x)); if (done.length) log("autosettle", done.join(" | ")); } catch (err) { log("autosettle failed", err.message ?? err); }
+    try { const r = await run("pot autosettle"); const done = r.filter((x) => !/: open$/.test(x)); if (done.length) log("autosettle", done.join(" | ")); } catch (err) { log("autosettle failed", err.stack ?? err.message ?? err); }
     schedule();
   }, nextBatch() - Date.now() + 2_000);
 }

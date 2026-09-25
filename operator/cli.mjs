@@ -424,7 +424,8 @@ export const commands = {
   async "pot settle"(c, state, args) {
     const potId = arg(args, "pot");
     const script = TransactionScript.fromPackage(loadPackage("settle-script"));
-    const storage = AccountStorageRequirements.fromSlotAndKeysArray([new SlotAndKeys(ORACLE_SLOT, [feedKey()])]);
+    // the pot reads its own feed key from the oracle: that entry must be in the foreign account data
+    const storage = AccountStorageRequirements.fromSlotAndKeysArray([new SlotAndKeys(ORACLE_SLOT, [feedKey(potFeedKey(state.pots[potId]))])]);
     const r = await c.transactions.execute({
       account: id(potId), script, foreignAccounts: [{ id: id(state.oracle.id), storage }], ...confirm });
     await commit(c);

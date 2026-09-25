@@ -49,9 +49,14 @@
       (a stake note could name a payout account). Skins: lcd / classic / modern, iK logo cycles.
 - [x] 12. Deployed (2026-09-25) at https://iknow-xi.vercel.app; guest freeze fixed (client in the SDK
       worker, faucet PoW in a worker with a sync SHA-256); play/pause + prev/next; three skins; topics
+- [x] 13. Automatic resolution (2026-09-25): operator watches each topic's X profile every 2 min
+      (syndication timeline, no key), publishes the earliest qualifying post since the topic's first
+      pot, settles due pots and pays out at every 10-minute mark; admin view gated to ADMINS wallets;
+      fixed an interval leak that multiplied the early-batch checks every 10 minutes
 - [ ] 8. Next: Bread withdraw and SAVE with a real user (SAVE now exercises the forwarding path),
       recover-from-chain for positions the app lost, pending-prediction chain check in the details,
-      admin lockdown before sharing widely, hosting the operator somewhere that does not sleep, a real X post test from a
+      hosting the operator somewhere that does not sleep, Pragma feed instead of the mock oracle,
+      a resolved/paid end-to-end run on testnet with real users, a real X post test from a
       personal account (create a pot with that account id + regex in Admin, then "resolve from post"),
       payout receipt in the app after a settlement, admin lockdown, hosting, mobile pass,
       stake-after-lock test

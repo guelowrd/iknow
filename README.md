@@ -32,9 +32,16 @@ right plays and pauses the music; previous and next track appear once it has pla
 cd operator && nohup node admin.mjs > admin.log 2>&1 &   # API on 127.0.0.1:5181 + batches + heartbeats
 ```
 
-There you can create a pot (date, short title, question, X account id, regex), open batches, settle, pay
-out, resolve a pot from an X post id or URL, or override it ("announced now"). New pots are written
-to `web/public/markets.json`, which the app reads.
+Only the wallets listed in `ADMINS` (`web/src/config.ts`) see it. There you can create a pot (date,
+topic, short name, stem, label, X handle, regex), open batches, settle, pay out, resolve a pot from an
+X post id or URL, or override it ("announced now"). New pots are written to `web/public/markets.json`,
+which the app reads.
+
+Resolution is automatic: the operator reads each watched profile's recent posts every two minutes
+(the public syndication timeline, no API key), and the earliest post since the topic's first pot
+that matches the topic's regex is published to the oracle. At every 10-minute mark the operator then
+settles every pot it can (a published post, or a deadline passed with a fresh heartbeat) and pays the
+winners out, so a matching post is money in wallets within about ten minutes.
 
 Live markets: oracle `0x91456cba0c509191225c89225c385a`, pots `0x8eddfd14bf6626913cb31a58428793`
 (Oct 20), `0x1d20145e5360cfd10671e1f093e97c` (Oct 28), `0xfb13ce79ff4bb7d1310de3bc1c8d3b` (Nov 5).

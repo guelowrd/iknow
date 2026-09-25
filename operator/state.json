@@ -145,7 +145,9 @@
       ],
       "topic": "When will Miden Partner Mainnet be announced?",
       "short": "Miden Partner Mainnet",
-      "stem": "Will Miden Partner Mainnet be announced"
+      "stem": "Will Miden Partner Mainnet be announced",
+      "handle": "0xMiden",
+      "createdMs": 1790287200000
     },
     "0x1d20145e5360cfd10671e1f093e97c": {
       "deadlineMs": 1793145600000,
@@ -178,7 +180,9 @@
       ],
       "topic": "When will Miden Partner Mainnet be announced?",
       "short": "Miden Partner Mainnet",
-      "stem": "Will Miden Partner Mainnet be announced"
+      "stem": "Will Miden Partner Mainnet be announced",
+      "handle": "0xMiden",
+      "createdMs": 1790287200000
     },
     "0xfb13ce79ff4bb7d1310de3bc1c8d3b": {
       "deadlineMs": 1793836800000,
@@ -211,7 +215,9 @@
       ],
       "topic": "When will Miden Partner Mainnet be announced?",
       "short": "Miden Partner Mainnet",
-      "stem": "Will Miden Partner Mainnet be announced"
+      "stem": "Will Miden Partner Mainnet be announced",
+      "handle": "0xMiden",
+      "createdMs": 1790287200000
     },
     "0x98a2db3dc85f4c116e4a86c7bec89a": {
       "deadlineMs": 1790467200000,
@@ -244,7 +250,9 @@
         "211193247500497504"
       ],
       "short": "zkGaylord something stupid",
-      "stem": "Will zkGaylord post something stupid"
+      "stem": "Will zkGaylord post something stupid",
+      "handle": "zkGaylord",
+      "createdMs": 1790337600000
     },
     "0x44d3a0f21e3863d1629649fe54f436": {
       "deadlineMs": 1790726400000,
@@ -277,7 +285,9 @@
         "211193247500497504"
       ],
       "short": "zkGaylord something stupid",
-      "stem": "Will zkGaylord post something stupid"
+      "stem": "Will zkGaylord post something stupid",
+      "handle": "zkGaylord",
+      "createdMs": 1790337600000
     }
   },
   "positions": [

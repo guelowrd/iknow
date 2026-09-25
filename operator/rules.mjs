@@ -37,6 +37,17 @@ export async function fetchPost(id) {
   return res.json();
 }
 
+/** Recent posts of a profile from the syndication timeline widget (no auth, unofficial), shaped like
+ * tweet-result posts so `evaluate` applies. */
+export async function fetchTimeline(handle) {
+  const res = await fetch(`https://syndication.twitter.com/srv/timeline-profile/screen-name/${encodeURIComponent(handle)}`, { headers: { "user-agent": "Mozilla/5.0" } });
+  if (!res.ok) throw new Error(`timeline ${res.status} for @${handle}`);
+  const m = (await res.text()).match(/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/s);
+  if (!m) throw new Error(`timeline for @${handle}: no data`);
+  const entries = JSON.parse(m[1])?.props?.pageProps?.timeline?.entries ?? [];
+  return entries.map((e) => e.content?.tweet).filter(Boolean).map((t) => ({ ...t, text: t.full_text ?? t.text }));
+}
+
 // Self-check: `node rules.mjs --check`
 if (process.argv.includes("--check")) {
   const assert = (cond, msg) => { if (!cond) { console.error("FAIL:", msg); process.exit(1); } };

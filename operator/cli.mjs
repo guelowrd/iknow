@@ -12,7 +12,7 @@ import {
   Note, NoteAssets, NoteMetadata, NoteRecipient, NoteScript, NoteStorage, NoteTag,
   NoteType, Package, RpcClient, SlotAndKeys, StorageMap, StorageSlot, TransactionScript, Word,
 } from "@miden-sdk/miden-sdk";
-import { evaluate, fetchPost } from "./rules.mjs";
+import { evaluate, fetchPost, fetchTimeline, snowflakeMs } from "./rules.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MOCK = !!process.env.IKNOW_MOCK;
@@ -290,6 +290,52 @@ export const commands = {
     await publish(c, state, verdict.tsMs, Math.floor(Date.now() / 1000), potFeedKey(p));
     return verdict;
   },
+  /** Watches X for every open feed: the earliest qualifying post since the feed's first pot resolves it. */
+  async "oracle watch"(c, state) {
+    const feeds = new Map();
+    for (const [id, p] of Object.entries(state.pots)) {
+      const key = potFeedKey(p).join(",");
+      const f = feeds.get(key) ?? { pot: id, handle: p.handle, account: p.account ?? DEFAULT_ACCOUNT, pattern: p.pattern ?? DEFAULT_PATTERN, sinceMs: Infinity };
+      f.sinceMs = Math.min(f.sinceMs, p.createdMs ?? 0);
+      feeds.set(key, f);
+    }
+    const report = [];
+    for (const f of feeds.values()) {
+      if (!f.handle) { report.push(`@? (${f.account}): no handle, not watched`); continue; }
+      const { valueMs } = await readOracleEntry(c, state.oracle.id, potFeedKey(state.pots[f.pot]));
+      if (valueMs) { report.push(`@${f.handle}: resolved already`); continue; }
+      const posts = (await fetchTimeline(f.handle)).filter((t) => snowflakeMs(t.id_str) >= f.sinceMs);
+      const hits = posts.map((t) => evaluate(t, { accountId: f.account, pattern: f.pattern })).filter((v) => v.qualifies).sort((a, b) => a.tsMs - b.tsMs);
+      if (hits.length === 0) { report.push(`@${f.handle}: ${posts.length} posts since ${new Date(f.sinceMs).toISOString()}, no match`); continue; }
+      const verdict = await commands["oracle resolve"](c, state, ["--pot", f.pot, "--post-id", hits[0].postId]);
+      report.push(`@${f.handle}: post ${hits[0].postId} qualifies, published ${verdict.tsMs}`);
+    }
+    console.log(report.join("\n"));
+    return report;
+  },
+  /** Settles every pot that can be settled (a value, or the deadline passed with a fresh heartbeat), then pays it out. */
+  async "pot autosettle"(c, state) {
+    const report = [];
+    const now = Date.now();
+    for (const [id, p] of Object.entries(state.pots)) {
+      const d = await potDetails(c, id);
+      if (d.outcome !== 0) {
+        if (state.positions.some((x) => x.pot === id && !x.claimed && (d.outcome === 3 || x.side === d.outcome))) { await commands["pot payout"](c, state, ["--pot", id]); report.push(`${p.label}: paid out`); }
+        continue;
+      }
+      const key = potFeedKey(p);
+      let { valueMs, observedAt } = await readOracleEntry(c, state.oracle.id, key);
+      const past = now >= p.deadlineMs + 60_000; // a minute of margin for the block timestamp
+      if (!valueMs && !past) { report.push(`${p.label}: open`); continue; }
+      if (!valueMs && observedAt * 1000 < p.deadlineMs) { await publish(c, state, 0, Math.floor(now / 1000), key); observedAt = Math.floor(now / 1000); }
+      await commands["pot settle"](c, state, ["--pot", id]);
+      const after = await potDetails(c, id);
+      report.push(`${p.label}: settled ${["pending", "YES", "NO", "VOID"][after.outcome]}`);
+      if (after.outcome !== 0) { await commands["pot payout"](c, state, ["--pot", id]); report.push(`${p.label}: paid out`); }
+    }
+    console.log(report.join("\n"));
+    return report;
+  },
   async "oracle read"(c, state, args) {
     const potId = arg(args, "pot", undefined);
     const key = potId ? potFeedKey(state.pots[potId]) : FEED_KEY_U64;
@@ -298,7 +344,10 @@ export const commands = {
   async "pot deploy"(c, state, args) {
     const deadlineMs = Date.parse(arg(args, "deadline"));
     const date = new Date(deadlineMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
-    const account = arg(args, "account", DEFAULT_ACCOUNT);
+    const handle = arg(args, "handle", "0xMiden").replace(/^@/, "");
+    // the numeric id is what the rules check (handles can change); taken from the profile's timeline
+    const account = arg(args, "account", handle === "0xMiden" ? DEFAULT_ACCOUNT : (await fetchTimeline(handle))[0]?.user?.id_str);
+    if (!account) throw new Error(`no posts found for @${handle}, pass --account`);
     const pattern = arg(args, "pattern", DEFAULT_PATTERN);
     const topic = arg(args, "topic", DEFAULT_TOPIC);
     const short = arg(args, "short", topic === DEFAULT_TOPIC ? DEFAULT_SHORT : stemOf(topic).replace(/^Will /, ""));
@@ -314,7 +363,7 @@ export const commands = {
     const asset = await feeFaucetId();
     const assetIdWord = u64s(new FungibleAsset(id(asset), 1n).vaultKey()).map(String);
     const oracleRoot = u64s(Word.fromHex(procedureHash(oracleComponent(), "get_entry"))).map(String);
-    const params = { deadlineMs, lockHeight, graceS, unit, assetIdWord, oracleId: state.oracle.id, oracleRoot, asset, topic, short, stem, label, question, account, pattern, feedKey };
+    const params = { deadlineMs, lockHeight, graceS, unit, assetIdWord, oracleId: state.oracle.id, oracleRoot, asset, topic, short, stem, label, question, handle, account, pattern, feedKey, createdMs: Date.now() };
     const potId = await createContract(c, potComponent(params));
     state.pots[potId] = params;
     saveState(state);

@@ -27,7 +27,7 @@ async function state() {
   for (const [id, p] of Object.entries(s.pots)) {
     let status = null;
     try { status = await run("pot status", ["--pot", id]); } catch (err) { status = { error: err.message ?? String(err) }; }
-    pots.push({ id, topic: p.topic, short: p.short, stem: p.stem, label: p.label, question: p.question, deadlineMs: p.deadlineMs, lockHeight: p.lockHeight, account: p.account, pattern: p.pattern, feedKey: p.feedKey, status });
+    pots.push({ id, topic: p.topic, short: p.short, stem: p.stem, label: p.label, question: p.question, handle: p.handle, deadlineMs: p.deadlineMs, lockHeight: p.lockHeight, account: p.account, pattern: p.pattern, feedKey: p.feedKey, status });
   }
   return { oracle: s.oracle?.id, pots, nextBatchMs: nextBatch(), batchMin: BATCH_MIN };
 }
@@ -46,20 +46,27 @@ function schedule() {
   setTimeout(async () => {
     await batchAll();
     if (new Date().getMinutes() < 10) { try { await run("oracle heartbeat"); } catch (err) { log("heartbeat failed", err.message ?? err); } }
+    try { const r = await run("pot autosettle"); const done = r.filter((x) => !/: open$/.test(x)); if (done.length) log("autosettle", done.join(" | ")); } catch (err) { log("autosettle failed", err.message ?? err); }
     schedule();
-setInterval(() => batchAll(BATCH_MIN), 60_000);
   }, nextBatch() - Date.now() + 2_000);
+}
+
+// X is read every two minutes; a qualifying post is published to the oracle at once
+async function watch() {
+  try { const r = await run("oracle watch"); const hit = r.filter((x) => /qualifies/.test(x)); if (hit.length) log("watch", hit.join(" | ")); } catch (err) { log("watch failed", err.message ?? err); }
 }
 
 const routes = {
   "GET /state": () => state(),
-  "POST /pots": (b) => run("pot deploy", ["--deadline", b.deadline, ...(b.topic ? ["--topic", b.topic] : []), ...(b.short ? ["--short", b.short] : []), ...(b.stem ? ["--stem", b.stem] : []), ...(b.label ? ["--label", b.label] : []), ...(b.account ? ["--account", b.account] : []), ...(b.pattern ? ["--pattern", b.pattern] : [])]),
+  "POST /pots": (b) => run("pot deploy", ["--deadline", b.deadline, ...(b.handle ? ["--handle", b.handle] : []), ...(b.topic ? ["--topic", b.topic] : []), ...(b.short ? ["--short", b.short] : []), ...(b.stem ? ["--stem", b.stem] : []), ...(b.label ? ["--label", b.label] : []), ...(b.account ? ["--account", b.account] : []), ...(b.pattern ? ["--pattern", b.pattern] : [])]),
   "POST /batch": (b) => run("pot batch", ["--pot", b.pot]),
   "POST /settle": (b) => run("pot settle", ["--pot", b.pot]),
   "POST /payout": (b) => run("pot payout", ["--pot", b.pot]),
   "POST /heartbeat": () => run("oracle heartbeat"),
   "POST /publish": (b) => run("oracle publish", ["--pot", b.pot, "--value", String(b.valueMs)]),
   "POST /resolve": (b) => run("oracle resolve", ["--pot", b.pot, "--post-id", String(b.postId)]),
+  "POST /watch": () => run("oracle watch"),
+  "POST /autosettle": () => run("pot autosettle"),
 };
 
 http.createServer(async (req, res) => {
@@ -83,3 +90,5 @@ http.createServer(async (req, res) => {
 }).listen(PORT, "127.0.0.1", () => log(`operator server on http://127.0.0.1:${PORT}, next batch ${new Date(nextBatch()).toISOString()}`));
 schedule();
 setInterval(() => batchAll(BATCH_MIN), 60_000);
+setInterval(watch, 120_000);
+watch();

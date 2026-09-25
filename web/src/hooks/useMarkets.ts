@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useMiden, useMidenClient } from "@miden-sdk/react";
 import { POLL_MS } from "@/config";
-import { readMarkets, type Market } from "@/lib/iknow";
+import { loadMarketDefs, readMarkets, type Market } from "@/lib/iknow";
 
 export function useMarkets() {
   const { isReady, runExclusive } = useMiden();
@@ -13,7 +13,8 @@ export function useMarkets() {
     if (!isReady) return;
     try {
       // MidenProvider auto-syncs every 15 s; reading here avoids a second sync in flight.
-      const next = await runExclusive(() => readMarkets(client));
+      const defs = await loadMarketDefs();
+      const next = await runExclusive(() => readMarkets(client, defs));
       setMarkets(next);
       setError(null);
     } catch (err) {

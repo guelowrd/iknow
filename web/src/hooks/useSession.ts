@@ -11,11 +11,19 @@ export type Session = {
   address: string | null;
   /** Whole MIDEN tokens available. */
   balance: number | null;
+  /** Exact balance in base units. */
+  balanceRaw: bigint | null;
   breadInstalled: boolean;
+  breadConnected: boolean;
+  breadAddress: string | null;
   breadConnecting: boolean;
   guestStep: string;
   error: string | null;
+  /** Use Bread as the active wallet. */
   connectBread: () => Promise<void>;
+  /** Connect Bread without leaving the guest (for saving guest funds). */
+  linkBread: () => Promise<void>;
+  useBread: () => void;
   startGuest: () => Promise<void>;
   disconnect: () => Promise<void>;
   refreshBalance: () => Promise<void>;
@@ -29,6 +37,7 @@ export function useSession(): Session {
   const client = useMidenClient();
   const [mode, setMode] = useState<Session["mode"]>(() => (localStorage.getItem(GUEST_KEY) === "1" ? "guest" : null));
   const [balance, setBalance] = useState<number | null>(null);
+  const [balanceRaw, setBalanceRaw] = useState<bigint | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const guest = useSessionAccount({
@@ -44,11 +53,6 @@ export function useSession(): Session {
 
   const readyState = bread.wallet?.readyState;
   const breadInstalled = readyState === WalletReadyState.Installed || readyState === WalletReadyState.Loadable;
-
-  useEffect(() => {
-    if (bread.connected) setMode("bread");
-  }, [bread.connected]);
-
   const address = mode === "bread" ? bread.address : mode === "guest" ? guest.sessionAccountId : null;
 
   const refreshBalance = useCallback(async () => {
@@ -57,16 +61,20 @@ export function useSession(): Session {
         const assets = await bread.requestAssets();
         const faucet = parseId(MIDEN_FAUCET).toString();
         const hit = assets.find((a) => parseId(a.faucetId).toString() === faucet);
-        setBalance(hit ? Number(BigInt(hit.amount) / UNIT) : 0);
+        const raw = hit ? BigInt(hit.amount) : 0n;
+        setBalanceRaw(raw);
+        setBalance(Number(raw / UNIT));
       } else if (mode === "guest" && guest.sessionAccountId && isReady) {
         const id = guest.sessionAccountId;
-        const amount = await runExclusive(async () => {
+        const raw = await runExclusive(async () => {
           const account = await client.getAccount(parseId(id));
           return account ? account.vault().getBalance(parseId(MIDEN_FAUCET)) : 0n;
         });
-        setBalance(Number(amount / UNIT));
+        setBalanceRaw(raw);
+        setBalance(Number(raw / UNIT));
       } else {
         setBalance(null);
+        setBalanceRaw(null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -77,15 +85,24 @@ export function useSession(): Session {
     refreshBalance();
   }, [refreshBalance, guest.isReady]);
 
-  const connectBread = useCallback(async () => {
+  const linkBread = useCallback(async () => {
     setError(null);
+    if (!bread.connected) await bread.connect();
+  }, [bread]);
+
+  const useBread = useCallback(() => {
+    localStorage.removeItem(GUEST_KEY);
+    setMode("bread");
+  }, []);
+
+  const connectBread = useCallback(async () => {
     try {
-      await bread.connect();
-      setMode("bread");
+      await linkBread();
+      useBread();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
-  }, [bread]);
+  }, [linkBread, useBread]);
 
   /** True while useSessionAccount has a stored wallet it has not loaded into state yet: calling
    * initialize() then would create (and fund) a second wallet. */
@@ -109,6 +126,7 @@ export function useSession(): Session {
     localStorage.removeItem(GUEST_KEY);
     setMode(null);
     setBalance(null);
+    setBalanceRaw(null);
   }, [mode, bread]);
 
   // resume a guest session created earlier (funding may still be pending); never create a second wallet
@@ -119,16 +137,9 @@ export function useSession(): Session {
   }, [mode, isReady, guest.sessionAccountId, guest.step]);
 
   return {
-    mode,
-    address,
-    balance,
-    breadInstalled,
-    breadConnecting: bread.connecting,
-    guestStep: guest.step,
-    error: error ?? guest.error?.message ?? null,
-    connectBread,
-    startGuest,
-    disconnect,
-    refreshBalance,
+    mode, address, balance, balanceRaw, breadInstalled,
+    breadConnected: bread.connected, breadAddress: bread.address, breadConnecting: bread.connecting,
+    guestStep: guest.step, error: error ?? guest.error?.message ?? null,
+    connectBread, linkBread, useBread, startGuest, disconnect, refreshBalance,
   };
 }

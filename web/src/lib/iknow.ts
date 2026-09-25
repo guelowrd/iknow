@@ -3,20 +3,23 @@ import {
   NoteRecipient, NoteScript, NoteStorage, NoteTag, NoteType, Package, Poseidon2, StorageMap, StorageSlot,
   StorageSlotArray, TransactionRequestBuilder, Word, type Account, type WebClient,
 } from "@miden-sdk/miden-sdk";
-import { FAUCET_URL, MARKET_SUBJECT, MARKETS, MIDEN_FAUCET, POT_PACKAGE_URL, UNIT } from "@/config";
+import { BATCH_MS, FAUCET_URL, MARKETS, MARKETS_URL, MIDEN_FAUCET, POT_PACKAGE_URL, UNIT } from "@/config";
 import stakeMasm from "../../../contracts/stake-note.masm?raw";
 
-export type Market = (typeof MARKETS)[number] & { yes: number; no: number; outcome: 0 | 1 | 2 | 3; lockHeight: number };
+export type MarketDef = { id: string; label: string; question: string; deadlineMs: number };
+export type Market = MarketDef & { yes: number; no: number; outcome: 0 | 1 | 2 | 3; lockHeight: number };
 export type Position = {
   market: string;
   side: 1 | 2;
   units: number;
   salt: string[];
+  /** Note serial number, needed to rebuild the note (older positions lack it). */
+  serial?: string[];
   noteId: string;
   txId?: string;
   at: number;
   wallet: string;
-  /** Guest bets: whether the note reached the pot through the transport service. */
+  /** Guest predictions: whether the note reached the pot through the transport service. */
   relayed?: boolean;
   state?: "pending" | "in" | "won" | "lost" | "paid" | "refund";
 };
@@ -28,23 +31,44 @@ export const pct = (yes: number, no: number) => (yes + no === 0 ? 50 : Math.roun
 export const randomWord = () =>
   Word.newFromFelts(Array.from({ length: 4 }, () => felt(new DataView(crypto.getRandomValues(new Uint8Array(8)).buffer).getBigUint64(0) >> 2n)));
 export const short = (s: string) => `${s.slice(0, 6)}…${s.slice(-4)}`;
-export const marketTitle = (m: { label: string }) => `${MARKET_SUBJECT} before ${m.label}`;
+export const nextBatchMs = () => Math.ceil(Date.now() / BATCH_MS) * BATCH_MS;
+export const OUTCOME = ["pending", "YES", "NO", "VOID"] as const;
+/** "Will X be announced before D?" → "X before D" for list rows; other questions stay as they are. */
+export const shortTitle = (q: string) => q.replace(/^Will /, "").replace(/ be announced/, "").replace(/\?$/, "");
+
+/** What a position pays if its side wins with today's totals (whole tokens). */
+export function payoutIfWins(p: Position, m: Market) {
+  const total = m.yes + m.no;
+  const side = p.side === 1 ? m.yes : m.no;
+  return side === 0 ? p.units : Math.floor((p.units * total) / side);
+}
 
 // ---------------------------------------------------------------------------------------------
-// reading pots (public accounts imported into the local client)
+// pots (public accounts imported into the local client)
 // ---------------------------------------------------------------------------------------------
+
+export async function loadMarketDefs(): Promise<MarketDef[]> {
+  try {
+    const res = await fetch(MARKETS_URL, { cache: "no-store" });
+    if (res.ok) {
+      const json = (await res.json()) as { markets?: MarketDef[] };
+      if (json.markets?.length) return json.markets;
+    }
+  } catch {
+    /* fall back to the built-in list */
+  }
+  return MARKETS;
+}
 
 async function potAccount(client: WebClient, id: string): Promise<Account | undefined> {
-  const accountId = parseId(id);
-  if (!(await client.getAccount(parseId(id)))) await client.importAccountById(accountId);
+  if (!(await client.getAccount(parseId(id)))) await client.importAccountById(parseId(id));
   return client.getAccount(parseId(id));
 }
 
-export async function readMarkets(client: WebClient): Promise<Market[]> {
+export async function readMarkets(client: WebClient, defs: MarketDef[]): Promise<Market[]> {
   const out: Market[] = [];
-  for (const m of MARKETS) {
-    const account = await potAccount(client, m.id);
-    const storage = account?.storage();
+  for (const m of defs) {
+    const storage = (await potAccount(client, m.id))?.storage();
     const totals = storage?.getItem("pot::pot::totals")?.toU64s();
     const market = storage?.getItem("pot::pot::market")?.toU64s();
     const outcome = Number(storage?.getItem("pot::pot::outcome")?.toU64s()[0] ?? 0n) as Market["outcome"];
@@ -73,7 +97,7 @@ export async function positionStates(client: WebClient, positions: Position[], m
 }
 
 // ---------------------------------------------------------------------------------------------
-// building a stake note
+// stake notes
 // ---------------------------------------------------------------------------------------------
 
 let potComponentPromise: Promise<AccountComponent> | null = null;
@@ -83,9 +107,9 @@ export function potComponent(): Promise<AccountComponent> {
     const res = await fetch(POT_PACKAGE_URL);
     if (!res.ok) throw new Error(`cannot load ${POT_PACKAGE_URL}: ${res.status}`);
     const pkg = Package.deserialize(new Uint8Array(await res.arrayBuffer()));
-    const zero = Word.newFromFelts([felt(0), felt(0), felt(0), felt(0)]);
+    const zero = () => Word.newFromFelts([felt(0), felt(0), felt(0), felt(0)]);
     const slots = new StorageSlotArray([
-      ...["market", "asset_id", "oracle", "oracle_root", "feed_key", "p2id_root", "totals", "outcome"].map((n) => StorageSlot.fromValue(`pot::pot::${n}`, zero)),
+      ...["market", "asset_id", "oracle", "oracle_root", "feed_key", "p2id_root", "totals", "outcome"].map((n) => StorageSlot.fromValue(`pot::pot::${n}`, zero())),
       StorageSlot.map("pot::pot::positions", new StorageMap()),
     ]);
     return AccountComponent.fromPackage(pkg, slots);
@@ -95,10 +119,11 @@ export function potComponent(): Promise<AccountComponent> {
 
 export const STAKE_MASM = stakeMasm;
 
-export type StakeDraft = { pot: string; sender: string; side: 1 | 2; units: number; salt: string[]; serial: Word };
+export type StakeDraft = { pot: string; sender: string; side: 1 | 2; units: number; salt: string[]; serial: string[] };
 
+const wordStrings = (w: Word) => Array.from(w.toU64s(), String);
 export function newDraft(pot: string, sender: string, side: 1 | 2, units: number): StakeDraft {
-  return { pot, sender, side, units, salt: Array.from(randomWord().toU64s(), String), serial: randomWord() };
+  return { pot, sender, side, units, salt: wordStrings(randomWord()), serial: wordStrings(randomWord()) };
 }
 
 /** Builds the stake note. Call it again for a second identical note: wasm-bindgen moves value args. */
@@ -107,7 +132,12 @@ export function buildStakeNote(script: NoteScript, d: StakeDraft): Note {
   const storage = new NoteStorage(new FeltArray([pot.prefix(), pot.suffix(), felt(d.side), ...d.salt.map(felt)]));
   const assets = new NoteAssets([new FungibleAsset(parseId(MIDEN_FAUCET), BigInt(d.units) * UNIT)]);
   const metadata = new NoteMetadata(parseId(d.sender), NoteType.Private, NoteTag.withAccountTarget(parseId(d.pot)));
-  return new Note(assets, metadata, new NoteRecipient(d.serial, script, storage));
+  return new Note(assets, metadata, new NoteRecipient(Word.newFromFelts(d.serial.map(felt)), script, storage));
+}
+
+/** The note of a stored position, for withdrawing it through a wallet that never held the note. */
+export function draftOf(p: Position): StakeDraft | null {
+  return p.serial ? { pot: p.market, sender: p.wallet, side: p.side, units: p.units, salt: p.salt, serial: p.serial } : null;
 }
 
 export function stakeRequest(note: Note) {
@@ -128,20 +158,16 @@ export function loadPositions(): Position[] {
     return [];
   }
 }
-export function savePosition(p: Position) {
+function write(ps: Position[]) {
   try {
-    localStorage.setItem(KEY, JSON.stringify([p, ...loadPositions()]));
+    localStorage.setItem(KEY, JSON.stringify(ps));
   } catch {
-    /* private mode: the bet still exists on chain */
+    /* private mode: the prediction still exists on chain */
   }
 }
-export function markRelayed(noteId: string) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(loadPositions().map((p) => (p.noteId === noteId ? { ...p, relayed: true } : p))));
-  } catch {
-    /* ignore */
-  }
-}
+export const savePosition = (p: Position) => write([p, ...loadPositions()]);
+export const removePosition = (noteId: string) => write(loadPositions().filter((p) => p.noteId !== noteId));
+export const markRelayed = (noteId: string) => write(loadPositions().map((p) => (p.noteId === noteId ? { ...p, relayed: true } : p)));
 
 // ---------------------------------------------------------------------------------------------
 // testnet faucet (guest wallets)

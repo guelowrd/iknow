@@ -72,6 +72,8 @@ a { color: var(--lcd); }
 .title .dot.on { background: var(--lcd); box-shadow: 0 0 6px var(--lcd); }
 .title .dot.play { width: 12px; height: 12px; cursor: pointer; }
 .title .dot.play:hover { border-color: var(--lcd); }
+.title .spacer { width: 12px; }
+.win.shade .title { border-bottom: 0; }
 .body { padding: 8px; }
 
 /* LCD display */
@@ -83,16 +85,21 @@ a { color: var(--lcd); }
   font-family: var(--font-lcd);
   padding: 8px 10px;
   display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto auto;
-  gap: 4px 12px;
-  min-height: 120px;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  min-height: 150px;
 }
+.question { font-size: 30px; line-height: 1.05; text-shadow: 0 0 10px rgba(53,255,90,0.45); }
+.stats { display: flex; gap: 16px; align-items: baseline; font-size: 22px; line-height: 1; flex-wrap: wrap; }
+.stats .yes { color: var(--yes); }
+.stats .no { color: var(--no); }
+.stats .dim { color: var(--lcd-dim); margin-left: auto; }
 .marquee {
   grid-column: 1 / -1;
   overflow: hidden;
   white-space: nowrap;
-  font-size: 24px;
+  font-size: 16px;
+  color: var(--lcd-dim);
   line-height: 1;
   mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
 }
@@ -102,7 +109,7 @@ a { color: var(--lcd); }
 }
 @keyframes scroll { to { transform: translateX(-50%); } }
 .big {
-  font-size: 56px;
+  font-size: 44px;
   line-height: 1;
   letter-spacing: 2px;
   text-shadow: 0 0 10px rgba(53,255,90,0.45);
@@ -201,6 +208,32 @@ a { color: var(--lcd); }
 }
 .chip button { border: 0; background: none; padding: 0; color: var(--lcd); text-transform: uppercase; letter-spacing: 1px; }
 .chip .addr { font-family: var(--font-lcd); font-size: 14px; text-transform: none; }
+
+.chip .save { background: var(--no); color: #fff; padding: 1px 6px; text-shadow: none; box-shadow: 0 0 8px rgba(255,59,59,0.6); }
+.btn.danger { background: var(--no); color: #fff; text-shadow: none; border-color: #7a1010; text-decoration: none; text-align: center; }
+.btn.danger:hover:not(:disabled) { background: #ff5a5a; }
+
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+.dialog { width: min(420px, 100%); }
+.dialog .lead { font-family: var(--font-lcd); font-size: 22px; color: var(--lcd); margin: 4px 0 8px; }
+.dialog .small { font-family: var(--font-lcd); font-size: 17px; color: var(--lcd-dim); margin: 0 0 10px; line-height: 1.2; }
+.dialog .choice { margin-bottom: 10px; }
+.dialog .choice .btn { width: 100%; font-size: 18px; padding: 10px; }
+.dialog .choice .small { margin: 6px 2px 0; }
+
+.detail { border-top: 1px solid var(--chrome-dark); margin-top: 6px; padding-top: 6px; font-family: var(--font-lcd); font-size: 18px; color: var(--lcd); }
+.detail .q { font-size: 20px; margin-bottom: 4px; }
+.detail .kv { display: flex; justify-content: space-between; gap: 12px; color: var(--lcd-dim); }
+.detail .kv span:first-child { color: var(--lcd); }
+.detail .controls { margin-top: 8px; }
+
+.admin h4 { margin: 12px 0 4px; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--lcd-dim); }
+.admin .form { display: grid; gap: 4px; }
+.admin .form label { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 8px; font-family: var(--font-lcd); font-size: 16px; color: var(--lcd-dim); }
+.admin input, .admin select { font: 16px var(--font-lcd); background: #000; color: var(--lcd); border: 1px solid var(--chrome-light); padding: 3px 6px; }
+.admin .actions { white-space: nowrap; }
+.admin .actions .btn { padding: 2px 6px; min-width: 0; margin-left: 2px; font-size: 9px; }
+.admin .log { font: 14px var(--font-lcd); color: var(--lcd-dim); background: #000; padding: 6px; margin: 8px 0 0; white-space: pre-wrap; }
 
 .tiny { font-size: 9px; color: #6b6b78; text-align: center; margin-top: 8px; }
 .tiny a { color: #6b6b78; }

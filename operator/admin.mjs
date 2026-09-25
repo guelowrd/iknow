@@ -51,9 +51,20 @@ function schedule() {
   }, nextBatch() - Date.now() + 2_000);
 }
 
-// X is read every five minutes; a qualifying post is published to the oracle at once
+// X is read every five minutes, one profile per tick; a qualifying post is published to the oracle at
+// once. The public timeline endpoint answers 429 when read too often: back off for a quarter hour.
+let watchTurn = 0;
+let watchPausedUntil = Date.now() + Number(process.env.IKNOW_WATCH_PAUSE_MS ?? 0);
 async function watch() {
-  try { const r = await run("oracle watch"); const hit = r.filter((x) => /qualifies/.test(x)); if (hit.length) log("watch", hit.join(" | ")); } catch (err) { log("watch failed", err.message ?? err); }
+  if (Date.now() < watchPausedUntil) return;
+  try {
+    const r = await run("oracle watch", ["--only", String(watchTurn++)]);
+    const hit = r.filter((x) => /qualifies/.test(x));
+    if (hit.length) log("watch", hit.join(" | "));
+  } catch (err) {
+    log("watch failed", err.message ?? err);
+    if (/429/.test(String(err.message ?? err))) watchPausedUntil = Date.now() + 15 * 60_000;
+  }
 }
 
 const routes = {

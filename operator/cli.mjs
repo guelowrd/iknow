@@ -291,7 +291,8 @@ export const commands = {
     return verdict;
   },
   /** Watches X for every open feed: the earliest qualifying post since the feed's first pot resolves it. */
-  async "oracle watch"(c, state) {
+  async "oracle watch"(c, state, args = []) {
+    const only = arg(args, "only", null); // round-robin index from the server: one profile read per tick
     const feeds = new Map();
     for (const [id, p] of Object.entries(state.pots)) {
       const key = potFeedKey(p).join(",");
@@ -300,7 +301,8 @@ export const commands = {
       feeds.set(key, f);
     }
     const report = [];
-    for (const f of feeds.values()) {
+    const list = [...feeds.values()];
+    for (const f of only === null ? list : [list[Number(only) % list.length]].filter(Boolean)) {
       if (!f.handle) { report.push(`@? (${f.account}): no handle, not watched`); continue; }
       const { valueMs } = await readOracleEntry(c, state.oracle.id, potFeedKey(state.pots[f.pot]));
       if (valueMs) { report.push(`@${f.handle}: resolved already`); continue; }

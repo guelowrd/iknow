@@ -25,7 +25,7 @@ async function state() {
   for (const [id, p] of Object.entries(s.pots)) {
     let status = null;
     try { status = await run("pot status", ["--pot", id]); } catch (err) { status = { error: err.message ?? String(err) }; }
-    pots.push({ id, topic: p.topic, label: p.label, question: p.question, deadlineMs: p.deadlineMs, lockHeight: p.lockHeight, account: p.account, pattern: p.pattern, feedKey: p.feedKey, status });
+    pots.push({ id, topic: p.topic, short: p.short, stem: p.stem, label: p.label, question: p.question, deadlineMs: p.deadlineMs, lockHeight: p.lockHeight, account: p.account, pattern: p.pattern, feedKey: p.feedKey, status });
   }
   return { oracle: s.oracle?.id, pots, nextBatchMs: nextBatch(), batchMin: BATCH_MIN };
 }
@@ -51,7 +51,7 @@ setInterval(() => batchAll(BATCH_MIN), 60_000);
 
 const routes = {
   "GET /state": () => state(),
-  "POST /pots": (b) => run("pot deploy", ["--deadline", b.deadline, ...(b.topic ? ["--topic", b.topic] : []), ...(b.label ? ["--label", b.label] : []), ...(b.account ? ["--account", b.account] : []), ...(b.pattern ? ["--pattern", b.pattern] : [])]),
+  "POST /pots": (b) => run("pot deploy", ["--deadline", b.deadline, ...(b.topic ? ["--topic", b.topic] : []), ...(b.short ? ["--short", b.short] : []), ...(b.stem ? ["--stem", b.stem] : []), ...(b.label ? ["--label", b.label] : []), ...(b.account ? ["--account", b.account] : []), ...(b.pattern ? ["--pattern", b.pattern] : [])]),
   "POST /batch": (b) => run("pot batch", ["--pot", b.pot]),
   "POST /settle": (b) => run("pot settle", ["--pot", b.pot]),
   "POST /payout": (b) => run("pot payout", ["--pot", b.pot]),

@@ -381,6 +381,9 @@ a { color: var(--lcd); }
 .detail .kv span:first-child { color: var(--lcd); }
 .detail .controls { margin-top: 8px; }
 .detail .item { padding: 3px 0; }
+.detail .item > .kv { cursor: pointer; }
+.detail .kv.more { padding-left: 14px; font-size: 15px; }
+.detail .kv.more span:first-child { color: var(--lcd-dim); }
 .detail .item + .item { border-top: 1px dotted var(--chrome-dark); }
 .detail .kv.sub { align-items: center; font-size: 16px; }
 .detail .btn.small { padding: 2px 8px; min-width: 0; font-size: 9px; }

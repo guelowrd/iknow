@@ -121,18 +121,13 @@ export function useSession(): Session {
    * initialize() then would create (and fund) a second wallet. */
   const guestStateLoading = () => !!localStorage.getItem("iknow-guest:accountId") && !guest.sessionAccountId;
 
+  /** Switches to the guest; the effect below creates or resumes the wallet once the mode is set,
+   * after the first paint, so "creating…" shows before the wallet code blocks the thread. */
   const startGuest = useCallback(async () => {
     setError(null);
     setMode("guest");
     localStorage.setItem(GUEST_KEY, "1");
-    if (guest.isReady || guestStateLoading()) return;
-    try {
-      await guest.initialize();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [guest]);
+  }, []);
 
   const disconnect = useCallback(async () => {
     if (mode === "bread") await bread.disconnect().catch(() => undefined);
@@ -142,7 +137,7 @@ export function useSession(): Session {
     setBalanceRaw(null);
   }, [mode, bread]);
 
-  // resume a guest session created earlier (funding may still be pending); never create a second wallet
+  // create the guest wallet, or resume one created earlier (funding may still be pending); never a second one
   useEffect(() => {
     if (mode !== "guest" || !isReady || guest.isReady || guest.step !== "idle" || guestStateLoading()) return;
     guest.initialize().catch(() => undefined);

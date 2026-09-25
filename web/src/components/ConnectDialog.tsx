@@ -42,7 +42,7 @@ export function ConnectDialog({ session, onClose }: { session: Session; onClose:
           </div>
           <div className="choice">
             <button className="btn wide go" onClick={guest} disabled={busy}>GUEST</button>
-            <p className="small">A throwaway wallet in this browser. Temporary: it is lost when the browser data gets cleared. Move it to Bread anytime with SAVE.</p>
+            <p className="small">A throwaway wallet in this browser, ready in about a minute. Temporary: it is lost when the browser data gets cleared. Move it to Bread anytime with SAVE.</p>
           </div>
           {error && <div className="hint err">{error}</div>}
         </div>

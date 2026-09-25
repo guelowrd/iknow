@@ -103,7 +103,7 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
     if (prediction.status === "sent") return <div className="hint">✓ in the next batch</div>;
     if (session.error) return <div className="hint err">{session.error}</div>;
     if (notice) return <div className="hint">{notice}</div>;
-    if (session.mode === "guest" && session.guestStep !== "ready") return <div className="hint">guest wallet: {session.guestStep}…</div>;
+    if (session.mode === "guest" && session.guestStep !== "ready") return <div className="hint">guest wallet: {session.guestStep}… about a minute, the page may pause</div>;
     if (!session.address) return <div className="hint">connect to play</div>;
     if (market?.outcome) return <div className="hint warn">closed · {["", "YES", "NO", "VOID"][market.outcome]}</div>;
     if ((session.balance ?? 0) < 1) return <div className="hint warn">no MIDEN in this wallet</div>;
@@ -114,11 +114,13 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
     <>
       <button className="skin" onClick={skin.toggle} aria-label="switch skin" title={`skin: ${skin.skin} · click to switch`}><img src="/ik.svg" alt="" /></button>
       <span className="name"><WalletChip session={session} onSave={onSave} onConnect={onConnect} /></span>
-      <button className={`play${audio.playing ? " on" : ""}`} onClick={audio.toggle} aria-label={audio.playing ? "stop music" : "play music"} title={audio.playing ? "stop" : "play"}>
+      {audio.started && <button className="play" onClick={audio.prev} aria-label="previous track" title="previous track"><svg viewBox="0 0 8 8" width="8" height="8" aria-hidden><rect x="0.5" y="1" width="1.5" height="6" fill="currentColor" /><path d="M7.5 1 L2.5 4 L7.5 7 Z" fill="currentColor" /></svg></button>}
+      <button className={`play${audio.playing ? " on" : ""}`} onClick={audio.toggle} aria-label={audio.playing ? "pause music" : "play music"} title={audio.playing ? "pause" : "play"}>
         {audio.playing
-          ? <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden><rect x="1" y="1" width="6" height="6" fill="currentColor" /></svg>
+          ? <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden><rect x="1" y="1" width="2.2" height="6" fill="currentColor" /><rect x="4.8" y="1" width="2.2" height="6" fill="currentColor" /></svg>
           : <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden><path d="M1.5 0.5 L7.5 4 L1.5 7.5 Z" fill="currentColor" /></svg>}
       </button>
+      {audio.started && <button className="play" onClick={audio.next} aria-label="next track" title="next track"><svg viewBox="0 0 8 8" width="8" height="8" aria-hidden><path d="M0.5 1 L5.5 4 L0.5 7 Z" fill="currentColor" /><rect x="6" y="1" width="1.5" height="6" fill="currentColor" /></svg></button>}
     </>
   );
 

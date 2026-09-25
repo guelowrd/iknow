@@ -38,6 +38,7 @@ function Main() {
   }, []);
 
   const onPlaced = useCallback((p: Position) => setPositions((ps) => [p, ...ps]), []);
+  useEffect(() => { (window as unknown as { __iknow?: unknown }).__iknow = { positions }; }, [positions]); // QA handle
   const prediction = usePrediction(session, onPlaced);
 
   // guest predictions whose relay to the pot failed earlier: try again once the client is up

@@ -186,6 +186,17 @@ export const markRelayed = (noteId: string) => write(loadPositions().map((p) => 
 // testnet faucet (guest wallets)
 // ---------------------------------------------------------------------------------------------
 
+/** The faucet proof of work in a worker, so the page stays responsive. */
+function powNonce(challenge: Uint8Array, target: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL("./pow.worker.ts", import.meta.url), { type: "module" });
+    worker.onmessage = (e: MessageEvent<string>) => { resolve(e.data); worker.terminate(); };
+    worker.onerror = (e) => { reject(new Error(e.message || "proof of work failed")); worker.terminate(); };
+    const start = new DataView(crypto.getRandomValues(new Uint8Array(8)).buffer).getBigUint64(0);
+    worker.postMessage({ challenge: Array.from(challenge), target, start: start.toString() });
+  });
+}
+
 /** Requests a public funding note over HTTP; PoW is SHA-256(challenge || nonce_be) below target. */
 export async function requestFaucetTokens(accountId: string): Promise<string> {
   const get = async (p: string, params?: URLSearchParams) => {
@@ -197,19 +208,9 @@ export async function requestFaucetTokens(accountId: string): Promise<string> {
   const amount = String(meta.base_amount);
   const pow = await get("pow", new URLSearchParams({ account_id: accountId, amount }));
   const challenge = Uint8Array.from((String(pow.challenge).replace(/^0x/, "").match(/../g) ?? []), (b) => parseInt(b, 16));
-  const input = new Uint8Array(challenge.length + 8);
-  input.set(challenge);
-  const view = new DataView(input.buffer);
-  const target = BigInt(pow.target);
-  let nonce = new DataView(crypto.getRandomValues(new Uint8Array(8)).buffer).getBigUint64(0);
-  for (;;) {
-    view.setBigUint64(challenge.length, nonce);
-    const digest = new DataView(await crypto.subtle.digest("SHA-256", input));
-    if (digest.getBigUint64(0) < target) break;
-    nonce = BigInt.asUintN(64, nonce + 1n);
-  }
+  const nonce = await powNonce(challenge, String(pow.target));
   const result = await get("get_tokens", new URLSearchParams({
-    account_id: accountId, is_private_note: "false", asset_amount: amount, challenge: pow.challenge, nonce: String(nonce),
+    account_id: accountId, is_private_note: "false", asset_amount: amount, challenge: pow.challenge, nonce,
   }));
   return result.note_id;
 }

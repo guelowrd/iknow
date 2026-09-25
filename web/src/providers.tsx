@@ -7,11 +7,11 @@ import { NOTE_TRANSPORT_URL, PROVER, RPC_URL } from "@/config";
 // MidenProvider stays OUTSIDE the wallet provider: the app reads pots and relays notes with its
 // own local client, and Bread executes the user's transactions itself through requestTransaction.
 // A signer ancestor would block client creation until a wallet connects (frontend-template note).
-// useWorker: false keeps one SMT forest, which imported public accounts need (web-sdk#222).
+// useWorker: true keeps the page responsive while the client works (the SDK's own guidance).
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <MidenProvider
-      config={{ rpcUrl: RPC_URL, prover: PROVER, noteTransportUrl: NOTE_TRANSPORT_URL, useWorker: false }}
+      config={{ rpcUrl: RPC_URL, prover: PROVER, noteTransportUrl: NOTE_TRANSPORT_URL, useWorker: true }}
       loadingComponent={<div className="tiny">loading…</div>}
     >
       {/* Assets are shared automatically once granted at connect: with the default UponRequest every

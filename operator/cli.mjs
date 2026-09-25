@@ -318,9 +318,12 @@ export const commands = {
     const potId = arg(args, "pot");
     const d = await potDetails(c, potId);
     const asset = state.pots[potId].asset;
-    const waiting = (await waitingNotes(c, potId)).length;
+    const notes = await stakeNotes(c, potId);
+    const shortId = (r) => r.id().toString().slice(0, 10);
     const status = { pot: potId, yesUnits: d.yes, noUnits: d.no, outcome: ["pending", "YES", "NO", "VOID"][d.outcome],
-      vault: d.account.vault().getBalance(id(asset)).toString(), waitingNotes: waiting, deadline: new Date(d.deadlineMs).toISOString() };
+      vault: d.account.vault().getBalance(id(asset)).toString(), waitingNotes: notes.filter((r) => r.inclusionProof()).length,
+      waiting: notes.filter((r) => r.inclusionProof()).map(shortId), unconfirmed: notes.filter((r) => !r.inclusionProof()).map(shortId),
+      deadline: new Date(d.deadlineMs).toISOString() };
     console.log(status);
     return status;
   },
@@ -477,11 +480,17 @@ export const procedureHash = (component, name) => component.getProcedureHash(`"$
 
 /** Stake or claim notes addressed to the pot that this client knows and that are still unspent.
  * Tags only carry part of the target id, so P2ID notes (faucet funding) are excluded explicitly. */
-export async function waitingNotes(c, potId) {
+/** Stake notes for the pot the store holds: those with an inclusion proof can be opened; the others
+ * came through the transport but their commitment was not found on chain yet (or never will be if
+ * the sender's scan hint was above the commitment block). */
+export async function stakeNotes(c, potId) {
   const tag = NoteTag.withAccountTarget(id(potId)).asU32();
   const p2id = NoteScript.p2id().root().toHex();
   return (await c.notes.list()).filter((r) =>
-    !r.isConsumed() && r.inclusionProof() && r.metadata()?.tag().asU32() === tag && r.toNote().script().root().toHex() !== p2id);
+    !r.isConsumed() && r.metadata()?.tag().asU32() === tag && r.toNote().script().root().toHex() !== p2id);
+}
+export async function waitingNotes(c, potId) {
+  return (await stakeNotes(c, potId)).filter((r) => r.inclusionProof());
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

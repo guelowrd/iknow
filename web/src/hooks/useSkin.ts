@@ -1,12 +1,15 @@
 import { useState } from "react";
 
-/** Two skins, same structure: "lcd" (dark charcoal, iKnow) and "classic" (Winamp base skin). */
-export type Skin = "lcd" | "classic";
+/** Skins, same structure: "lcd" (dark charcoal, iKnow), "classic" (the Winamp 2 base skin) and
+ * "modern" (the silver-blue Winamp Modern skin). The iK logo cycles through them. */
+export const SKINS = ["lcd", "classic", "modern"] as const;
+export type Skin = (typeof SKINS)[number];
 const KEY = "iknow:skin";
 
 const read = (): Skin => {
   try {
-    return localStorage.getItem(KEY) === "classic" ? "classic" : "lcd";
+    const v = localStorage.getItem(KEY);
+    return (SKINS as readonly string[]).includes(v ?? "") ? (v as Skin) : "lcd";
   } catch {
     return "lcd";
   }
@@ -20,7 +23,7 @@ export function applySkin(skin: Skin = read()) {
 export function useSkin() {
   const [skin, setSkin] = useState<Skin>(read);
   const toggle = () => {
-    const next: Skin = skin === "lcd" ? "classic" : "lcd";
+    const next = SKINS[(SKINS.indexOf(skin) + 1) % SKINS.length];
     try {
       localStorage.setItem(KEY, next);
     } catch {

@@ -24,35 +24,120 @@
   --font-ui: "Silkscreen", "Courier New", monospace;
   --font-lcd: "VT323", "Courier New", monospace;
 }
-/* "classic" skin: the Winamp base skin. Blue-gray brushed body, striped light title bars, pure
-   green on black display, silver bevel buttons with dark glyphs. Same structure, other paint. */
+/* ------------------------------------------------------------------------------------------ */
+/* "classic" skin: the Winamp 2 base skin. Navy metallic body with brushed lines, bright blue-white
+   striped title bars with the name on a dark band, pure green on black display, silver bevel
+   buttons with black glyphs, black playlist with green text and the blue selection bar. */
 :root[data-skin="classic"] {
-  --chrome: #33364a;
-  --chrome-light: #666b8e;
-  --chrome-dark: #121319;
-  --chrome-text: #dcdff0;
-  --title-a: #30334a;
-  --title-b: #9aa0c4;
+  --page: #090b14;
+  --chrome: #2b365c;
+  --chrome-light: #8ea0d8;
+  --chrome-dark: #0f1428;
+  --chrome-text: #eef2ff;
+  --title-a: #1a2448;
+  --title-b: #b7c6f2;
   --lcd-bg: #000;
   --lcd: #00ff00;
-  --lcd-dim: #00a800;
+  --lcd-dim: #1fa31f;
   --yes: #00ff00;
-  --no: #ff4a4a;
-  --gold: #ffcc00;
+  --no: #ff3c3c;
+  --gold: #ffd200;
   --select: #0000c6;
-  --page: #0c0c12;
-  --btn: #c9cbd6;
-  --btn-light: #f4f5fa;
-  --btn-dark: #70738a;
-  --btn-text: #14151d;
+  --btn: #cfd3dd;
+  --btn-light: #ffffff;
+  --btn-dark: #596079;
+  --btn-text: #0b0b0b;
 }
+:root[data-skin="classic"] body { background-image: radial-gradient(circle at 50% 0%, #1b2440 0%, var(--page) 60%); }
 :root[data-skin="classic"] .win {
-  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 3px);
+  background-image: repeating-linear-gradient(180deg, rgba(255,255,255,0.07) 0 1px, transparent 1px 4px);
+  box-shadow: inset 2px 2px 0 var(--chrome-light), inset -2px -2px 0 var(--chrome-dark), 0 6px 18px rgba(0,0,0,0.7);
 }
-:root[data-skin="classic"] .title { letter-spacing: 2px; text-shadow: 0 1px 0 #000; }
+:root[data-skin="classic"] .title {
+  height: 24px;
+  background: repeating-linear-gradient(180deg, var(--title-b) 0 2px, var(--title-a) 2px 4px);
+  color: #fff; letter-spacing: 2px; text-shadow: 1px 1px 0 #000;
+}
+:root[data-skin="classic"] .title .name { flex: 0 0 auto; margin: 0 auto; background: var(--title-a); padding: 3px 12px; border: 1px solid var(--chrome-dark); }
+:root[data-skin="classic"] .lcd { box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px #3b4b7a; }
+:root[data-skin="classic"] .spectrum i.y { background: linear-gradient(180deg, #ff2a2a 0%, #ffd200 45%, #00ff00 100%); }
+:root[data-skin="classic"] .spectrum i.n { background: linear-gradient(180deg, #ff2a2a 0%, #ff7a2a 60%, #7a1a1a 100%); }
 :root[data-skin="classic"] .btn.go { color: var(--btn-text); text-shadow: none; }
-:root[data-skin="classic"] .btn.yes { color: #087a12; }
+:root[data-skin="classic"] .btn.yes { color: #0a7a12; }
 :root[data-skin="classic"] .btn.no { color: #b01818; }
+:root[data-skin="classic"] .chip { background: #000; border-color: var(--chrome-light); }
+:root[data-skin="classic"] .list { border: 2px solid var(--chrome-dark); }
+:root[data-skin="classic"] .tiny, :root[data-skin="classic"] .tiny a { color: #8ea0d8; }
+:root[data-skin="classic"] .title .play.on { color: #0a7a12; }
+
+/* ------------------------------------------------------------------------------------------ */
+/* "modern" skin: Winamp Modern. Silver body with a soft vertical sheen, rounded silver buttons
+   with dark glyphs, a light blue display with navy text and a blue spectrum, dark blue playlist
+   with pale text and a blue selection bar, orange accent. */
+:root[data-skin="modern"] {
+  --page: #1c2634;
+  --chrome: #bfc8d4;
+  --chrome-light: #f3f6fa;
+  --chrome-dark: #6f7c8e;
+  --chrome-text: #1d2733;
+  --title-a: #8fa7c6;
+  --title-b: #d3deeb;
+  --lcd-bg: #9fc4e6;
+  --lcd: #0e2a4d;
+  --lcd-dim: #3f6390;
+  --yes: #0b6b2a;
+  --no: #b3261e;
+  --gold: #e07b1a;
+  --select: #3f79c0;
+  --btn: #dbe1e8;
+  --btn-light: #ffffff;
+  --btn-dark: #7f8b9b;
+  --btn-text: #1d2733;
+}
+:root[data-skin="modern"] body { background-image: radial-gradient(circle at 50% 0%, #2c3b50 0%, var(--page) 60%); }
+:root[data-skin="modern"] .win {
+  background-image: linear-gradient(180deg, #d7dee7 0%, var(--chrome) 45%, #a9b4c2 100%);
+  border-radius: 6px; border-color: #8a97a8;
+  box-shadow: inset 1px 1px 0 var(--chrome-light), inset -1px -1px 0 #93a0b1, 0 8px 20px rgba(0,0,0,0.45);
+}
+:root[data-skin="modern"] .title {
+  height: 24px; border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, var(--title-b) 0%, var(--title-a) 100%);
+  color: #14202e; letter-spacing: 2px; text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+}
+:root[data-skin="modern"] .lcd {
+  background: linear-gradient(180deg, #b9d6ef 0%, var(--lcd-bg) 55%, #86b1dc 100%);
+  border: 1px solid #5d7ea3; border-radius: 4px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), inset 0 0 0 1px rgba(255,255,255,0.25);
+}
+:root[data-skin="modern"] .question, :root[data-skin="modern"] .big { text-shadow: 0 1px 0 rgba(255,255,255,0.45); }
+:root[data-skin="modern"] .spectrum i.y { background: linear-gradient(180deg, #4d8fd8 0%, #1e4f93 100%); }
+:root[data-skin="modern"] .spectrum i.n { background: linear-gradient(180deg, #f0a25a 0%, #b3541e 100%); }
+:root[data-skin="modern"] .btn { border-radius: 6px; }
+:root[data-skin="modern"] .btn.go { color: #1d2733; text-shadow: 0 1px 0 rgba(255,255,255,0.6); }
+:root[data-skin="modern"] .btn.yes { color: var(--yes); }
+:root[data-skin="modern"] .btn.no { color: var(--no); }
+:root[data-skin="modern"] .btn.danger, :root[data-skin="modern"] .chip .save { background: var(--gold); border-color: #a3560f; color: #fff; }
+:root[data-skin="modern"] .close, :root[data-skin="modern"] .title .play { border-radius: 4px; }
+:root[data-skin="modern"] .chip { background: #eef2f7; border-color: #93a0b1; }
+:root[data-skin="modern"] .chip button { color: #1d2733; }
+:root[data-skin="modern"] .list { background: #24406a; color: #d8e6f6; border: 1px solid #5d7ea3; border-radius: 4px; }
+:root[data-skin="modern"] .row.sel { background: var(--select); color: #fff; }
+:root[data-skin="modern"] .list .empty, :root[data-skin="modern"] .footer { color: #8fa9c9; }
+:root[data-skin="modern"] .footer { color: #3f5a80; }
+:root[data-skin="modern"] .slider input[type="range"] { border-color: #5d7ea3; border-radius: 5px; }
+:root[data-skin="modern"] .slider .amount { color: #14202e; }
+:root[data-skin="modern"] .detail { color: #14202e; border-top-color: #93a0b1; }
+:root[data-skin="modern"] .detail .kv, :root[data-skin="modern"] .detail .kv span:first-child { color: #2b3b50; }
+:root[data-skin="modern"] .detail a, :root[data-skin="modern"] .dialog a, :root[data-skin="modern"] .tiny a { color: #1e4f93; }
+:root[data-skin="modern"] .dialog .lead { color: #14202e; }
+:root[data-skin="modern"] .dialog .small { color: #3f5a80; }
+:root[data-skin="modern"] .hint { color: #3f5a80; }
+:root[data-skin="modern"] .tiny { color: #8fa9c9; }
+:root[data-skin="modern"] .admin input, :root[data-skin="modern"] .admin select, :root[data-skin="modern"] .admin .log { background: #eef2f7; color: #14202e; border-color: #93a0b1; }
+:root[data-skin="modern"] .admin h4 { color: #3f5a80; }
+:root[data-skin="modern"] .title .play.on { color: var(--yes); }
+:root[data-skin="modern"] .row .led { box-shadow: none; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --page: #101014; }
 }

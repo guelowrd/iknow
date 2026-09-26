@@ -252,7 +252,13 @@
       "short": "zkGaylord something stupid",
       "stem": "Will zkGaylord post something stupid",
       "handle": "zkGaylord",
-      "createdMs": 1790337600000
+      "createdMs": 1790337600000,
+      "post": {
+        "id": "2103523556818915769",
+        "handle": "zkGaylord",
+        "tsMs": 1790354072180
+      },
+      "settledAt": 1790355000000
     },
     "0x44d3a0f21e3863d1629649fe54f436": {
       "deadlineMs": 1790726400000,
@@ -287,7 +293,13 @@
       "short": "zkGaylord something stupid",
       "stem": "Will zkGaylord post something stupid",
       "handle": "zkGaylord",
-      "createdMs": 1790337600000
+      "createdMs": 1790337600000,
+      "post": {
+        "id": "2103523556818915769",
+        "handle": "zkGaylord",
+        "tsMs": 1790354072180
+      },
+      "settledAt": 1790355600000
     }
   },
   "positions": [
@@ -499,7 +511,11 @@
         "3870716455175030358"
       ],
       "noteId": "0xadd1d45caa555cf1c5b1b2a7c0db0caf5b25575b1e35062ef6069fd40c3aa269",
-      "claimed": false
+      "claimed": true,
+      "payout": {
+        "note": "0xd0b074644d520fd87124077233d7d1ae7e5108f63952877b7f1cbe1d9b3154c1",
+        "at": 1790355060000
+      }
     },
     {
       "pot": "0x44d3a0f21e3863d1629649fe54f436",
@@ -513,6 +529,133 @@
         "4061518740347819031"
       ],
       "noteId": "0x0f811d25923f276cda60ef8f53457aca85efc7cc23b482f8cc6c50120c6b6205",
+      "claimed": true,
+      "payout": {
+        "note": "0xf4da7724ee9451489e3bc38ec9b8a2f37c424752d9d4bd1dda81de7f6494a671",
+        "at": 1790355660000
+      }
+    },
+    {
+      "pot": "0x98a2db3dc85f4c116e4a86c7bec89a",
+      "wallet": "0x49d1ad95bcca3b414cba00d66f639d",
+      "side": 2,
+      "units": 1,
+      "salt": [
+        "2251345865211621727",
+        "248841117409785489",
+        "11447647191016197",
+        "4183886943566924935"
+      ],
+      "noteId": "0x2391cc9a811264b67426c1a18d3e372a118733da62ced2a169134eb2fffa0dfb",
+      "claimed": false
+    },
+    {
+      "pot": "0x98a2db3dc85f4c116e4a86c7bec89a",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 2,
+      "units": 1,
+      "salt": [
+        "111621934645557179",
+        "2223713838934216600",
+        "1774366853341428200",
+        "4076688544487518344"
+      ],
+      "noteId": "0x79f86c07c0b210afcfee4fb6a53b7360de2dae4e8b2a2231c0b1a55f4d87fb3e",
+      "claimed": false
+    },
+    {
+      "pot": "0x44d3a0f21e3863d1629649fe54f436",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 2,
+      "units": 2,
+      "salt": [
+        "2655510434792480113",
+        "4292651393464010239",
+        "1939083588087318703",
+        "2098059222484185141"
+      ],
+      "noteId": "0xbe042275fac3882c88c6b86be263e4437f230e6a6da668aeae5e4e8ae1be807e",
+      "claimed": false
+    },
+    {
+      "pot": "0x1d20145e5360cfd10671e1f093e97c",
+      "wallet": "0x12f7715a1775374138c34736376352",
+      "side": 2,
+      "units": 10,
+      "salt": [
+        "286246464188065099",
+        "183691673296936647",
+        "2127685104543656226",
+        "1306486773245185548"
+      ],
+      "noteId": "0xe007fee458f79eea244251a8f1b94804fc10471c9d7dc3cfc659a22a4080ed93",
+      "claimed": false
+    },
+    {
+      "pot": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
+      "wallet": "0x12f7715a1775374138c34736376352",
+      "side": 1,
+      "units": 10,
+      "salt": [
+        "4046210895252027647",
+        "4599943280656140620",
+        "1698217089962487994",
+        "1171650860332101283"
+      ],
+      "noteId": "0x4495c2707a6c78e3b64ea328b543090861df8e81ba49a10fc564c4c82d4ef546",
+      "claimed": false
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x31fa43034e4eb1c139078ade36955f",
+      "side": 4373868629482509300,
+      "units": 8,
+      "salt": [
+        "10294662588791137937",
+        "690067",
+        "0"
+      ],
+      "noteId": "0xa5e510b7229b3aa9f90458b02f0fcd758382d8d3efa3ae716d351da3e113ca0c",
+      "claimed": false
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x31fa43034e4eb1c139078ade36955f",
+      "side": 1,
+      "units": 1,
+      "salt": [
+        "1533933489072705857",
+        "3563916200303807326",
+        "2647187909738923404",
+        "101389258040280126"
+      ],
+      "noteId": "0x36176adb4a61b2947693718bd0863df915330ffa68613aa19d7fd14e6a845dd6",
+      "claimed": false
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x31fa43034e4eb1c139078ade36955f",
+      "side": 4373868629482509300,
+      "units": 5,
+      "salt": [
+        "10294662588791137937",
+        "690220",
+        "0"
+      ],
+      "noteId": "0xb8e97e09fe042ef0c1280328a44afb191ace427f65793c29e50f3a2db26d8f86",
+      "claimed": false
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x31fa43034e4eb1c139078ade36955f",
+      "side": 4373868629482509300,
+      "units": 55,
+      "salt": [
+        "10294662588791137937",
+        "690146",
+        "0"
+      ],
+      "noteId": "0x620588a1ca5a5be6b26f026996fb0c1f5994134a95bb74aaf87d8c64856acf5c",
       "claimed": false
     }
   ]

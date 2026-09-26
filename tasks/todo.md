@@ -71,3 +71,12 @@ twice during review: two-party matched bets dropped because the first markets wi
 Assembly dropped because the pot design only needs patterns the compiler already ships (verified: p2ide
 example, miden-bank deposit note, docs.rs hash_elements and execute_foreign_procedure). Open spikes:
 dual-context Rust note script, batch proving time. Open Pragma question: an event feed.
+
+## UI/UX iteration 2 (2026-09-26): resolved window, prediction states, payout ledger
+
+- [ ] operator: record the resolving post (id, handle, time) on resolve, settledAt on settle, payout note/tx/time per position on payout; markets.json carries settledAt, resolvedAt, post, payouts (keyed by position commitment) → verify: markets.json for the two settled pots after backfill
+- [ ] operator: republish markets.json (git commit + push, IKNOW_PUBLISH=1) after a settlement → verify: dry run of the publish step
+- [ ] app: "Resolved predictions" window, shaded by default, grouped by topic, outcome first and colored, pool and multiple; resolved pots leave the topics window → verify: screenshot
+- [ ] app: display result mode for a settled pot (outcome, pool, multiple, evidence link, no batch countdown) → verify: screenshot
+- [ ] app: My predictions rows with state LED and net story, live topics first, colored state column, per-topic summary, payout ledger lines, refunds, payout notice → verify: screenshot with the lost position; won/paid rendering by code review
+- [ ] README + memory

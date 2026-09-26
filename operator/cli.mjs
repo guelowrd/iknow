@@ -10,7 +10,7 @@ import {
   MidenClient, AccountBuilder, AccountComponent, AccountId, AccountStorageMode,
   AccountStorageRequirements, AuthSecretKey, Endpoint, Felt, FungibleAsset,
   Note, NoteAssets, NoteMetadata, NoteRecipient, NoteScript, NoteStorage, NoteTag,
-  NoteType, Package, RpcClient, SlotAndKeys, StorageMap, StorageSlot, TransactionScript, Word,
+  NoteType, Package, Poseidon2, RpcClient, SlotAndKeys, StorageMap, StorageSlot, TransactionScript, Word,
 } from "@miden-sdk/miden-sdk";
 import { evaluate, fetchPost, fetchTimeline, snowflakeMs } from "./rules.mjs";
 
@@ -56,11 +56,17 @@ export function feedKeyFor(account, pattern) {
 /** Feed key of a pot as u64 strings (older pots share the default key). */
 const potFeedKey = (p) => (p.feedKey ?? FEED_KEY_U64.map(String)).map(BigInt);
 /** web/public/markets.json: what the app needs to show the pots. */
+/** The pot's commitment for a position, as the app computes it (a public map key on chain). */
+export const positionKey = (p) => { const t = id(p.wallet); return u64s(Poseidon2.hashElements([t.prefix(), t.suffix(), felt(p.side), felt(p.units), ...p.salt.map(felt)])).join(","); };
 export function writeMarkets(state) {
   const markets = Object.entries(state.pots).map(([id, p]) => ({
     id, topic: p.topic ?? DEFAULT_TOPIC, short: p.short ?? DEFAULT_SHORT, stem: p.stem ?? stemOf(p.topic ?? DEFAULT_TOPIC),
     label: p.label, question: p.question, deadlineMs: p.deadlineMs, account: p.account ?? DEFAULT_ACCOUNT,
     pattern: p.pattern ?? DEFAULT_PATTERN, feedKey: potFeedKey(p).map(String),
+    // settlement facts for the app: when, from which post, and each payout note by position commitment
+    settledAt: p.settledAt ?? null, resolvedAt: p.post?.tsMs ?? null,
+    post: p.post ? `https://x.com/${p.post.handle}/status/${p.post.id}` : null,
+    payouts: Object.fromEntries(state.positions.filter((x) => x.pot === id && x.payout).map((x) => [positionKey(x), x.payout])),
   }));
   fs.writeFileSync(MARKETS_FILE, JSON.stringify({ oracle: state.oracle?.id, markets }, null, 2) + "\n");
 }
@@ -288,6 +294,8 @@ export const commands = {
     console.log(`evidence ${file}`, verdict);
     if (!verdict.qualifies) return verdict;
     await publish(c, state, verdict.tsMs, Math.floor(Date.now() / 1000), potFeedKey(p));
+    for (const q of Object.values(state.pots)) if (potFeedKey(q).join(",") === potFeedKey(p).join(",")) q.post = { id: postId, handle: p.handle, tsMs: verdict.tsMs };
+    saveState(state);
     return verdict;
   },
   /** Watches X for every open feed: the earliest qualifying post since the feed's first pot resolves it. */
@@ -429,6 +437,9 @@ export const commands = {
     const r = await c.transactions.execute({
       account: id(potId), script, foreignAccounts: [{ id: id(state.oracle.id), storage }], ...confirm });
     await commit(c);
+    state.pots[potId].settledAt = Date.now();
+    saveState(state);
+    writeMarkets(state);
     console.log(`settled tx ${tx(r)}`);
     await commands["pot status"](c, state, args);
   },
@@ -463,11 +474,16 @@ export const commands = {
     // Hand each payout note to its target: wallets outside this client (Bread, guests) receive it
     // through the transport service; wallets in this client already have it.
     if (MOCK) return;
+    // what each position is paid (the pot's formula), to tell the payout notes of one wallet apart
+    const pays = (p) => (d.outcome === 3 ? BigInt(p.units) : (BigInt(p.units) * BigInt(d.yes + d.no)) / BigInt(d.outcome === 1 ? d.yes : d.no));
     for (const out of r.result.executedTransaction().outputNotes().notes()) {
       const note = out.intoFull();
       if (!note) continue;
       const [suffix, prefix] = note.recipient().storage().items();
       const target = AccountId.fromPrefixSuffix(prefix, suffix).toString();
+      const amount = (note.assets().fungibleAssets()[0]?.amount() ?? 0n) / BigInt(state.pots[potId].unit);
+      const p = due.find((x) => !x.payout && x.wallet === target && pays(x) === amount);
+      if (p) { p.payout = { note: note.id().toString(), tx: tx(r), at: Date.now() }; saveState(state); writeMarkets(state); }
       try {
         await c.notes.sendPrivateOutput({ noteId: note.id().toString(), to: id(target) });
         console.log(`relayed payout ${note.id().toString().slice(0, 12)} to ${target}`);

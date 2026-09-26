@@ -2,7 +2,12 @@
 // admin view (localhost only) and runs the schedule: batches on every pot at each 10-minute mark
 // (earlier once BATCH_MIN notes wait, checked every minute), an oracle heartbeat at the top of each hour. Run: nohup node admin.mjs > admin.log 2>&1 &
 import http from "node:http";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { client, commands, loadState } from "./cli.mjs";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const PORT = Number(process.env.IKNOW_ADMIN_PORT ?? 5181);
 // browser origins allowed to talk to this server, e.g. the Vercel deployment: IKNOW_ADMIN_ORIGINS=https://iknow.vercel.app
@@ -13,13 +18,27 @@ const c = await client();
 
 // commands share the client, so they run one at a time
 let queue = Promise.resolve();
+const PUBLISHES = new Set(["pot deploy", "pot settle", "pot payout", "pot autosettle"]); // they rewrite markets.json
 function run(name, args = []) {
-  const p = queue.then(() => commands[name](c, loadState(), args));
+  const p = queue.then(async () => { const r = await commands[name](c, loadState(), args); if (PUBLISHES.has(name)) publishMarkets(name); return r; });
   queue = p.catch(() => undefined);
   return p;
 }
 
 const log = (...a) => console.log(new Date().toISOString(), ...a);
+
+// markets.json ships with the web build: after a change, commit and push it (IKNOW_PUBLISH=1) so the
+// deployed app shows new pots and settlements without anyone at the keyboard.
+function publishMarkets(what) {
+  if (!process.env.IKNOW_PUBLISH) return;
+  const git = (...a) => execFileSync("git", a, { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] });
+  try { git("diff", "--quiet", "--", "web/public/markets.json"); return; } catch { /* changed */ }
+  try {
+    git("commit", "-q", "-m", `markets: ${what}\n\nWritten by the operator server.`, "--", "web/public/markets.json");
+    try { git("push", "-q", "origin", "main"); } catch { git("pull", "--rebase", "--autostash", "-q", "origin", "main"); git("push", "-q", "origin", "main"); }
+    log("published markets.json:", what);
+  } catch (err) { log("publish failed", String(err.stderr ?? err.message ?? err).trim().slice(0, 200)); }
+}
 
 async function state() {
   const s = loadState();

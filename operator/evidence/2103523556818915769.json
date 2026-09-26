@@ -1,0 +1,55 @@
+{
+  "fetchedAt": "2026-09-25T16:44:00.158Z",
+  "pot": "0x98a2db3dc85f4c116e4a86c7bec89a",
+  "verdict": {
+    "qualifies": true,
+    "postId": "2103523556818915769",
+    "tsMs": 1790354072180
+  },
+  "post": {
+    "__typename": "Tweet",
+    "favorite_count": 0,
+    "lang": "en",
+    "created_at": "2026-09-25T16:34:32.000Z",
+    "display_text_range": [
+      0,
+      16
+    ],
+    "entities": {},
+    "id_str": "2103523556818915769",
+    "text": "something stupid",
+    "user": {
+      "id_str": "1811045655449899008",
+      "name": "Gaylord",
+      "screen_name": "zkGaylord",
+      "is_blue_verified": true,
+      "profile_image_shape": "Circle",
+      "verified": false,
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1931813968395247616/jAr7rh49_normal.jpg",
+      "highlighted_label": {
+        "badge": {
+          "url": "https://pbs.twimg.com/profile_images/2092006758810107904/m3hJoOSc_bigger.jpg"
+        },
+        "description": "Miden",
+        "url": {
+          "url": "https://twitter.com/0xMiden",
+          "url_type": "DeepLink"
+        },
+        "user_label_display_type": "Badge",
+        "user_label_type": "BusinessLabel"
+      }
+    },
+    "edit_control": {
+      "edit_tweet_ids": [
+        "2103523556818915769"
+      ],
+      "editable_until_msecs": "1790357672000",
+      "edits_remaining": "5",
+      "is_edit_eligible": true
+    },
+    "conversation_count": 0,
+    "news_action_type": "conversation",
+    "isEdited": false,
+    "isStaleEdit": false
+  }
+}

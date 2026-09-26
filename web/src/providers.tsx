@@ -3,6 +3,11 @@ import { MidenProvider } from "@miden-sdk/react";
 import { MidenFiSignerProvider } from "@miden-sdk/miden-wallet-adapter-react";
 import { AllowedPrivateData, PrivateDataPermission, WalletAdapterNetwork } from "@miden-sdk/miden-wallet-adapter-base";
 import { NOTE_TRANSPORT_URL, PROVER, RPC_URL } from "@/config";
+import { WasmWebClient } from "@miden-sdk/miden-sdk";
+
+// QA: ?worker=classic runs the worker Safari and WKWebView get (the SDK picks it by user agent).
+const workerMode = new URLSearchParams(location.search).get("worker");
+if (workerMode === "classic" || workerMode === "module") (WasmWebClient as unknown as { workerMode: string }).workerMode = workerMode; // static, not in the typings
 
 // MidenProvider stays OUTSIDE the wallet provider: the app reads pots and relays notes with its
 // own local client, and Bread executes the user's transactions itself through requestTransaction.

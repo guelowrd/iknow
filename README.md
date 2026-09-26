@@ -170,6 +170,9 @@ in `operator/evidence/`. Contracts are read from `contracts/*/target/miden/relea
   thread took a minute. A guest wallet is still about two minutes from click to ready, mostly the
   faucet note being consumed and committed; the display says so.
 - `window.__iknow.positions` exposes the computed position states for QA.
+- Safari and WKWebView (Bread's in-app browser) get the SDK's classic worker, which fetches the wasm
+  at `assets/miden_client_web.wasm` next to itself; `vite.config.ts` emits the wasm at that path for
+  both the page and the worker builds. `?worker=classic` forces that worker in any browser for QA.
 - The dev server is pinned to port 5180: IndexedDB is per origin and another Miden app on 5173 would
   share the store.
 - Bread with Guardian is a multisig: it reuses the fee conversion salt as its replay guard and fails

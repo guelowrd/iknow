@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>iKnow diag</title>
+<pre id="o" style="white-space:pre-wrap;font:13px/1.4 monospace;padding:12px;color:#ddd;background:#111;min-height:100vh;margin:0"></pre>
+<script type="module">
+const o = document.getElementById("o"), log = (s) => { o.textContent += s + "\n"; };
+log(navigator.userAgent); log(`crossOriginIsolated=${crossOriginIsolated} SAB=${typeof SharedArrayBuffer} streaming=${typeof WebAssembly.instantiateStreaming}`);
+try {
+  const html = await (await fetch("/", { cache: "no-store" })).text();
+  const js = html.match(/\/assets\/index-[^"]+\.js/)[0];
+  const wasm = (await (await fetch(js, { cache: "no-store" })).text()).match(/\/assets\/miden_client_web-[^"]+\.wasm/)[0];
+  log(`js=${js}\nwasm=${wasm}`);
+  const t0 = performance.now();
+  const r = await fetch(wasm);
+  log(`status=${r.status} type=${r.type} redirected=${r.redirected} url=${r.url}`);
+  for (const h of ["content-type", "content-length", "content-encoding", "x-vercel-cache", "x-vercel-id", "cache-control"]) log(`  ${h}: ${r.headers.get(h)}`);
+  const buf = await r.clone().arrayBuffer();
+  log(`bytes=${buf.byteLength} magic=${Array.from(new Uint8Array(buf, 0, 4)).join(",")} in ${Math.round(performance.now() - t0)}ms`);
+  try { const t1 = performance.now(); await WebAssembly.compileStreaming(r); log(`compileStreaming ok in ${Math.round(performance.now() - t1)}ms`); }
+  catch (e) { log(`compileStreaming FAILED: ${e}`); }
+  try { const t2 = performance.now(); await WebAssembly.compile(buf); log(`compile(arrayBuffer) ok in ${Math.round(performance.now() - t2)}ms`); }
+  catch (e) { log(`compile(arrayBuffer) FAILED: ${e}`); }
+} catch (e) { log(`diag error: ${e}`); }
+</script>

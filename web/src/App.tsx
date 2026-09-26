@@ -3,6 +3,7 @@ import { useMiden, useMidenClient } from "@miden-sdk/react";
 import { Player } from "@/components/Player";
 import { Pots } from "@/components/Pots";
 import { MyPredictions } from "@/components/MyPredictions";
+import { Resolved } from "@/components/Resolved";
 import { SaveDialog } from "@/components/SaveDialog";
 import { ConnectDialog } from "@/components/ConnectDialog";
 import { Admin } from "@/components/Admin";
@@ -99,6 +100,7 @@ function Main() {
       />
       <Pots markets={markets} selected={selected} onSelect={setSelected} />
       <MyPredictions positions={mine} markets={markets} onWithdraw={withdraw} connected={!!session.address} guestId={session.guestId} />
+      <Resolved markets={markets} selected={selected} onSelect={setSelected} />
       {admin && isAdmin && <Admin markets={markets} onChanged={refresh} />}
       {admin && !isAdmin && <div className="tiny">admin: connect with an admin wallet</div>}
       {connecting && <ConnectDialog session={session} onClose={() => setConnecting(false)} />}

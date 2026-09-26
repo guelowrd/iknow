@@ -8,7 +8,13 @@ import stakeMasm from "../../../contracts/stake-note.masm?raw";
 
 /** topic = the header question ("When will X be announced?"), short = its name in lists, label = the
  * deadline ("before Oct 20, 2026"), question = the pot's long form ("Will X be announced before …?"). */
-export type MarketDef = { id: string; topic: string; short: string; label: string; question: string; deadlineMs: number };
+export type Payout = { note: string; tx?: string; at: number };
+export type MarketDef = {
+  id: string; topic: string; short: string; label: string; question: string; deadlineMs: number;
+  /** Settlement facts written by the operator: when it settled, the post that resolved it (and its
+   * time), and each payout note by position commitment. */
+  settledAt?: number | null; resolvedAt?: number | null; post?: string | null; payouts?: Record<string, Payout>;
+};
 export type Market = MarketDef & { yes: number; no: number; outcome: 0 | 1 | 2 | 3; lockHeight: number };
 export type Position = {
   market: string;
@@ -24,6 +30,8 @@ export type Position = {
   /** Guest predictions: whether the note reached the pot through the transport service. */
   relayed?: boolean;
   state?: "pending" | "in" | "won" | "lost" | "paid" | "refund";
+  /** The pot's payout note for this position, once the operator paid it. */
+  payout?: Payout;
 };
 
 export const felt = (n: bigint | number | string) => new Felt(BigInt(n));
@@ -36,6 +44,13 @@ export const short = (s: string) => `${s.slice(0, 6)}…${s.slice(-4)}`;
 export const nextBatchMs = () => Math.ceil(Date.now() / BATCH_MS) * BATCH_MS;
 export const OUTCOME = ["pending", "YES", "NO", "VOID"] as const;
 export const dateLabel = (ms: number) => new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+export const dateTime = (ms: number) => `${new Date(ms).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" })} UTC`;
+/** What a settled pot paid its winners per token staked: "1.25x". */
+export function multiple(m: Market) {
+  const side = m.outcome === 1 ? m.yes : m.no;
+  const x = side ? (m.yes + m.no) / side : 0;
+  return `${x.toFixed(2).replace(/\.?0+$/, "")}x`;
+}
 /** Durations for the display: "m:ss", and "2d 4h" / "4h 12m" / "12m". */
 export const mmss = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
 export function remaining(ms: number) {
@@ -97,11 +112,12 @@ export async function positionStates(client: WebClient, positions: Position[], m
   for (const p of positions) {
     const market = markets.find((m) => m.id === p.market);
     const account = await potAccount(client, p.market);
-    const flag = Number(account?.storage().getMapItem("pot::pot::positions", positionKey(parseId(p.wallet), p.side, p.units, p.salt))?.toU64s()[0] ?? 0n);
+    const key = positionKey(parseId(p.wallet), p.side, p.units, p.salt);
+    const flag = Number(account?.storage().getMapItem("pot::pot::positions", key)?.toU64s()[0] ?? 0n);
     let state: Position["state"] = flag === 0 ? "pending" : "in";
     if (flag === 2) state = "paid";
     else if (flag === 1 && market?.outcome) state = market.outcome === 3 ? "refund" : market.outcome === p.side ? "won" : "lost";
-    out.push({ ...p, state });
+    out.push({ ...p, state, payout: market?.payouts?.[Array.from(key.toU64s(), String).join(",")] });
   }
   return out;
 }

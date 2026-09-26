@@ -129,6 +129,8 @@
 :root[data-skin="modern"] .slider .amount { color: #14202e; }
 :root[data-skin="modern"] .detail { color: #14202e; border-top-color: #93a0b1; }
 :root[data-skin="modern"] .detail .kv, :root[data-skin="modern"] .detail .kv span:first-child { color: #2b3b50; }
+:root[data-skin="modern"] .detail .kv .state.paid, :root[data-skin="modern"] .detail .kv .state.refund { color: var(--lcd); }
+:root[data-skin="modern"] .detail .kv .state.lost { color: #8a96a6; }
 :root[data-skin="modern"] .detail a, :root[data-skin="modern"] .dialog a, :root[data-skin="modern"] .tiny a { color: #1e4f93; }
 :root[data-skin="modern"] .dialog .lead { color: #14202e; }
 :root[data-skin="modern"] .dialog .small { color: #3f5a80; }
@@ -346,7 +348,14 @@ a { color: var(--lcd); }
 .row .led.in { background: var(--lcd); box-shadow: 0 0 6px var(--lcd); }
 .row .led.won { background: var(--gold); }
 .row .led.lost { background: #555; box-shadow: none; }
-.row .led.paid { background: #fff; box-shadow: 0 0 6px #fff; }
+.row .led.paid, .row .led.refund { background: #fff; box-shadow: 0 0 6px #fff; }
+.row .led.pending { animation: blink 1.2s steps(2, jump-none) infinite; }
+/* resolved window: the outcome is the first column */
+.list.resolved .row { grid-template-columns: 44px 1fr auto auto; }
+.out.yes { color: var(--yes); }
+.out.no { color: var(--no); }
+.out.void { color: var(--lcd-dim); }
+.row.sel .out { color: #fff; }
 .list .empty { padding: 8px; color: var(--lcd-dim); }
 .list .head { display: flex; justify-content: space-between; gap: 10px; padding: 5px 8px 2px; font-size: 16px; cursor: pointer; }
 .list .head svg { margin-right: 4px; vertical-align: 0; }
@@ -381,6 +390,11 @@ a { color: var(--lcd); }
 .detail .close { margin: 0; }
 .detail .kv { display: flex; justify-content: space-between; gap: 12px; color: var(--lcd-dim); }
 .detail .kv span:first-child { color: var(--lcd); }
+.detail .kv.sum { margin-bottom: 4px; }
+.detail .kv .state.pending, .detail .kv .state.won { color: var(--gold); }
+.detail .kv .state.in { color: var(--lcd); }
+.detail .kv .state.paid, .detail .kv .state.refund { color: #fff; }
+.detail .kv .state.lost { color: #777; }
 .detail .controls { margin-top: 8px; }
 .detail .item { padding: 3px 0; }
 .detail .item > .kv { cursor: pointer; }
@@ -412,5 +426,6 @@ a { color: var(--lcd); }
   .marquee { font-size: 18px; }
   .row { grid-template-columns: 20px 1fr auto; }
   .row .hide-sm { display: none; }
+  .list.resolved .row { grid-template-columns: 44px 1fr auto; }
   .row > span:nth-child(2) { white-space: normal; line-height: 1.1; } /* keep the date visible */
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Close, Win } from "./Win";
-import { dateLabel, fmt, mmss, nextBatchMs, pct, remaining, short, type Market } from "@/lib/iknow";
+import { dateLabel, dateTime, fmt, mmss, multiple, nextBatchMs, OUTCOME, pct, remaining, short, type Market } from "@/lib/iknow";
 import type { Session } from "@/hooks/useSession";
 import type { PredictStatus } from "@/hooks/usePrediction";
 import { useAudio } from "@/hooks/useAudio";
@@ -92,9 +92,14 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
   }, [prediction.status, prediction]);
 
   const busy = prediction.status === "building" || prediction.status === "signing" || prediction.status === "relaying";
-  const ticker = market
-    ? `next batch in ${mmss(nextBatchMs() - now)}  ·  ${market.outcome ? `resolved ${["", "YES", "NO", "VOID"][market.outcome]}` : `resolves by ${dateLabel(market.deadlineMs)}, ${remaining(market.deadlineMs - now)} at most`}`
-    : "…";
+  const outcome = market ? OUTCOME[market.outcome] : "";
+  const ticker = !market
+    ? "…"
+    : market.outcome
+      ? `resolved ${outcome}${market.settledAt ? ` on ${dateLabel(market.settledAt)}` : ""}  ·  ${fmt(market.yes + market.no)} MIDEN in the pot${market.outcome === 3 ? ", refunded" : `, ${outcome} paid ${multiple(market)}`}`
+      : `next batch in ${mmss(nextBatchMs() - now)}  ·  resolves by ${dateLabel(market.deadlineMs)}, ${remaining(market.deadlineMs - now)} at most`;
+  // a settled pot shows its result: every bar in the winning color
+  const bars = !market ? { yes: 0, no: 0 } : market.outcome ? { yes: market.outcome === 1 ? 1 : 0, no: market.outcome === 2 ? 1 : 0 } : { yes: market.yes, no: market.no };
   const hint = (() => {
     if (prediction.status === "error") return <div className="hint err">{prediction.error}</div>;
     if (prediction.status === "building") return <div className="hint">building note…</div>;
@@ -104,8 +109,14 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
     if (session.error) return <div className="hint err">{session.error}</div>;
     if (notice) return <div className="hint">{notice}</div>;
     if (session.mode === "guest" && session.guestStep !== "ready") return <div className="hint">guest wallet: {session.guestStep}… about a minute, the page may pause</div>;
+    if (market?.outcome) {
+      // the evidence: the post that resolved it, or the deadline that passed without one
+      const at = market.resolvedAt ? ` on ${dateTime(market.resolvedAt)}` : "";
+      if (market.outcome === 3) return <div className="hint">void: no answer within the grace period, stakes refunded</div>;
+      if (market.post) return <div className="hint">{market.outcome === 1 ? "resolved YES by " : "resolved NO: "}<a href={market.post} target="_blank" rel="noreferrer">this post</a>{market.outcome === 1 ? at : `${at}, after the deadline`}</div>;
+      return <div className="hint">resolved {outcome}: nothing matched before the deadline</div>;
+    }
     if (!session.address) return <div className="hint">connect to play</div>;
-    if (market?.outcome) return <div className="hint warn">closed · {["", "YES", "NO", "VOID"][market.outcome]}</div>;
     if ((session.balance ?? 0) < 1) return <div className="hint warn">no MIDEN in this wallet</div>;
     return null;
   })();
@@ -132,6 +143,11 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
           <div className="question">{market?.question ?? "…"}</div>
           {staking && market ? (
             <div className="stats"><span className="big">{fmt(units)}<small>MIDEN</small></span><span className="dim">of {fmt(session.balance ?? 0)}</span></div>
+          ) : market?.outcome ? (
+            <div className="stats">
+              <span className={market.outcome === 1 ? "yes" : market.outcome === 2 ? "no" : "dim"}>{outcome}{market.outcome === 3 ? "" : " wins"}</span>
+              <span className="dim">{market.outcome === 3 ? "stakes refunded" : `paid ${multiple(market)} · ${fmt(market.yes + market.no)} MIDEN pool`}</span>
+            </div>
           ) : (
             <div className="stats">
               <span className="yes">YES {market ? pct(market.yes, market.no) : 50}%</span>
@@ -139,7 +155,7 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
               <span className="dim">{fmt(market ? market.yes + market.no : 0)} MIDEN staked</span>
             </div>
           )}
-          <Spectrum yes={market?.yes ?? 0} no={market?.no ?? 0} analyser={audio.analyser} playing={audio.playing} />
+          <Spectrum yes={bars.yes} no={bars.no} analyser={audio.analyser} playing={audio.playing} />
           {hint}
         </div>
 
@@ -158,7 +174,7 @@ export function Player({ market, index, count, session, prediction, onPrev, onNe
         ) : (
           <div className="controls">
             <button className="btn" onClick={onPrev} disabled={index <= 0} aria-label="previous pot"><SkipBack /></button>
-            <button className="btn wide go" onClick={() => setStaking(true)} disabled={!canPredict}>iKnow</button>
+            <button className="btn wide go" onClick={() => setStaking(true)} disabled={!canPredict}>{market?.outcome ? "closed" : "iKnow"}</button>
             <button className="btn" onClick={onNext} disabled={index >= count - 1} aria-label="next pot"><SkipForward /></button>
           </div>
         )}

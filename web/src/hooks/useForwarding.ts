@@ -98,6 +98,7 @@ export function useForwarding(session: Session, relay: (noteId: string, to: stri
       }
       const opened = await collect(guestId);
       const moved = bread ? await forward(guestId, bread) : 0n;
+      if (opened > 0) setNotice(`${opened} payout note${opened > 1 ? "s" : ""} received`);
       if (moved > 0n) setNotice(`${fmt(Number(moved / UNIT))} MIDEN forwarded to Bread`);
       if (opened > 0 || moved > 0n) api.current.refresh().catch(() => undefined);
       console.debug(`guest upkeep: ${guestId.slice(0, 10)} opened ${opened}, forwarded ${moved}${bread ? " to Bread" : ""}`);

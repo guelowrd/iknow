@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 
-type Props = { title?: string; bar?: ReactNode; children: ReactNode; className?: string; onClose?: () => void };
+type Props = { title?: string; bar?: ReactNode; children: ReactNode; className?: string; onClose?: () => void; shaded?: boolean };
 
 /** Close cross, top left like every window people know. */
 export const Close = ({ onClick }: { onClick: () => void }) => (
@@ -11,8 +11,8 @@ export const Close = ({ onClick }: { onClick: () => void }) => (
 
 /** A window: title bar and body. A double-click on the title shades it, Winamp style; a window
  * with onClose (a dialog) gets the close cross instead. */
-export function Win({ title, bar, children, className, onClose }: Props) {
-  const [shaded, setShaded] = useState(false);
+export function Win({ title, bar, children, className, onClose, shaded: shadedAtFirst = false }: Props) {
+  const [shaded, setShaded] = useState(shadedAtFirst);
   return (
     <section className={`win${shaded ? " shade" : ""}${className ? ` ${className}` : ""}`}>
       <div className="title" onDoubleClick={onClose ? undefined : () => setShaded((s) => !s)} title={onClose ? undefined : "double-click to shade"}>

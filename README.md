@@ -22,15 +22,26 @@ the red **SAVE** button. The app runs the guest wallet of the browser: it opens 
 receives (payouts, refunds) and, whenever Bread is the connected wallet, forwards it to Bread. The
 chain always pays the account that staked, so this is how a guest payout reaches Bread; the guest
 wallet has to survive in the browser until then. Pots are grouped by topic (the question stem) and a
-pot's label is its deadline. Double-click a title bar to shade a window. The iK logo at the top left
-cycles through the skins (dark iKnow, classic Winamp 2, Winamp Modern); the play button at the top
-right plays and pauses the music; previous and next track appear once it has played.
+pot's label is its deadline. A settled pot leaves the topics window for **Resolved predictions** at the
+bottom (shaded until you double-click its title): outcome first, what the pool paid per token, when.
+Selecting one puts the display in result mode, with the post that resolved it. **My predictions**
+shows one row per topic with a state LED (blinking: waiting for a batch; green: in a pot; gold: won;
+white: paid; grey: lost) and the story in a few words ("won 10 · lost 1 · net +9"); the detail lists
+each prediction with its state, and every payout with its note. Double-click a title bar to shade a
+window. The iK logo at the top left cycles through the skins (dark iKnow, classic Winamp 2, Winamp
+Modern); the play button at the top right plays and pauses the music; previous and next track appear
+once it has played.
 
 `#admin` at the end of the URL shows the operator view, live when the operator server runs:
 
 ```
-cd operator && nohup node --env-file=.env admin.mjs > admin.log 2>&1 &   # API on 127.0.0.1:5181 + schedule; .env holds X_BEARER_TOKEN
+cd operator && IKNOW_PUBLISH=1 nohup node --env-file=.env admin.mjs > admin.log 2>&1 &   # API on 127.0.0.1:5181 + schedule; .env holds X_BEARER_TOKEN
 ```
+
+The operator records what the app shows about a settlement (the resolving post, the settle time, each
+payout note by position commitment) in `web/public/markets.json`, and with `IKNOW_PUBLISH=1` commits
+and pushes that file after any command that changes it (a new pot, a settlement, a payout), so the
+deployed app follows without anyone at the keyboard.
 
 Only the wallets listed in `ADMINS` (`web/src/config.ts`) see it. There you can create a pot (date,
 topic, short name, stem, label, X handle, regex), open batches, settle, pay out, resolve a pot from an
@@ -60,11 +71,12 @@ config change on new pots.
 `contracts/`, so the project root stays the repository root) and sets the cross-origin isolation
 headers the SDK needs. Import the GitHub repository in Vercel with the default settings; every push
 to `main` redeploys. The pot list ships with the build (`web/public/markets.json`, written by the
-operator), so a new pot is a commit and a push. The admin view of a deployment talks to the operator
-server on your machine only if that server allows the origin:
+operator), so a new pot is a commit and a push, which the operator server does itself with
+`IKNOW_PUBLISH=1`. The admin view of a deployment talks to the operator server on your machine only
+if that server allows the origin:
 
 ```
-IKNOW_ADMIN_ORIGINS=https://<project>.vercel.app nohup node admin.mjs > admin.log 2>&1 &
+IKNOW_ADMIN_ORIGINS=https://<project>.vercel.app IKNOW_PUBLISH=1 nohup node --env-file=.env admin.mjs > admin.log 2>&1 &
 ```
 
 ## Layout

@@ -61,7 +61,7 @@
       hosting the operator somewhere that does not sleep, Pragma feed instead of the mock oracle,
       a "resolved" section or fade for settled pots in the topics window, a real X post test from a
       personal account (create a pot with that account id + regex in Admin, then "resolve from post"),
-      payout receipt in the app after a settlement, admin lockdown, hosting, mobile pass,
+      payout receipt in the app after a settlement, hosting, mobile pass (Safari/WKWebView wasm path fixed 2026-09-26; next: open it in Bread's Explore tab, check the layout at phone width),
       stake-after-lock test
 
 ## Review (Phase 0)

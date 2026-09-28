@@ -12,7 +12,7 @@ import {
   Note, NoteAssets, NoteMetadata, NoteRecipient, NoteScript, NoteStorage, NoteTag,
   NoteType, Package, Poseidon2, RpcClient, SlotAndKeys, StorageMap, StorageSlot, TransactionScript, Word,
 } from "@miden-sdk/miden-sdk";
-import { evaluate, fetchPost, fetchTimeline, snowflakeMs } from "./rules.mjs";
+import { evaluate, fetchAccountId, fetchPost, fetchTimeline, snowflakeMs } from "./rules.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MOCK = !!process.env.IKNOW_MOCK;
@@ -355,8 +355,9 @@ export const commands = {
     const deadlineMs = Date.parse(arg(args, "deadline"));
     const date = new Date(deadlineMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
     const handle = arg(args, "handle", "0xMiden").replace(/^@/, "");
-    // the numeric id is what the rules check (handles can change); taken from the profile's timeline
-    const account = arg(args, "account", handle === "0xMiden" ? DEFAULT_ACCOUNT : (await fetchTimeline(handle))[0]?.user?.id_str);
+    // the numeric id is what the rules check (handles can change): known from an earlier pot, else looked up
+    const known = Object.values(state.pots).find((p) => p.handle?.toLowerCase() === handle.toLowerCase())?.account;
+    const account = arg(args, "account", handle === "0xMiden" ? DEFAULT_ACCOUNT : known ?? (await fetchAccountId(handle)));
     if (!account) throw new Error(`no posts found for @${handle}, pass --account`);
     const pattern = arg(args, "pattern", DEFAULT_PATTERN);
     const topic = arg(args, "topic", DEFAULT_TOPIC);

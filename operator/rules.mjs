@@ -37,6 +37,16 @@ export async function fetchPost(id) {
   return res.json();
 }
 
+/** Numeric id of a handle: X API v2 when X_BEARER_TOKEN is set, else the profile's syndication
+ * timeline (which answers 429 after a few reads). */
+export async function fetchAccountId(handle) {
+  const token = process.env.X_BEARER_TOKEN;
+  if (!token) return (await fetchTimeline(handle))[0]?.user?.id_str;
+  const res = await fetch(`https://api.x.com/2/users/by/username/${encodeURIComponent(handle)}`, { headers: { authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(`x api ${res.status} for @${handle}`);
+  return (await res.json()).data?.id;
+}
+
 /** Recent posts of a profile, shaped like tweet-result posts so `evaluate` applies. With
  * X_BEARER_TOKEN set, the X API v2 is used (metered, reliable); otherwise the syndication timeline
  * widget (no auth, unofficial, answers 429 when read more than a few times in a few minutes). */

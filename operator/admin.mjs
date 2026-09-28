@@ -18,7 +18,7 @@ const c = await client();
 
 // commands share the client, so they run one at a time
 let queue = Promise.resolve();
-const PUBLISHES = new Set(["pot deploy", "pot settle", "pot payout", "pot autosettle"]); // they rewrite markets.json
+const PUBLISHES = new Set(["pot deploy", "pot settle", "pot payout", "pot autosettle", "pot hide"]); // they rewrite markets.json
 function run(name, args = []) {
   const p = queue.then(async () => { const r = await commands[name](c, loadState(), args); if (PUBLISHES.has(name)) publishMarkets(name); return r; });
   queue = p.catch(() => undefined);
@@ -46,7 +46,7 @@ async function state() {
   for (const [id, p] of Object.entries(s.pots)) {
     let status = null;
     try { status = await run("pot status", ["--pot", id]); } catch (err) { status = { error: err.message ?? String(err) }; }
-    pots.push({ id, topic: p.topic, short: p.short, stem: p.stem, label: p.label, question: p.question, handle: p.handle, deadlineMs: p.deadlineMs, lockHeight: p.lockHeight, account: p.account, pattern: p.pattern, feedKey: p.feedKey, status });
+    pots.push({ id, topic: p.topic, short: p.short, stem: p.stem, label: p.label, question: p.question, handle: p.handle, deadlineMs: p.deadlineMs, lockHeight: p.lockHeight, account: p.account, pattern: p.pattern, feedKey: p.feedKey, hidden: !!p.hidden, status });
   }
   return { oracle: s.oracle?.id, pots, nextBatchMs: nextBatch(), batchMin: BATCH_MIN };
 }
@@ -93,6 +93,7 @@ const routes = {
   "POST /batch": (b) => run("pot batch", ["--pot", b.pot]),
   "POST /settle": (b) => run("pot settle", ["--pot", b.pot]),
   "POST /payout": (b) => run("pot payout", ["--pot", b.pot]),
+  "POST /hide": (b) => run("pot hide", ["--pot", b.pot, "--hidden", b.hidden ? "1" : "0"]),
   "POST /heartbeat": () => run("oracle heartbeat"),
   "POST /publish": (b) => run("oracle publish", ["--pot", b.pot, "--value", String(b.valueMs)]),
   "POST /resolve": (b) => run("oracle resolve", ["--pot", b.pot, "--post-id", String(b.postId)]),

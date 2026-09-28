@@ -50,8 +50,8 @@ which the app reads.
 
 Resolution is automatic: the operator reads each watched profile's recent posts every two minutes
 (the X API v2 when `X_BEARER_TOKEN` is set, else the public syndication timeline, which rate-limits
-at a few reads per few minutes), and the earliest post since the topic's first pot
-that matches the topic's regex is published to the oracle. At every 10-minute mark the operator then
+at a few reads per few minutes), and the earliest post after the pot's creation
+that matches the pot's regex is published to the oracle. At every 10-minute mark the operator then
 settles every pot it can (a published post, or a deadline passed with a fresh heartbeat) and pays the
 winners out, so a matching post is money in wallets within about ten minutes.
 
@@ -139,6 +139,7 @@ node cli.mjs bet --wallet <id> --pot <id> --side yes|no --units 3
 node cli.mjs pot inbox|batch|status|settle|payout --pot <id>
 node cli.mjs wallet claim --wallet <id>         # winner consumes the payout note
 node cli.mjs pot deploy --deadline <iso> [--label ..] [--question ..] [--account <x id>] [--pattern <regex>]
+node cli.mjs pot hide --pot <id> [--hidden 0]                  # leave a pot out of the app (or show it again)
 node cli.mjs oracle resolve --pot <id> --post-id <id or url>   # the pot's account + regex
 node cli.mjs oracle publish --pot <id> --value <post ms>       # manual override, 0 = not yet
 IKNOW_MOCK=1 node mock-cycle.mjs                # the same commands end to end on the SDK's mock chain
@@ -146,8 +147,9 @@ node admin.mjs                                  # operator server: API + schedul
 ```
 
 Each pot has a question: "a post by X account `account` whose normalized text matches `pattern`
-before the date". The oracle feed key derives from account + pattern, so pots with different
-questions resolve independently; `oracle heartbeat` covers every feed. The oracle is a mock: the admin
+before the date". Only posts made after the pot was created count: the oracle feed key derives from
+account + pattern + creation time, so a pot reusing a question gets its own feed instead of
+inheriting an earlier resolution; `oracle heartbeat` covers every feed. The oracle is a mock: the admin
 publishes or overrides values by hand. `pot payout` relays each payout note to its target through the
 transport service, so Bread and guest wallets receive it.
 

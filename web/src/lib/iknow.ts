@@ -14,6 +14,8 @@ export type MarketDef = {
   /** Settlement facts written by the operator: when it settled, the post that resolved it (and its
    * time), and each payout note by position commitment. */
   settledAt?: number | null; resolvedAt?: number | null; post?: string | null; payouts?: Record<string, Payout>;
+  /** Set from the admin view: the app leaves the pot out. */
+  hidden?: boolean;
 };
 export type Market = MarketDef & { yes: number; no: number; outcome: 0 | 1 | 2 | 3; lockHeight: number };
 export type Position = {
@@ -77,7 +79,7 @@ export async function loadMarketDefs(): Promise<MarketDef[]> {
     const res = await fetch(MARKETS_URL, { cache: "no-store" });
     if (res.ok) {
       const json = (await res.json()) as { markets?: MarketDef[] };
-      if (json.markets?.length) return json.markets;
+      if (json.markets?.length) return json.markets.filter((m) => !m.hidden);
     }
   } catch {
     /* fall back to the built-in list */

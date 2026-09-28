@@ -48,9 +48,10 @@ export const saveState = (s) => fs.writeFileSync(STATE_FILE, JSON.stringify(s, n
 export const felt = (n) => new Felt(BigInt(n));
 export const word = (a, b, c, d) => Word.newFromFelts([felt(a), felt(b), felt(c), felt(d)]);
 export const feedKey = (key = FEED_KEY_U64) => word(...key);
-/** Feed key of a question: sha256(account | pattern) folded into four felts. */
-export function feedKeyFor(account, pattern) {
-  const hash = createHash("sha256").update(`${account}|${pattern}`).digest();
+/** Feed key of a question: sha256(account | pattern | since) folded into four felts. `since` is the
+ * pot's creation time: only posts after it count, so a pot reusing a question gets its own feed. */
+export function feedKeyFor(account, pattern, sinceMs) {
+  const hash = createHash("sha256").update(`${account}|${pattern}|${sinceMs}`).digest();
   return Array.from({ length: 4 }, (_, i) => (hash.readBigUInt64LE(i * 8) >> 2n)).map(String);
 }
 /** Feed key of a pot as u64 strings (older pots share the default key). */
@@ -62,7 +63,7 @@ export function writeMarkets(state) {
   const markets = Object.entries(state.pots).map(([id, p]) => ({
     id, topic: p.topic ?? DEFAULT_TOPIC, short: p.short ?? DEFAULT_SHORT, stem: p.stem ?? stemOf(p.topic ?? DEFAULT_TOPIC),
     label: p.label, question: p.question, deadlineMs: p.deadlineMs, account: p.account ?? DEFAULT_ACCOUNT,
-    pattern: p.pattern ?? DEFAULT_PATTERN, feedKey: potFeedKey(p).map(String),
+    pattern: p.pattern ?? DEFAULT_PATTERN, feedKey: potFeedKey(p).map(String), hidden: !!p.hidden,
     // settlement facts for the app: when, from which post, and each payout note by position commitment
     settledAt: p.settledAt ?? null, resolvedAt: p.post?.tsMs ?? null,
     post: p.post ? `https://x.com/${p.post.handle}/status/${p.post.id}` : null,
@@ -282,13 +283,15 @@ export const commands = {
       await publish(c, state, valueMs, Math.floor(Date.now() / 1000), key);
     }
   },
-  /** Fetches an X post, applies the pot's question (account + regex), publishes the timestamp. */
+  /** Fetches an X post, applies the pot's question (account + regex, posted after the pot was
+   * created), publishes the timestamp. */
   async "oracle resolve"(c, state, args) {
     const potId = arg(args, "pot");
     const p = state.pots[potId];
     const postId = arg(args, "post-id").replace(/^.*\/status\//, "").replace(/\?.*$/, "");
     const post = await fetchPost(postId);
     const verdict = evaluate(post, { accountId: p.account ?? DEFAULT_ACCOUNT, pattern: p.pattern ?? DEFAULT_PATTERN });
+    if (verdict.qualifies && verdict.tsMs < (p.createdMs ?? 0)) Object.assign(verdict, { qualifies: false, reason: `posted ${new Date(verdict.tsMs).toISOString()}, before the pot was created` });
     const file = path.join(ROOT, "operator", "evidence", `${postId}.json`);
     fs.writeFileSync(file, JSON.stringify({ fetchedAt: new Date().toISOString(), pot: potId, verdict, post }, null, 2));
     console.log(`evidence ${file}`, verdict);
@@ -365,7 +368,8 @@ export const commands = {
     const stem = arg(args, "stem", stemOf(topic));
     const label = arg(args, "label", `before ${date}`);
     const question = `${stem} ${label}?`;
-    const feedKey = account === DEFAULT_ACCOUNT && pattern === DEFAULT_PATTERN ? FEED_KEY_U64.map(String) : feedKeyFor(account, pattern);
+    const createdMs = Date.now();
+    const feedKey = feedKeyFor(account, pattern, createdMs);
     // Default lock height: the block expected at the deadline (testnet blocks every ~3 s).
     const height = await c.getSyncHeight();
     const lockHeight = Number(arg(args, "lock-height", height + Math.max(0, Math.floor((deadlineMs - Date.now()) / 3000))));
@@ -374,7 +378,7 @@ export const commands = {
     const asset = await feeFaucetId();
     const assetIdWord = u64s(new FungibleAsset(id(asset), 1n).vaultKey()).map(String);
     const oracleRoot = u64s(Word.fromHex(procedureHash(oracleComponent(), "get_entry"))).map(String);
-    const params = { deadlineMs, lockHeight, graceS, unit, assetIdWord, oracleId: state.oracle.id, oracleRoot, asset, topic, short, stem, label, question, handle, account, pattern, feedKey, createdMs: Date.now() };
+    const params = { deadlineMs, lockHeight, graceS, unit, assetIdWord, oracleId: state.oracle.id, oracleRoot, asset, topic, short, stem, label, question, handle, account, pattern, feedKey, createdMs };
     const potId = await createContract(c, potComponent(params));
     state.pots[potId] = params;
     saveState(state);
@@ -382,6 +386,14 @@ export const commands = {
     console.log(`pot ${potId} "${question}" deadline ${new Date(deadlineMs).toISOString()} lock ${lockHeight} (now ${height})`);
     await fund(c, potId, "pot");
     return potId;
+  },
+  /** Leaves a pot out of the app's windows (or shows it again); markets.json carries the flag. */
+  async "pot hide"(c, state, args) {
+    const p = state.pots[arg(args, "pot")];
+    p.hidden = arg(args, "hidden", "1") === "1";
+    saveState(state);
+    writeMarkets(state);
+    return { hidden: p.hidden };
   },
   async "pot status"(c, state, args) {
     const potId = arg(args, "pot");

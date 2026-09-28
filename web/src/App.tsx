@@ -74,12 +74,12 @@ function Main() {
   const forwarding = useForwarding(session, prediction.relayOutputNote, prediction.status === "idle" && !saving && !connecting);
 
   // the list follows the connected wallet: a guest sees its own, Bread sees its own plus the
-  // browser's guest (which it runs), nobody connected sees nothing
+  // browser's guest (which it runs), nobody connected sees nothing; positions on hidden pots stay out
   const mine = useMemo(() => {
     if (!session.address) return [];
     const wallets = [session.address, session.mode === "bread" ? session.guestId : null].filter((a): a is string => !!a).map((a) => parseId(a).toString());
-    return positions.filter((p) => wallets.includes(parseId(p.wallet).toString()));
-  }, [positions, session.address, session.mode, session.guestId]);
+    return positions.filter((p) => wallets.includes(parseId(p.wallet).toString()) && markets.some((m) => m.id === p.market));
+  }, [positions, markets, session.address, session.mode, session.guestId]);
 
   const isAdmin = !!session.address && ADMINS.some((a) => parseId(a).toString() === parseId(session.address!).toString());
 

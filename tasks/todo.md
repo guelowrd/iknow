@@ -80,3 +80,16 @@ dual-context Rust note script, batch proving time. Open Pragma question: an even
 - [x] app: display result mode for a settled pot (outcome, pool, multiple, evidence link, no batch countdown) → verify: screenshot
 - [x] app: My predictions rows with state LED and net story, live topics first, colored state column, per-topic summary, payout ledger lines, refunds, payout notice → verify: screenshot with the lost position; won/paid rendering by code review
 - [x] README + memory
+
+## Operator fixes (2026-09-28)
+
+- [x] pot deploy: handle → id through the X API (users/by/username) or an earlier pot, not the syndication widget (429) → verify: both paths return 1811045655449899008 for zkGaylord; pot 0xa41eca47 created from the admin view
+- [x] batch: only notes with the stake script root are stakes; tag collisions (P2IDE notes for other accounts sharing the pot's top id bits) blocked every batch on 0x98a2 and 0xa41e → verify: forced batches on both pots say "nothing to open"; compiled root 0xbfc0b5c0 matches the real stake notes in the store
+- [ ] wallet 0x31fa43034e4eb1c139078ade36955f sent four plain P2IDE payments (8, 5, 55, 55 MIDEN, Sep 26) to the Oct 20 pot; the old batch consumed them into the vault and recorded bogus positions (side = pot suffix). Decide: refund from the pot, and drop the four entries from state.json
+
+## Since bound + hide (2026-09-28)
+
+- [ ] operator: feed key = sha256(account | pattern | createdMs); resolve rejects posts before the pot's creation → verify: keys differ per creation time; resolve check offline against the Sep 25 post
+- [ ] operator: `pot hide --pot --hidden 1|0`, POST /hide, markets.json `hidden`, auto-publish → verify: hide the test pot through the API, markets.json shows hidden true, commit pushed
+- [ ] app: hidden pots left out of the windows and of My predictions; admin row gets hide/unhide for resolved pots → verify: build passes; Resolved window on localhost without the test pot
+- [ ] README

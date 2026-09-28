@@ -4,7 +4,7 @@ import { ADMIN_URL, EXPLORER_URL, ORACLE } from "@/config";
 import { fmt, OUTCOME, type Market } from "@/lib/iknow";
 
 type PotStatus = { yesUnits: number; noUnits: number; outcome: string; vault: string; waitingNotes: number; error?: string };
-type ServerPot = { id: string; topic: string; short: string; label: string; question: string; deadlineMs: number; lockHeight: number; handle?: string; account: string; pattern: string; status: PotStatus | null };
+type ServerPot = { id: string; topic: string; short: string; label: string; question: string; deadlineMs: number; lockHeight: number; handle?: string; account: string; pattern: string; hidden?: boolean; status: PotStatus | null };
 type ServerState = { oracle: string; pots: ServerPot[]; nextBatchMs: number; batchMin?: number };
 
 async function api<T>(path: string, body?: unknown): Promise<T> {
@@ -51,7 +51,7 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
     }
   };
 
-  const pots = server?.pots ?? markets.map((m) => ({ id: m.id, topic: m.topic, short: m.short, label: m.label, question: m.question, handle: undefined as string | undefined, deadlineMs: m.deadlineMs, lockHeight: m.lockHeight, account: "", pattern: "", status: { yesUnits: m.yes, noUnits: m.no, outcome: OUTCOME[m.outcome], vault: "", waitingNotes: 0 } }));
+  const pots: ServerPot[] = server?.pots ?? markets.map((m) => ({ id: m.id, topic: m.topic, short: m.short, label: m.label, question: m.question, handle: undefined, deadlineMs: m.deadlineMs, lockHeight: m.lockHeight, account: "", pattern: "", hidden: m.hidden, status: { yesUnits: m.yes, noUnits: m.no, outcome: OUTCOME[m.outcome], vault: "", waitingNotes: 0 } }));
 
   return (
     <Win title="Admin" className="admin">
@@ -62,7 +62,7 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
           <tbody>
             {pots.map((p) => (
               <tr key={p.id}>
-                <td><a href={`${EXPLORER_URL}/account/${p.id}`} target="_blank" rel="noreferrer" title={p.question}>{p.label}</a><div className="dim">{p.short}{p.handle ? ` · @${p.handle}` : ""}</div></td>
+                <td><a href={`${EXPLORER_URL}/account/${p.id}`} target="_blank" rel="noreferrer" title={p.question}>{p.label}</a><div className="dim">{p.short}{p.handle ? ` · @${p.handle}` : ""}{p.hidden ? " · hidden" : ""}</div></td>
                 <td>{fmt(p.status?.yesUnits ?? 0)}</td>
                 <td>{fmt(p.status?.noUnits ?? 0)}</td>
                 <td>{p.status?.waitingNotes ?? "·"}</td>
@@ -72,6 +72,7 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
                     <button className="btn" disabled={!!busy} onClick={() => act(`batch ${p.label}`, "/batch", { pot: p.id })}>batch</button>
                     <button className="btn" disabled={!!busy} onClick={() => act(`settle ${p.label}`, "/settle", { pot: p.id })}>settle</button>
                     <button className="btn" disabled={!!busy} onClick={() => act(`payout ${p.label}`, "/payout", { pot: p.id })}>payout</button>
+                    {p.status?.outcome && p.status.outcome !== "pending" && <button className="btn" disabled={!!busy} onClick={() => act(`${p.hidden ? "unhide" : "hide"} ${p.label}`, "/hide", { pot: p.id, hidden: !p.hidden })}>{p.hidden ? "unhide" : "hide"}</button>}
                   </>}
                 </td>
               </tr>

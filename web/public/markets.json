@@ -17,6 +17,7 @@
         "0",
         "100"
       ],
+      "hidden": false,
       "settledAt": null,
       "resolvedAt": null,
       "post": null,
@@ -38,6 +39,7 @@
         "0",
         "100"
       ],
+      "hidden": false,
       "settledAt": null,
       "resolvedAt": null,
       "post": null,
@@ -59,6 +61,7 @@
         "0",
         "100"
       ],
+      "hidden": false,
       "settledAt": null,
       "resolvedAt": null,
       "post": null,
@@ -80,6 +83,7 @@
         "3502117837801013956",
         "211193247500497504"
       ],
+      "hidden": false,
       "settledAt": 1790355000000,
       "resolvedAt": 1790354072180,
       "post": "https://x.com/zkGaylord/status/2103523556818915769",
@@ -106,6 +110,7 @@
         "3502117837801013956",
         "211193247500497504"
       ],
+      "hidden": false,
       "settledAt": 1790355600000,
       "resolvedAt": 1790354072180,
       "post": "https://x.com/zkGaylord/status/2103523556818915769",
@@ -132,6 +137,7 @@
         "3502117837801013956",
         "211193247500497504"
       ],
+      "hidden": true,
       "settledAt": 1790585411563,
       "resolvedAt": null,
       "post": null,

@@ -164,6 +164,28 @@
       "resolvedAt": null,
       "post": null,
       "payouts": {}
+    },
+    {
+      "id": "0x1b5a6db4347682514e5d79715e5186",
+      "topic": "When will zkGaylord post something dumb?",
+      "short": "zkGaylord posts something dumb",
+      "stem": "Will zkGaylord post something dumb",
+      "label": "before Sep 29, 2026",
+      "question": "Will zkGaylord post something dumb before Sep 29, 2026?",
+      "deadlineMs": 1790726340000,
+      "account": "1811045655449899008",
+      "pattern": "something dumb",
+      "feedKey": [
+        "4465514125462235932",
+        "2972731475201018083",
+        "1377375735716177008",
+        "3918590350554294654"
+      ],
+      "hidden": false,
+      "settledAt": null,
+      "resolvedAt": null,
+      "post": null,
+      "payouts": {}
     }
   ]
 }

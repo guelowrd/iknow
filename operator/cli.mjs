@@ -356,6 +356,7 @@ export const commands = {
   },
   async "pot deploy"(c, state, args) {
     const deadlineMs = Date.parse(arg(args, "deadline"));
+    if (!(deadlineMs > Date.now())) throw new Error(`deadline ${arg(args, "deadline")} is not in the future`);
     const date = new Date(deadlineMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
     const handle = arg(args, "handle", "0xMiden").replace(/^@/, "");
     // the numeric id is what the rules check (handles can change): known from an earlier pot, else looked up

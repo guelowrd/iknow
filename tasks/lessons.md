@@ -7,3 +7,4 @@
   whole app to Courier New. Self-host fonts (web/public/fonts) with `font-display: block`.
 - 2026-09-25 · "Same font and size as X" means match the one that looks right, not the one that is
   easier to match. Show a screenshot of the result with the request.
+- perl -pi with `|` as the s### delimiter turns `\|\|` in the pattern into alternation and prefixes every line with the replacement (Admin.tsx, 2026-09-28): use the Edit tool for exact strings, or `\Q…\E` with a delimiter absent from the pattern.

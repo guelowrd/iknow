@@ -86,6 +86,7 @@ dual-context Rust note script, batch proving time. Open Pragma question: an even
 - [x] pot deploy: handle → id through the X API (users/by/username) or an earlier pot, not the syndication widget (429) → verify: both paths return 1811045655449899008 for zkGaylord; pot 0xa41eca47 created from the admin view
 - [x] batch: only notes with the stake script root are stakes; tag collisions (P2IDE notes for other accounts sharing the pot's top id bits) blocked every batch on 0x98a2 and 0xa41e → verify: forced batches on both pots say "nothing to open"; compiled root 0xbfc0b5c0 matches the real stake notes in the store
 - [ ] wallet 0x31fa43034e4eb1c139078ade36955f sent four plain P2IDE payments (8, 5, 55, 55 MIDEN, Sep 26) to the Oct 20 pot; the old batch consumed them into the vault and recorded bogus positions (side = pot suffix). Decide: refund from the pot, and drop the four entries from state.json
+- [x] pot deploy refuses a deadline that is not in the future (a pot made from the admin view with the year typed as 2016 settled NO at the next tick); the create button stays off for such a date → verify: `pot deploy --deadline 2016-09-29T23:59:00Z` throws "not in the future"; pot 0x2a6975c8 ("before Sep 29, 2016") hidden
 
 ## Since bound + hide (2026-09-28)
 

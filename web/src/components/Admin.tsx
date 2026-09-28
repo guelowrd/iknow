@@ -92,7 +92,7 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
               <label>label<input placeholder="before Oct 20, 2026 (from the date if empty)" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} /></label>
               <label>X handle<input placeholder="0xMiden" value={form.handle} onChange={(e) => setForm({ ...form, handle: e.target.value })} /></label>
               <label>regex<input placeholder="partner mainnet starts now" value={form.pattern} onChange={(e) => setForm({ ...form, pattern: e.target.value })} /></label>
-              <button className="btn wide go" disabled={!!busy || !form.deadline} onClick={() => act("deploy", "/pots", {
+              <button className="btn wide go" disabled={!!busy || !(Date.parse(form.deadline + "Z") > Date.now())} onClick={() => act("deploy", "/pots", {
                 deadline: new Date(form.deadline + "Z").toISOString(), topic: form.topic || undefined, short: form.short || undefined, stem: form.stem || undefined, label: form.label || undefined,
                 handle: form.handle || undefined, pattern: form.pattern || undefined,
               })}>{busy === "deploy" ? "deploying…" : "create pot"}</button>

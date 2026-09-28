@@ -42,7 +42,8 @@ export const fmt = (units: number) => units.toLocaleString("en-US");
 export const pct = (yes: number, no: number) => (yes + no === 0 ? 50 : Math.round((100 * yes) / (yes + no)));
 export const randomWord = () =>
   Word.newFromFelts(Array.from({ length: 4 }, () => felt(new DataView(crypto.getRandomValues(new Uint8Array(8)).buffer).getBigUint64(0) >> 2n)));
-export const short = (s: string) => `${s.slice(0, 6)}…${s.slice(-4)}`;
+/** Addresses read as Bread shows them: 8 leading chars, 4 before the note-tag suffix; hex ids keep 6…4. */
+export const short = (s: string) => { const i = s.indexOf("_"); return i < 0 ? `${s.slice(0, 6)}…${s.slice(-4)}` : `${s.slice(0, 8)}...${s.slice(i - 4, i)}`; };
 export const nextBatchMs = () => Math.ceil(Date.now() / BATCH_MS) * BATCH_MS;
 export const OUTCOME = ["pending", "YES", "NO", "VOID"] as const;
 export const dateLabel = (ms: number) => new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });

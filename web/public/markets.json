@@ -115,6 +115,27 @@
           "at": 1790355660000
         }
       }
+    },
+    {
+      "id": "0xa41eca471feb1ad10dd88c510af6c8",
+      "topic": "When will zkGaylord post something stupid",
+      "short": "zkGaylord posts something stupid",
+      "stem": "Will zkGaylord post something stupid",
+      "label": "before Sep 29, 2026",
+      "question": "Will zkGaylord post something stupid before Sep 29, 2026?",
+      "deadlineMs": 1790726340000,
+      "account": "1811045655449899008",
+      "pattern": "something stupid",
+      "feedKey": [
+        "2686219281000839191",
+        "1191374127129098808",
+        "3502117837801013956",
+        "211193247500497504"
+      ],
+      "settledAt": null,
+      "resolvedAt": null,
+      "post": null,
+      "payouts": {}
     }
   ]
 }

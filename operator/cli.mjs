@@ -573,15 +573,23 @@ export const commands = {
 export const procedureHash = (component, name) => component.getProcedureHash(`"${name.replace(/_/g, "-")}"`);
 
 /** Stake or claim notes addressed to the pot that this client knows and that are still unspent.
- * Tags only carry part of the target id, so P2ID notes (faucet funding) are excluded explicitly. */
+/** Root of the stake note script; the same for every pot since only the pot's code is linked in. */
+let stakeRootP;
+export const stakeRoot = (c, p) => (stakeRootP ??= c.compile.noteScript({
+  code: fs.readFileSync(path.join(ROOT, "contracts", "stake-note.masm"), "utf8"),
+  libraries: [{ component: potComponent(p) }],
+}).then((s) => s.root().toHex()));
+
 /** Stake notes for the pot the store holds: those with an inclusion proof can be opened; the others
  * came through the transport but their commitment was not found on chain yet (or never will be if
- * the sender's scan hint was above the commitment block). */
+ * the sender's scan hint was above the commitment block).
+ * A tag only carries part of the target id, so the node also delivers other accounts' notes (faucet
+ * P2ID, strangers' P2IDE): only notes running the stake script count. */
 export async function stakeNotes(c, potId) {
   const tag = NoteTag.withAccountTarget(id(potId)).asU32();
-  const p2id = NoteScript.p2id().root().toHex();
+  const root = await stakeRoot(c, loadState().pots[potId]);
   return (await c.notes.list()).filter((r) =>
-    !r.isConsumed() && r.metadata()?.tag().asU32() === tag && r.toNote().script().root().toHex() !== p2id);
+    !r.isConsumed() && r.metadata()?.tag().asU32() === tag && r.toNote().script().root().toHex() === root);
 }
 export async function waitingNotes(c, potId) {
   return (await stakeNotes(c, potId)).filter((r) => r.inclusionProof());

@@ -89,7 +89,7 @@ dual-context Rust note script, batch proving time. Open Pragma question: an even
 
 ## Since bound + hide (2026-09-28)
 
-- [ ] operator: feed key = sha256(account | pattern | createdMs); resolve rejects posts before the pot's creation → verify: keys differ per creation time; resolve check offline against the Sep 25 post
-- [ ] operator: `pot hide --pot --hidden 1|0`, POST /hide, markets.json `hidden`, auto-publish → verify: hide the test pot through the API, markets.json shows hidden true, commit pushed
-- [ ] app: hidden pots left out of the windows and of My predictions; admin row gets hide/unhide for resolved pots → verify: build passes; Resolved window on localhost without the test pot
-- [ ] README
+- [x] operator: feed key = sha256(account | pattern | createdMs); resolve rejects posts before the pot's creation → verify: keys differ per creation time; resolve check offline against the Sep 25 post
+- [x] operator: `pot hide --pot --hidden 1|0`, POST /hide, markets.json `hidden`, auto-publish → verify: hide the test pot through the API, markets.json shows hidden true, commit pushed
+- [x] app: hidden pots left out of the windows and of My predictions; admin row gets hide/unhide for resolved pots → verify: build passes; Resolved window on localhost without the test pot
+- [x] README

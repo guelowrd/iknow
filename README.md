@@ -105,7 +105,7 @@ shim, so point the tests at it:
 
 ```
 export CARGO_MIDEN="$(midenup show home)/publications/0.16.0-02832cce48a59e5d/bin/cargo-miden"
-cd integration && cargo test --release
+cd integration && cargo test --release       # PROPTEST_CASES=200 for a longer run of the random pots
 ```
 
 Build one contract by hand: `cd contracts/pot && "$(dirname "$CARGO_MIDEN")/cargo-miden" miden build --release`.

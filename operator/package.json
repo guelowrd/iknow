@@ -3,10 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node rules.mjs --check && node --test --test-concurrency=1",
-    "mock": "IKNOW_MOCK=1 node mock-cycle.mjs"
+    "test": "node rules.mjs --check && node --test --test-concurrency=1"
   },
   "dependencies": {
     "@miden-sdk/miden-sdk": "0.16.3"
+  },
+  "devDependencies": {
+    "fast-check": "^4.10.2"
   }
 }

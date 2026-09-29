@@ -19,12 +19,14 @@ export const normalize = (text) =>
 export function evaluate(post, { accountId = X_USER_ID, pattern } = {}) {
   const re = new RegExp(pattern ?? PHRASE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
   const author = post?.user?.id_str;
-  if (author !== accountId) return { qualifies: false, reason: `author ${author} is not ${accountId}` };
+  if (author !== accountId) return { qualifies: false, reason: `author ${typeof author === "string" ? author : typeof author} is not ${accountId}` };
   if (post.retweeted_status || post.retweeted_tweet) return { qualifies: false, reason: "repost of someone else" };
   const parentAuthor = post.parent?.user?.id_str ?? post.in_reply_to_user_id_str;
   if (parentAuthor && parentAuthor !== accountId) return { qualifies: false, reason: "reply outside own thread" };
-  const text = normalize(post.note_tweet?.text ?? post.text ?? "");
+  // X answers are untrusted: a field of the wrong type fails to qualify instead of throwing
+  const text = normalize([post.note_tweet?.text, post.text].find((t) => typeof t === "string") ?? "");
   if (!re.test(text)) return { qualifies: false, reason: "pattern not found" };
+  if (typeof post.id_str !== "string" || !/^\d+$/.test(post.id_str)) return { qualifies: false, reason: "no post id" };
   return { qualifies: true, postId: post.id_str, tsMs: snowflakeMs(post.id_str) };
 }
 

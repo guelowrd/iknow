@@ -129,7 +129,7 @@ Build one contract by hand: `cd contracts/pot && "$(dirname "$CARGO_MIDEN")/carg
 ## Operator CLI
 
 ```
-cd operator && npm install && npm test          # rules self-check
+cd operator && npm install && npm test          # rules, fuzzed X posts, admin API guard, full cycle on the mock chain (~2 min)
 node cli.mjs oracle deploy                      # public oracle account, funded from the faucet
 node cli.mjs oracle heartbeat                   # [0, value, 0, now]: makes NO claimable after the date
 node cli.mjs oracle resolve --post-id <id>      # fetches the X post, applies the rules, publishes the timestamp
@@ -142,7 +142,6 @@ node cli.mjs pot deploy --deadline <iso> [--label ..] [--question ..] [--account
 node cli.mjs pot hide --pot <id> [--hidden 0]                  # leave a pot out of the app (or show it again)
 node cli.mjs oracle resolve --pot <id> --post-id <id or url>   # the pot's account + regex
 node cli.mjs oracle publish --pot <id> --value <post ms>       # manual override, 0 = not yet
-IKNOW_MOCK=1 node mock-cycle.mjs                # the same commands end to end on the SDK's mock chain
 node admin.mjs                                  # operator server: API + schedule (replaces loop.sh)
 ```
 

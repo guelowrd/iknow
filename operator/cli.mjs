@@ -36,7 +36,8 @@ export const DEFAULT_TOPIC = "When will Miden Partner Mainnet be announced?";
 export const DEFAULT_SHORT = "Miden Partner Mainnet";
 /** "When will X happen?" → "Will X happen" */
 export const stemOf = (title) => title.replace(/^When will /i, "Will ").replace(/\?$/, "");
-const MARKETS_FILE = path.join(ROOT, "web", "public", "markets.json");
+// the mock chain writes its own file: the operator server publishes any change to the real one
+const MARKETS_FILE = MOCK ? path.join(ROOT, "operator", "markets.mock.json") : path.join(ROOT, "web", "public", "markets.json");
 const POLL_MS = 3_000;
 
 // ---------------------------------------------------------------------------------------------
@@ -357,6 +358,9 @@ export const commands = {
   async "pot deploy"(c, state, args) {
     const deadlineMs = Date.parse(arg(args, "deadline"));
     if (!(deadlineMs > Date.now())) throw new Error(`deadline ${arg(args, "deadline")} is not in the future`);
+    // an invalid regex would make every later watch tick throw; ponytail: compiling is the only check,
+    // a catastrophic pattern could still stall the process on a matching post (RE2 if others ever set patterns)
+    try { new RegExp(arg(args, "pattern", DEFAULT_PATTERN), "i"); } catch { throw new Error(`pattern ${arg(args, "pattern")} is not a valid regex`); }
     const date = new Date(deadlineMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
     const handle = arg(args, "handle", "0xMiden").replace(/^@/, "");
     // the numeric id is what the rules check (handles can change): known from an earlier pot, else looked up

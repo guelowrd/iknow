@@ -106,6 +106,12 @@ http.createServer(async (req, res) => {
   const origin = req.headers.origin ?? "";
   const allowed = /^http:\/\/localhost(:\d+)?$/.test(origin) || ORIGINS.includes(origin);
   const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": allowed ? origin : "null", "Access-Control-Allow-Headers": "content-type", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
+  // Any page open in the operator's browser can reach this port. CORS only hides answers, so refuse
+  // before a route runs: foreign origins, hosts other than loopback (DNS rebinding), and posts that
+  // are not JSON (a text/plain post skips the preflight). Origin-less callers are local tools.
+  const loopback = /^(127\.0\.0\.1|localhost)(:\d+)?$/.test(req.headers.host ?? "");
+  const json = req.method !== "POST" || /^application\/json\b/.test(req.headers["content-type"] ?? "");
+  if (!loopback || (req.headers.origin !== undefined && !allowed) || !json) { res.writeHead(403, headers); return res.end(JSON.stringify({ ok: false, error: "forbidden" })); }
   if (req.method === "OPTIONS") { res.writeHead(204, headers); return res.end(); }
   const route = routes[`${req.method} ${req.url.split("?")[0]}`];
   if (!route) { res.writeHead(404, headers); return res.end(JSON.stringify({ error: "no such route" })); }

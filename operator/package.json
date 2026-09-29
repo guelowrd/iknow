@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node rules.mjs --check",
+    "test": "node rules.mjs --check && node --test --test-concurrency=1",
     "mock": "IKNOW_MOCK=1 node mock-cycle.mjs"
   },
   "dependencies": {

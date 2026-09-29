@@ -109,6 +109,9 @@ export CARGO_MIDEN="$(midenup show home)/publications/0.16.0-02832cce48a59e5d/bi
 cd integration && cargo test --release       # PROPTEST_CASES=200 for a longer run of the random pots
 ```
 
+CI (`.github/workflows/ci.yml`) runs the web, contract and operator suites plus the npm and cargo advisories on
+every push, fuzzers on random seeds. Vercel reruns the web tests on a fixed seed before each build.
+
 Build one contract by hand: `cd contracts/pot && "$(dirname "$CARGO_MIDEN")/cargo-miden" miden build --release`.
 
 ## Notes for the next phases

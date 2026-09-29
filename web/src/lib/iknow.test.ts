@@ -6,6 +6,7 @@ import fc from "fast-check";
 import { ADMINS } from "@/config";
 import { draftOf, felt, loadPositions, parseId, payoutIfWins, pct, remaining, short, type Market, type Position } from "./iknow";
 
+if (import.meta.env.FC_SEED) fc.configureGlobal({ seed: Number(import.meta.env.FC_SEED) }); // fixed in the Vercel gate, random in CI
 const store = new Map<string, string>();
 vi.stubGlobal("localStorage", { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, String(v)) });
 beforeEach(() => store.clear());

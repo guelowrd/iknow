@@ -1,0 +1,73 @@
+# Every push and pull request: web (vitest + fast-check), contracts on MockChain (proptest), operator on the
+# SDK mock chain, dependency advisories. The operator's own markets.json commits skip it. Fuzzers run on
+# random seeds here; the Vercel build gate (vercel.json) reruns the web tests on a fixed one.
+name: ci
+on:
+  push:
+    branches: [main]
+    paths-ignore: [web/public/markets.json]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm test
+      - run: npm run build
+
+  advisories:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: taiki-e/install-action@4cef1412cce204788f482e778a0b9187f9626a29 # v2.87.21
+        with:
+          tool: cargo-audit
+      - run: cargo audit
+
+  contracts-and-operator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Rust toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.local/share/midenup
+          key: midenup-${{ runner.os }}-${{ hashFiles('miden-toolchain.toml') }}
+      - name: Miden toolchain (miden-toolchain.toml)
+        run: |
+          command -v midenup || cargo install --locked midenup
+          midenup show home
+          [ -d "$(midenup show home)/publications" ] || { midenup init && midenup install 0.16.0; }
+          echo "CARGO_MIDEN=$(ls -d "$(midenup show home)"/publications/0.16.0-*/bin/cargo-miden | head -1)" >> "$GITHUB_ENV"
+      - name: Contracts on MockChain
+        working-directory: integration
+        run: cargo test --release
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: operator/package-lock.json
+      - name: Operator on the mock chain (runs the packages the contract tests just built)
+        working-directory: operator
+        run: npm ci && npm audit --audit-level=high && npm test

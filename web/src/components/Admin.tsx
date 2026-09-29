@@ -40,7 +40,7 @@ export function Admin({ markets, onChanged }: { markets: Market[]; onChanged: ()
   const act = async (label: string, path: string, body?: unknown) => {
     setBusy(label);
     try {
-      const result = await api<unknown>(path, body);
+      const result = await api<unknown>(path, body ?? {}); // every action route is a POST, with or without fields
       setLog((l) => [`${label}: ${typeof result === "object" ? JSON.stringify(result) : String(result)}`, ...l].slice(0, 8));
       await refresh();
       onChanged();

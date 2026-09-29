@@ -98,7 +98,7 @@ dual-context Rust note script, batch proving time. Open Pragma question: an even
 ## Stability and security program (2026-09-29): one commit and push per layer
 
 - [x] 1. admin API guard: 403 unless the Host is loopback, the Origin (when sent) is allowed, and a POST carries JSON; admin.test.mjs spawns the server on the mock chain → verify: node --test green; curl on the live server with a foreign Origin gets 403; the admin view still loads
-- [ ] 1b. admin buttons heartbeat, watch X, settle due send no body, so they go out as GET and hit no route → verify: POST with {} from the view; curl GET /heartbeat was 404 before
+- [x] 1b. admin buttons heartbeat, watch X, settle due send no body, so they go out as GET and hit no route → verify: POST with {} from the view; curl GET /heartbeat was 404 before
 - [ ] 2. operator suite: cycle.test.mjs replaces mock-cycle.mjs (already broken: oracle publish needs --pot) and asserts batch, payout pro rata, plain payment not taken as a stake, past deadline refused; rules.test.mjs fuzzes evaluate with fast-check; pot deploy rejects an invalid regex → verify: npm test green; the fuzz finds a crash in the old evaluate
 - [ ] 3. contracts: proptest over random stake sets (claims never exceed the vault, pro rata floor, dust below the winner count), stake after lock height refused, boundary case for units x total above 64 bits → verify: cargo test green, or the boundary case pins down the overflow
 - [ ] 4. web: vitest + fast-check on the pure helpers and on loadPositions fed junk storage; loadPositions drops entries whose wallet does not parse → verify: npm test green; the junk test fails on the old loadPositions

@@ -11,6 +11,7 @@ running batches in a loop. Spec in [docs/feasibility.md](docs/feasibility.md), p
 
 ```
 cd web && npm install && npm run dev        # http://localhost:5180
+npm test                                    # web helpers and stored positions, fuzzed (vitest + fast-check)
 ```
 
 Press **connect** and choose **Bread** (Chrome extension on testnet, recommended) or **guest**, a

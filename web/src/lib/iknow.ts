@@ -68,7 +68,7 @@ export function remaining(ms: number) {
 export function payoutIfWins(p: Position, m: Market) {
   const total = m.yes + m.no;
   const side = p.side === 1 ? m.yes : m.no;
-  return side === 0 ? p.units : Math.floor((p.units * total) / side);
+  return side === 0 ? p.units : Number((BigInt(p.units) * BigInt(total)) / BigInt(side)); // exact past 2^53, like the pot
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -183,9 +183,19 @@ export const potAddress = (pot: string) => Address.fromAccountId(parseId(pot));
 // ---------------------------------------------------------------------------------------------
 
 const KEY = "iknow:positions";
+const parses = (id: unknown) => { try { return typeof id === "string" && !!parseId(id); } catch { return false; } };
+const isWord = (w: unknown) => Array.isArray(w) && w.length === 4 && w.every((x) => typeof x === "string" && /^\d+$/.test(x) && BigInt(x) < 2n ** 63n);
+/** Storage is outside the app's control (older versions, other tabs, the user): an entry is kept only
+ * if every field its readers dereference is usable, so one bad entry cannot take the list down. */
+function isPosition(v: unknown): v is Position {
+  const p = v as Partial<Record<keyof Position, unknown>> | null;
+  return !!p && typeof p === "object" && parses(p.wallet) && parses(p.market) && typeof p.noteId === "string" && (p.side === 1 || p.side === 2) &&
+    Number.isSafeInteger(p.units) && (p.units as number) > 0 && isWord(p.salt) && (p.serial === undefined || isWord(p.serial));
+}
 export function loadPositions(): Position[] {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    const ps: unknown = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    return Array.isArray(ps) ? ps.filter(isPosition) : [];
   } catch {
     return [];
   }

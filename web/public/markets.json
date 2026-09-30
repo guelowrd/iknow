@@ -2,7 +2,7 @@
   "oracle": "0x91456cba0c509191225c89225c385a",
   "markets": [
     {
-      "id": "0x8eddfd14bf6626913cb31a58428793",
+      "id": "0xd9eb2b7b96157651149d98d26a5a5b",
       "topic": "When will Miden Partner Mainnet be announced?",
       "short": "Miden Partner Mainnet",
       "stem": "Will Miden Partner Mainnet be announced",
@@ -12,19 +12,19 @@
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
       "feedKey": [
-        "0",
-        "0",
-        "0",
-        "100"
+        "1656277300434316133",
+        "1696107383107278110",
+        "334491337321446530",
+        "3907904344456565026"
       ],
-      "hidden": true,
+      "hidden": false,
       "settledAt": null,
       "resolvedAt": null,
       "post": null,
       "payouts": {}
     },
     {
-      "id": "0x1d20145e5360cfd10671e1f093e97c",
+      "id": "0x1033adda76b4bd910616709fdf14c1",
       "topic": "When will Miden Partner Mainnet be announced?",
       "short": "Miden Partner Mainnet",
       "stem": "Will Miden Partner Mainnet be announced",
@@ -34,19 +34,19 @@
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
       "feedKey": [
-        "0",
-        "0",
-        "0",
-        "100"
+        "879873403459507927",
+        "734157770943787970",
+        "1002249397129077021",
+        "4221158581004978923"
       ],
-      "hidden": true,
+      "hidden": false,
       "settledAt": null,
       "resolvedAt": null,
       "post": null,
       "payouts": {}
     },
     {
-      "id": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
+      "id": "0x48ee84fc7675539124c3a2f58d7968",
       "topic": "When will Miden Partner Mainnet be announced?",
       "short": "Miden Partner Mainnet",
       "stem": "Will Miden Partner Mainnet be announced",
@@ -56,142 +56,16 @@
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
       "feedKey": [
-        "0",
-        "0",
-        "0",
-        "100"
+        "3249535204952876823",
+        "3220316989436170273",
+        "3024960074556235301",
+        "1866472702033425110"
       ],
-      "hidden": true,
+      "hidden": false,
       "settledAt": null,
       "resolvedAt": null,
       "post": null,
       "payouts": {}
-    },
-    {
-      "id": "0x98a2db3dc85f4c116e4a86c7bec89a",
-      "topic": "When will zkGaylord post something stupid?",
-      "short": "zkGaylord something stupid",
-      "stem": "Will zkGaylord post something stupid",
-      "label": "before Sep 27, 2026",
-      "question": "Will zkGaylord post something stupid before Sep 27, 2026?",
-      "deadlineMs": 1790467200000,
-      "account": "1811045655449899008",
-      "pattern": "something stupid",
-      "feedKey": [
-        "2686219281000839191",
-        "1191374127129098808",
-        "3502117837801013956",
-        "211193247500497504"
-      ],
-      "hidden": false,
-      "settledAt": 1790355000000,
-      "resolvedAt": 1790354072180,
-      "post": "https://x.com/zkGaylord/status/2103523556818915769",
-      "payouts": {
-        "17393811921448219250,1049540710034945415,11260420461955706756,4173734630848319572": {
-          "note": "0xd0b074644d520fd87124077233d7d1ae7e5108f63952877b7f1cbe1d9b3154c1",
-          "at": 1790355060000
-        }
-      }
-    },
-    {
-      "id": "0x44d3a0f21e3863d1629649fe54f436",
-      "topic": "When will zkGaylord post something stupid?",
-      "short": "zkGaylord something stupid",
-      "stem": "Will zkGaylord post something stupid",
-      "label": "before Sep 30, 2026",
-      "question": "Will zkGaylord post something stupid before Sep 30, 2026?",
-      "deadlineMs": 1790726400000,
-      "account": "1811045655449899008",
-      "pattern": "something stupid",
-      "feedKey": [
-        "2686219281000839191",
-        "1191374127129098808",
-        "3502117837801013956",
-        "211193247500497504"
-      ],
-      "hidden": false,
-      "settledAt": 1790355600000,
-      "resolvedAt": 1790354072180,
-      "post": "https://x.com/zkGaylord/status/2103523556818915769",
-      "payouts": {
-        "14538015096677742233,7189547748971072225,891493207420150422,15019920752622636828": {
-          "note": "0xf4da7724ee9451489e3bc38ec9b8a2f37c424752d9d4bd1dda81de7f6494a671",
-          "at": 1790355660000
-        }
-      }
-    },
-    {
-      "id": "0xa41eca471feb1ad10dd88c510af6c8",
-      "topic": "When will zkGaylord post something stupid",
-      "short": "zkGaylord posts something stupid",
-      "stem": "Will zkGaylord post something stupid",
-      "label": "before Sep 29, 2026",
-      "question": "Will zkGaylord post something stupid before Sep 29, 2026?",
-      "deadlineMs": 1790726340000,
-      "account": "1811045655449899008",
-      "pattern": "something stupid",
-      "feedKey": [
-        "2686219281000839191",
-        "1191374127129098808",
-        "3502117837801013956",
-        "211193247500497504"
-      ],
-      "hidden": true,
-      "settledAt": 1790585411563,
-      "resolvedAt": null,
-      "post": null,
-      "payouts": {}
-    },
-    {
-      "id": "0x2a6975c82dcb61d14869140e2a9f4d",
-      "topic": "When will zkGaylord post something dumb",
-      "short": "zkGaylord posts something dumb",
-      "stem": "Will zkGaylord post something dumb",
-      "label": "before Sep 29, 2016",
-      "question": "Will zkGaylord post something dumb before Sep 29, 2016?",
-      "deadlineMs": 1475193540000,
-      "account": "1811045655449899008",
-      "pattern": "something dumb",
-      "feedKey": [
-        "4329386256923797069",
-        "2697338078154256501",
-        "3036367485672727019",
-        "1519482947978997403"
-      ],
-      "hidden": true,
-      "settledAt": 1790613621931,
-      "resolvedAt": null,
-      "post": null,
-      "payouts": {}
-    },
-    {
-      "id": "0x1b5a6db4347682514e5d79715e5186",
-      "topic": "When will zkGaylord post something dumb?",
-      "short": "zkGaylord posts something dumb",
-      "stem": "Will zkGaylord post something dumb",
-      "label": "before Sep 29, 2026",
-      "question": "Will zkGaylord post something dumb before Sep 29, 2026?",
-      "deadlineMs": 1790726340000,
-      "account": "1811045655449899008",
-      "pattern": "something dumb",
-      "feedKey": [
-        "4465514125462235932",
-        "2972731475201018083",
-        "1377375735716177008",
-        "3918590350554294654"
-      ],
-      "hidden": false,
-      "settledAt": 1790726439329,
-      "resolvedAt": null,
-      "post": null,
-      "payouts": {
-        "17806133296326821668,4646736616977871738,9921785754066447238,2855494697121044198": {
-          "note": "0xdc3b4f501c63397d64121b06e222aaf671a25d8444cc0c6a7dc15bc2d92db03b",
-          "tx": "0xf46a85260477a90a7c8dfe52e2d92e8e9becb5ede58457dfa5115747682e94d3",
-          "at": 1790726448179
-        }
-      }
     }
   ]
 }

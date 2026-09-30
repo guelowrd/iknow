@@ -114,9 +114,9 @@
     ]
   },
   "pots": {
-    "0x8eddfd14bf6626913cb31a58428793": {
+    "0xd9eb2b7b96157651149d98d26a5a5b": {
       "deadlineMs": 1792454400000,
-      "lockHeight": 1167148,
+      "lockHeight": 1166981,
       "graceS": 2592000,
       "unit": 1000000,
       "assetIdWord": [
@@ -133,25 +133,25 @@
         "14258625366430178332"
       ],
       "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "When will Miden Partner Mainnet be announced?",
+      "short": "Miden Partner Mainnet",
+      "stem": "Will Miden Partner Mainnet be announced",
       "label": "before Oct 20, 2026",
       "question": "Will Miden Partner Mainnet be announced before Oct 20, 2026?",
+      "handle": "0xMiden",
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
       "feedKey": [
-        "0",
-        "0",
-        "0",
-        "100"
+        "1656277300434316133",
+        "1696107383107278110",
+        "334491337321446530",
+        "3907904344456565026"
       ],
-      "topic": "When will Miden Partner Mainnet be announced?",
-      "short": "Miden Partner Mainnet",
-      "stem": "Will Miden Partner Mainnet be announced",
-      "handle": "0xMiden",
-      "createdMs": 1790287200000
+      "createdMs": 1790758778513
     },
-    "0x1d20145e5360cfd10671e1f093e97c": {
+    "0x1033adda76b4bd910616709fdf14c1": {
       "deadlineMs": 1793145600000,
-      "lockHeight": 1397547,
+      "lockHeight": 1397484,
       "graceS": 2592000,
       "unit": 1000000,
       "assetIdWord": [
@@ -168,25 +168,25 @@
         "14258625366430178332"
       ],
       "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "When will Miden Partner Mainnet be announced?",
+      "short": "Miden Partner Mainnet",
+      "stem": "Will Miden Partner Mainnet be announced",
       "label": "before Oct 28, 2026",
       "question": "Will Miden Partner Mainnet be announced before Oct 28, 2026?",
+      "handle": "0xMiden",
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
       "feedKey": [
-        "0",
-        "0",
-        "0",
-        "100"
+        "879873403459507927",
+        "734157770943787970",
+        "1002249397129077021",
+        "4221158581004978923"
       ],
-      "topic": "When will Miden Partner Mainnet be announced?",
-      "short": "Miden Partner Mainnet",
-      "stem": "Will Miden Partner Mainnet be announced",
-      "handle": "0xMiden",
-      "createdMs": 1790287200000
+      "createdMs": 1790758800193
     },
-    "0xfb13ce79ff4bb7d1310de3bc1c8d3b": {
+    "0x48ee84fc7675539124c3a2f58d7968": {
       "deadlineMs": 1793836800000,
-      "lockHeight": 1627948,
+      "lockHeight": 1627884,
       "graceS": 2592000,
       "unit": 1000000,
       "assetIdWord": [
@@ -203,103 +203,21 @@
         "14258625366430178332"
       ],
       "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "When will Miden Partner Mainnet be announced?",
+      "short": "Miden Partner Mainnet",
+      "stem": "Will Miden Partner Mainnet be announced",
       "label": "before Nov 5, 2026",
       "question": "Will Miden Partner Mainnet be announced before Nov 5, 2026?",
+      "handle": "0xMiden",
       "account": "1468873289267171330",
       "pattern": "partner mainnet starts now",
       "feedKey": [
-        "0",
-        "0",
-        "0",
-        "100"
+        "3249535204952876823",
+        "3220316989436170273",
+        "3024960074556235301",
+        "1866472702033425110"
       ],
-      "topic": "When will Miden Partner Mainnet be announced?",
-      "short": "Miden Partner Mainnet",
-      "stem": "Will Miden Partner Mainnet be announced",
-      "handle": "0xMiden",
-      "createdMs": 1790287200000
-    },
-    "0x98a2db3dc85f4c116e4a86c7bec89a": {
-      "deadlineMs": 1790467200000,
-      "lockHeight": 504746,
-      "graceS": 2592000,
-      "unit": 1000000,
-      "assetIdWord": [
-        "0",
-        "0",
-        "7345323674754581761",
-        "1733920650650809521"
-      ],
-      "oracleId": "0x91456cba0c509191225c89225c385a",
-      "oracleRoot": [
-        "1981213289986970776",
-        "15105134555494835915",
-        "13485627950703404713",
-        "14258625366430178332"
-      ],
-      "asset": "0x18101fa522c174b165efd4f70a0385",
-      "topic": "When will zkGaylord post something stupid?",
-      "label": "before Sep 27, 2026",
-      "question": "Will zkGaylord post something stupid before Sep 27, 2026?",
-      "account": "1811045655449899008",
-      "pattern": "something stupid",
-      "feedKey": [
-        "2686219281000839191",
-        "1191374127129098808",
-        "3502117837801013956",
-        "211193247500497504"
-      ],
-      "short": "zkGaylord something stupid",
-      "stem": "Will zkGaylord post something stupid",
-      "handle": "zkGaylord",
-      "createdMs": 1790337600000,
-      "post": {
-        "id": "2103523556818915769",
-        "handle": "zkGaylord",
-        "tsMs": 1790354072180
-      },
-      "settledAt": 1790355000000
-    },
-    "0x44d3a0f21e3863d1629649fe54f436": {
-      "deadlineMs": 1790726400000,
-      "lockHeight": 591147,
-      "graceS": 2592000,
-      "unit": 1000000,
-      "assetIdWord": [
-        "0",
-        "0",
-        "7345323674754581761",
-        "1733920650650809521"
-      ],
-      "oracleId": "0x91456cba0c509191225c89225c385a",
-      "oracleRoot": [
-        "1981213289986970776",
-        "15105134555494835915",
-        "13485627950703404713",
-        "14258625366430178332"
-      ],
-      "asset": "0x18101fa522c174b165efd4f70a0385",
-      "topic": "When will zkGaylord post something stupid?",
-      "label": "before Sep 30, 2026",
-      "question": "Will zkGaylord post something stupid before Sep 30, 2026?",
-      "account": "1811045655449899008",
-      "pattern": "something stupid",
-      "feedKey": [
-        "2686219281000839191",
-        "1191374127129098808",
-        "3502117837801013956",
-        "211193247500497504"
-      ],
-      "short": "zkGaylord something stupid",
-      "stem": "Will zkGaylord post something stupid",
-      "handle": "zkGaylord",
-      "createdMs": 1790337600000,
-      "post": {
-        "id": "2103523556818915769",
-        "handle": "zkGaylord",
-        "tsMs": 1790354072180
-      },
-      "settledAt": 1790355600000
+      "createdMs": 1790758836016
     }
   },
   "positions": [
@@ -315,7 +233,12 @@
         "1320131721543321589"
       ],
       "noteId": "0x9d850c6fff9353fc0cc6be04dd09d8f7247f0cfb6f9ed1e4c0ba6a91228a6677",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0xfa1371c4583516e033ab9e0be0f7dae63d6228049b6655dea278846b0377706e",
+        "tx": "0xb7a8eda06bfd95b0be0a37c07a74f17b41557bdfbefaf7b8decf1b0421df16ea",
+        "at": 1790758304914
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -329,7 +252,12 @@
         "594491446993563943"
       ],
       "noteId": "0xc92bbbcde5cf1b2bdad994d4f308040eb69e37dcee54aa0d73df9af4da64409d",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x0d92428e7cc822ed5bf0ffb93a5837bda226e58d0f64efdae6eb1970345ca280",
+        "tx": "0x1fca0373bdc5e7c5f0c6e75719d1fe619f172367eabf7fb4188558df1f5035a4",
+        "at": 1790758311813
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -343,7 +271,12 @@
         "3971125195140731083"
       ],
       "noteId": "0xa819947d7840a23776a799976ab79cd0b1b8296e149a3917d81faaba34b1190c",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0xf885fcb4014fe4c65fc4ff7ead6c37e4882014b5f92f01206a8a1ec29fd29a98",
+        "tx": "0xa25b3766ddfc12daf33d95e9f3dd47b1a9b7471de108fb93a9ba631df4f1104a",
+        "at": 1790758318526
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -357,7 +290,12 @@
         "982141887532769273"
       ],
       "noteId": "0xc7b5e03fbd585078979fbec4bcd7ce722a38703f8d587c9c3159fdbe4726f2ab",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x2d1e6802b8370376a3a6568405689a52b7e6173a4a9f8a08f06cbc9ce74a03b4",
+        "tx": "0x9fea34b943014f66c2f293e48f1dc48e274530fd85533472e59cde6f33d2089b",
+        "at": 1790758325229
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -371,7 +309,12 @@
         "263716148831220145"
       ],
       "noteId": "0x6ae7b2d3a9136194bb422aac866352658d5fc36a0ecf15748a3211e85640a64f",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x44d10581e1bd3af4cb483fa6185e7bf952d0d574a4ac388941f28ebcd5403d6a",
+        "tx": "0x8a630cfa57fba4d6fae6a72bdbc7ea5a2956bfc77dec6172811b02890e49533c",
+        "at": 1790758332886
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -385,7 +328,12 @@
         "486164532072097069"
       ],
       "noteId": "0xcdef3d535396f15817a93c280c284e47b7c9dc1afddce407ff3e9f19ca415c41",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x0c18ebb22eae0d1b3c7994bd713eefc60277b6646d117f9603ec69701a2cb6a4",
+        "tx": "0xe4b432821eb016d50047e61f8d7139a92ff1b10b424252f55b11c4ceab1f6490",
+        "at": 1790758339821
+      }
     },
     {
       "pot": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
@@ -399,7 +347,12 @@
         "435321270849451104"
       ],
       "noteId": "0x418f8761be68964d23b954af1a7fabca15b19622e51edc20bdf77ca3cf2bc272",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x1499b4d16402903566333572df00753c73ccb4f7c53949afb369f7d87f8feb1d",
+        "tx": "0x3327f3760b73d64a9806c1e4804f4f1faf95cccf78f8c10eb044b22dfb1bc3d7",
+        "at": 1790758200052
+      }
     },
     {
       "pot": "0x1d20145e5360cfd10671e1f093e97c",
@@ -413,7 +366,12 @@
         "1688984771056850253"
       ],
       "noteId": "0x8ba034d760413f7413db7cc8cedb71510a3ed8c536a85a4f9b3b32ce66eb05ad",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0xa67fa3eda34cb0e32eb308efe4734d0a3c8d5a74b0ee09cbab7c0cfade037fb1",
+        "tx": "0x656a9a6edf03f1e26b267f56a05957611e360454b37a3858d737bbaee9ab8f8b",
+        "at": 1790758253833
+      }
     },
     {
       "pot": "0x1d20145e5360cfd10671e1f093e97c",
@@ -427,7 +385,12 @@
         "2217393000642925816"
       ],
       "noteId": "0xab18358d253476dfd2949cd4eb410ca89fac43c04bec80ebb8bfb025ddd2c165",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x2aa31096270ef00251cede34f24cd655663d8c87c68aa57853fc3430f6d68d56",
+        "tx": "0x1886799e67063c60358e92b70191b98b9951e222e8358f64d80bff273519e1d3",
+        "at": 1790758261368
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -441,7 +404,12 @@
         "312439797958188023"
       ],
       "noteId": "0xa28faf3f53acf65cc0defd8a926984c3a7024b6ec8bba93d964fb852ecb4e037",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x8c02e19783f3194d971539edcbf3b27c7c37718586f77007a6521e74c88280c6",
+        "tx": "0x9b330669197190ceab17070255ad8a9d2da30a4629b6e9223fde2b7823804de5",
+        "at": 1790758346490
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -455,7 +423,12 @@
         "2360200933500089191"
       ],
       "noteId": "0x4da0701c2c3c1bfe10697031ef2dcdc38e4a1c94bf955b83036dd847f0dc9bdb",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0xc0b969e595abc179bcb154f2611166805928c78eb5a578c55582bdd244ebcb15",
+        "tx": "0x898ca930227410bb7abd787fddc6658d2eb24b5acc12e9a0a273dc2233bde9b6",
+        "at": 1790758354600
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -469,7 +442,12 @@
         "4172479388857560879"
       ],
       "noteId": "0x2b9945ea38527b8f2ea09c9c325386dd9cc71f7b6200569d81ca1b65eb7a86d0",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x3ceb720cc41b0815021fd33323cf3703e82a23a50250e5db7ce9a2bb50e1c4bf",
+        "tx": "0x14473ba0be9b119431a4ca3f3287fc9664ba8a15d49ec8572d92d1a86e3d8776",
+        "at": 1790758361973
+      }
     },
     {
       "pot": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
@@ -483,7 +461,12 @@
         "4359069088461695494"
       ],
       "noteId": "0xf7883a650bbdce5b69768651342b1bfa7cdc81197cf82e5594f35c3fa925795f",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0xa939b210c522cdbc03903c4f93c51a173105876095444cb9fbac399957a0bc92",
+        "tx": "0x01e5c2969fdc5624fae2aa07b9d2630e3d92e95ba6c717134f412efeb74b4e6a",
+        "at": 1790758208133
+      }
     },
     {
       "pot": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
@@ -497,7 +480,12 @@
         "4234292965687277690"
       ],
       "noteId": "0x93276e6e7a2475e27148cacb895e21ab479b1bb55dd9ce530f947cc1429238fc",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x1cc029ce78c31e8a70c6f1af7f366e7aefc41a96d00cd596abdf602cc49d459a",
+        "tx": "0xd66b4cd421b41d86a4562c5a805a510120ecaa431a7c3ce5da69c90d55429b8e",
+        "at": 1790758215172
+      }
     },
     {
       "pot": "0x98a2db3dc85f4c116e4a86c7bec89a",
@@ -589,7 +577,12 @@
         "1306486773245185548"
       ],
       "noteId": "0xe007fee458f79eea244251a8f1b94804fc10471c9d7dc3cfc659a22a4080ed93",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x36d7c56b95c114514bbc1cd4ab93c7c7b94106ea6feda47a9d002a43b9e70fa7",
+        "tx": "0x48be40f20ab4409b673c3c5a8869414bab4ffa423f0a106037070d1407079cdf",
+        "at": 1790758268755
+      }
     },
     {
       "pot": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
@@ -603,7 +596,12 @@
         "1171650860332101283"
       ],
       "noteId": "0x4495c2707a6c78e3b64ea328b543090861df8e81ba49a10fc564c4c82d4ef546",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x5b5ab9145157a0af90440635b927a88fe11e15d37d478cd72e42bdc0ca40d8f7",
+        "tx": "0xceec5b6f30bd97ea4600fc02eacec0fd2a4e8683ef6617934993b6723a71d5b7",
+        "at": 1790758223177
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -616,7 +614,12 @@
         "0"
       ],
       "noteId": "0xa5e510b7229b3aa9f90458b02f0fcd758382d8d3efa3ae716d351da3e113ca0c",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x8820c6d92c42b4fc03ffea6d74fdf6091282087fb9f9fad39a8938c9fa72f506",
+        "tx": "0x5c614f594f8b25b883e2da15120ab7d2fa8e28e78a7fd2b25ff0f5df6226c95e",
+        "at": 1790758368784
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -630,7 +633,12 @@
         "101389258040280126"
       ],
       "noteId": "0x36176adb4a61b2947693718bd0863df915330ffa68613aa19d7fd14e6a845dd6",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x8d61fdb8664b6a00d6e17aefcdacb7d893f31de35e5035ac168d4c60b2d48909",
+        "tx": "0x145281e6750da342ea8620ae29e1c327580220ffdeeb82c0ef67167e92121460",
+        "at": 1790758375900
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -643,7 +651,12 @@
         "0"
       ],
       "noteId": "0xb8e97e09fe042ef0c1280328a44afb191ace427f65793c29e50f3a2db26d8f86",
-      "claimed": false
+      "claimed": true,
+      "refund": {
+        "note": "0x720864728786f74e4bef738f5729e63034d39c27595157ef4f3c603d5fd969f4",
+        "tx": "0xaac13bdd84dbdf4fe302723856dfe29111b07ee032f97f8a40837c4e4e86057a",
+        "at": 1790758382891
+      }
     },
     {
       "pot": "0x8eddfd14bf6626913cb31a58428793",
@@ -656,7 +669,574 @@
         "0"
       ],
       "noteId": "0x620588a1ca5a5be6b26f026996fb0c1f5994134a95bb74aaf87d8c64856acf5c",
+      "claimed": true,
+      "refund": {
+        "note": "0xa90f5d4af4ebfe1779818f67ba929ab89632d8f273d55a4e69aa9936ca585deb",
+        "tx": "0x0ca32b342fb90c7b46e006743d05e39aac3c6498697d437ceefa3668372b9e0e",
+        "at": 1790758389715
+      }
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x31fa43034e4eb1c139078ade36955f",
+      "side": 4373868629482509300,
+      "units": 55,
+      "salt": [
+        "10294662588791137937",
+        "690597",
+        "0"
+      ],
+      "noteId": "0x727307f1f1026950317defa1149e2ba51c62a22a96d79a8c30b46e388a0084c1",
+      "claimed": true,
+      "refund": {
+        "note": "0xe7043925a32520fd7cff86f79371cd30c6d74c902876d4872a10e0481567730e",
+        "tx": "0x128e0707ae97c11e38caaae214f878b90f8b815c01a5f35a4a6ed503ee6c044a",
+        "at": 1790758396327
+      }
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x07d293f42d572e413ed9451423e1b0",
+      "side": 2,
+      "units": 15,
+      "salt": [
+        "3936416008654192679",
+        "1607645342139949730",
+        "42529450473395133",
+        "1545121742598058794"
+      ],
+      "noteId": "0xd77629dd128788edb149694a3969d1c3ced73b6d807ee28f84ab9fe718e5a79e",
+      "claimed": true,
+      "refund": {
+        "note": "0xf9b6064f5a19f3831180667edd00c4f397ed3e3694d673a764f83ef00a4e75bf",
+        "tx": "0x2cc9fb218ca12a76052a136b71e906849bf19cc51040c11f06ab74b672d9def3",
+        "at": 1790758402942
+      }
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 2,
+      "units": 7,
+      "salt": [
+        "4380215359379398407",
+        "4059955664558298783",
+        "81326558730220698",
+        "1389713025499462432"
+      ],
+      "noteId": "0x0143691796e36e4506e291183f0957d4cfc96754b71f3db9494dde9198cb5db0",
+      "claimed": true,
+      "refund": {
+        "note": "0xa3509ca6c2c6bcf397d1332d2237a95a1e606b3943663b5dc0c6c4ce0c884410",
+        "tx": "0xf3a60ddf1b76c2beddfdbd1a2ad44424543b22f6b3b02aa570d0759277ef2c78",
+        "at": 1790758409530
+      }
+    },
+    {
+      "pot": "0x1d20145e5360cfd10671e1f093e97c",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 1,
+      "units": 21,
+      "salt": [
+        "2393462966419932065",
+        "166573987939447735",
+        "4024682109745050561",
+        "2578916541632631654"
+      ],
+      "noteId": "0xc0a45c0803deda22d2626eeb3b9d74f6023a4ae6f076e71f00dab710a79307e5",
+      "claimed": true,
+      "refund": {
+        "note": "0x37c14247d91beb22360c3771c75a97e7ee9150cc80faf0ef6f982190dc249e61",
+        "tx": "0x331c10d9f6b407587f11f7e587167b91a3a90ed3aa12a7133185e3da12d41b99",
+        "at": 1790758276793
+      }
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 2,
+      "units": 3,
+      "salt": [
+        "1374217280464506529",
+        "530358369986219101",
+        "4578569391762732137",
+        "3660627245898534177"
+      ],
+      "noteId": "0x02202a9649331dc8df932877e26caaabe6bd0244ea51920bb3e69db22b02303b",
+      "claimed": true,
+      "refund": {
+        "note": "0x07dfd3e42da7ef90ddaf41ff5d9e4d2496dde4ac6f51bb0cac1be44b9df6c098",
+        "tx": "0xb4d16878ba70e2f89f3fddbd581916be98364ad9e8e5540ee97b3082b7dc00b7",
+        "at": 1790758416228
+      }
+    },
+    {
+      "pot": "0x1d20145e5360cfd10671e1f093e97c",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 2,
+      "units": 3,
+      "salt": [
+        "3091349801069620929",
+        "1947156090260148933",
+        "2423896958177691812",
+        "678865138320353517"
+      ],
+      "noteId": "0xaf7fce5f0f9f3712b1b06fcc5d21978792645f0b99c0c206264e38d64af89c6f",
+      "claimed": true,
+      "refund": {
+        "note": "0x1b0ee22635fc926148f740bc77f54245126f3d48c431fd1bb7e1fbc13cc2f0f6",
+        "tx": "0x18e9aa4b9039b42ef6d15f880281655e3bd7f5b810666f6a8b9854cb34a7a069",
+        "at": 1790758284090
+      }
+    },
+    {
+      "pot": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 1,
+      "units": 1,
+      "salt": [
+        "3656806101319201457",
+        "428087865462000108",
+        "3423465785060629207",
+        "4397889610524079733"
+      ],
+      "noteId": "0xf8bf2e114d08fa9815495b1cfba7f3fdba234efbfda349c23bda2f3e73bd9403",
+      "claimed": true,
+      "refund": {
+        "note": "0xc609ebafe68421bc8df8e274535d4d04b7457feb9502456e320ac01d1850577b",
+        "tx": "0x54105ab89ddc93c80eaac359bc85b7c4c0712cf7c3714f369b1923adb1f812db",
+        "at": 1790758230149
+      }
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0xe1327febfde7598152ffa720a984a4",
+      "side": 2,
+      "units": 1,
+      "salt": [
+        "2647707043275280458",
+        "3403609272607922552",
+        "1606991079575890474",
+        "4330400721337311131"
+      ],
+      "noteId": "0x47a5cafe8a2b4d9b6fd3ee553971658e2d765b15bb4f4d5ff856a5bf996c955c",
+      "claimed": true,
+      "refund": {
+        "note": "0x54bc98d39c0fe3b538da35088e37c5b3565f37da3844392eab1b9ab2a51fd1c6",
+        "tx": "0x6f2e46c94066a3efddd9e14efc09726cb10f4e939ce2b04945022f3264acb525",
+        "at": 1790758422874
+      }
+    },
+    {
+      "pot": "0x1d20145e5360cfd10671e1f093e97c",
+      "wallet": "0xe1327febfde7598152ffa720a984a4",
+      "side": 1,
+      "units": 1,
+      "salt": [
+        "367853756484656374",
+        "1726536610969613286",
+        "2894683905428508021",
+        "32484200497125608"
+      ],
+      "noteId": "0x7822fa150d1a6b963e4d6b228f3c64e10653f597c4c87aaa00d7871e402d8204",
+      "claimed": true,
+      "refund": {
+        "note": "0x407ef6732ad22bb62e6465fd817c43ca16b9b0541bd136b20236367e6eec69fe",
+        "tx": "0x057f55481c5d33cf723e41d783370d063fe5eab149544b7766b10b75383eedab",
+        "at": 1790758291286
+      }
+    },
+    {
+      "pot": "0xfb13ce79ff4bb7d1310de3bc1c8d3b",
+      "wallet": "0xe1327febfde7598152ffa720a984a4",
+      "side": 1,
+      "units": 1,
+      "salt": [
+        "1275649889754382850",
+        "1000385574889216885",
+        "4555304603241890557",
+        "182737959347055280"
+      ],
+      "noteId": "0x6c83bda52231f6fba53336d1426dc04ef9a34a9ed0632ee348218db95338cb4a",
+      "claimed": true,
+      "refund": {
+        "note": "0xa549318c40a0383ba43cd84093d082fc225e08f0e735e638431b4a4be4d9c51d",
+        "tx": "0x25aa082a1ec96589b153be1398a19ba05641f9898c5e43751a762975d8e50f3a",
+        "at": 1790758237850
+      }
+    },
+    {
+      "pot": "0x1b5a6db4347682514e5d79715e5186",
+      "wallet": "0x2878cdaf9dcbc78160d347c2b745a3",
+      "side": 2,
+      "units": 10,
+      "salt": [
+        "2841855974470423228",
+        "4298632228038135319",
+        "3591665443526405566",
+        "3895950014055525087"
+      ],
+      "noteId": "0x1f1c19ed1098445570e216bc7c7682e9d9d80fa8f25764dcd2fb7c91f10c28a4",
+      "claimed": true,
+      "payout": {
+        "note": "0xdc3b4f501c63397d64121b06e222aaf671a25d8444cc0c6a7dc15bc2d92db03b",
+        "tx": "0xf46a85260477a90a7c8dfe52e2d92e8e9becb5ede58457dfa5115747682e94d3",
+        "at": 1790726448179
+      }
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0xe94db48691950dc129931a1107147a",
+      "side": 1,
+      "units": 1,
+      "salt": [
+        "2506710245941807461",
+        "668897642813728619",
+        "1185630821186569827",
+        "1302718486015668923"
+      ],
+      "noteId": "0x73c51a434318551065ccef200444a7de94e0e7bff0e25ae2b8b4ed61c800112a",
+      "claimed": true,
+      "refund": {
+        "note": "0x087f95a72cb264666b55efd4677df647d6dfd28ca573ed75c844f9cbce8471c5",
+        "tx": "0xe333abedc025bcb728699a60d63e8e0e258163d18117715fffc08472063c5627",
+        "at": 1790758429659
+      }
+    },
+    {
+      "pot": "0x1b5a6db4347682514e5d79715e5186",
+      "wallet": "0x07d293f42d572e413ed9451423e1b0",
+      "side": 1,
+      "units": 50,
+      "salt": [
+        "3826181707329698368",
+        "577269700178097724",
+        "695038977069370510",
+        "4282263797737215893"
+      ],
+      "noteId": "0xe9a95e0741297b7d66b30f4339e4a93c2ffff5132e05bf4b8736da9e6ebac233",
       "claimed": false
+    },
+    {
+      "pot": "0x8eddfd14bf6626913cb31a58428793",
+      "wallet": "0x30c6f5feb21d0a8177747283ab4e5d",
+      "side": 1,
+      "units": 1,
+      "salt": [
+        "1616798489727745396",
+        "486851960992761631",
+        "2853781111325064680",
+        "3175156063202146481"
+      ],
+      "noteId": "0xb03e4c1a0b89220cb8a79c347a5b1ce03a375cffe079c9a0af10a577292ad25a",
+      "claimed": true,
+      "refund": {
+        "note": "0xbb9ec6e8949b7b30b556cfa26f917a1e8e4a80798fa5b4c2320f3174caa146e9",
+        "tx": "0xd6c7c0e8000c56cd2b7857657ddb86747d297f87c43a940c204f4b8cc2241b78",
+        "at": 1790758437107
+      }
     }
-  ]
+  ],
+  "retired": {
+    "0x8eddfd14bf6626913cb31a58428793": {
+      "deadlineMs": 1792454400000,
+      "lockHeight": 1167148,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "label": "before Oct 20, 2026",
+      "question": "Will Miden Partner Mainnet be announced before Oct 20, 2026?",
+      "account": "1468873289267171330",
+      "pattern": "partner mainnet starts now",
+      "feedKey": [
+        "0",
+        "0",
+        "0",
+        "100"
+      ],
+      "topic": "When will Miden Partner Mainnet be announced?",
+      "short": "Miden Partner Mainnet",
+      "stem": "Will Miden Partner Mainnet be announced",
+      "handle": "0xMiden",
+      "createdMs": 1790287200000,
+      "hidden": true
+    },
+    "0x1d20145e5360cfd10671e1f093e97c": {
+      "deadlineMs": 1793145600000,
+      "lockHeight": 1397547,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "label": "before Oct 28, 2026",
+      "question": "Will Miden Partner Mainnet be announced before Oct 28, 2026?",
+      "account": "1468873289267171330",
+      "pattern": "partner mainnet starts now",
+      "feedKey": [
+        "0",
+        "0",
+        "0",
+        "100"
+      ],
+      "topic": "When will Miden Partner Mainnet be announced?",
+      "short": "Miden Partner Mainnet",
+      "stem": "Will Miden Partner Mainnet be announced",
+      "handle": "0xMiden",
+      "createdMs": 1790287200000,
+      "hidden": true
+    },
+    "0xfb13ce79ff4bb7d1310de3bc1c8d3b": {
+      "deadlineMs": 1793836800000,
+      "lockHeight": 1627948,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "label": "before Nov 5, 2026",
+      "question": "Will Miden Partner Mainnet be announced before Nov 5, 2026?",
+      "account": "1468873289267171330",
+      "pattern": "partner mainnet starts now",
+      "feedKey": [
+        "0",
+        "0",
+        "0",
+        "100"
+      ],
+      "topic": "When will Miden Partner Mainnet be announced?",
+      "short": "Miden Partner Mainnet",
+      "stem": "Will Miden Partner Mainnet be announced",
+      "handle": "0xMiden",
+      "createdMs": 1790287200000,
+      "hidden": true
+    },
+    "0x98a2db3dc85f4c116e4a86c7bec89a": {
+      "deadlineMs": 1790467200000,
+      "lockHeight": 504746,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "When will zkGaylord post something stupid?",
+      "label": "before Sep 27, 2026",
+      "question": "Will zkGaylord post something stupid before Sep 27, 2026?",
+      "account": "1811045655449899008",
+      "pattern": "something stupid",
+      "feedKey": [
+        "2686219281000839191",
+        "1191374127129098808",
+        "3502117837801013956",
+        "211193247500497504"
+      ],
+      "short": "zkGaylord something stupid",
+      "stem": "Will zkGaylord post something stupid",
+      "handle": "zkGaylord",
+      "createdMs": 1790337600000,
+      "post": {
+        "id": "2103523556818915769",
+        "handle": "zkGaylord",
+        "tsMs": 1790354072180
+      },
+      "settledAt": 1790355000000
+    },
+    "0x44d3a0f21e3863d1629649fe54f436": {
+      "deadlineMs": 1790726400000,
+      "lockHeight": 591147,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "When will zkGaylord post something stupid?",
+      "label": "before Sep 30, 2026",
+      "question": "Will zkGaylord post something stupid before Sep 30, 2026?",
+      "account": "1811045655449899008",
+      "pattern": "something stupid",
+      "feedKey": [
+        "2686219281000839191",
+        "1191374127129098808",
+        "3502117837801013956",
+        "211193247500497504"
+      ],
+      "short": "zkGaylord something stupid",
+      "stem": "Will zkGaylord post something stupid",
+      "handle": "zkGaylord",
+      "createdMs": 1790337600000,
+      "post": {
+        "id": "2103523556818915769",
+        "handle": "zkGaylord",
+        "tsMs": 1790354072180
+      },
+      "settledAt": 1790355600000
+    },
+    "0xa41eca471feb1ad10dd88c510af6c8": {
+      "deadlineMs": 1790726340000,
+      "lockHeight": 591061,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "When will zkGaylord post something stupid",
+      "short": "zkGaylord posts something stupid",
+      "stem": "Will zkGaylord post something stupid",
+      "label": "before Sep 29, 2026",
+      "question": "Will zkGaylord post something stupid before Sep 29, 2026?",
+      "handle": "zkGaylord",
+      "account": "1811045655449899008",
+      "pattern": "something stupid",
+      "feedKey": [
+        "2686219281000839191",
+        "1191374127129098808",
+        "3502117837801013956",
+        "211193247500497504"
+      ],
+      "createdMs": 1790585382497,
+      "settledAt": 1790585411563,
+      "hidden": true
+    },
+    "0x2a6975c82dcb61d14869140e2a9f4d": {
+      "deadlineMs": 1475193540000,
+      "lockHeight": 553380,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "When will zkGaylord post something dumb",
+      "short": "zkGaylord posts something dumb",
+      "stem": "Will zkGaylord post something dumb",
+      "label": "before Sep 29, 2016",
+      "question": "Will zkGaylord post something dumb before Sep 29, 2016?",
+      "handle": "zkGaylord",
+      "account": "1811045655449899008",
+      "pattern": "something dumb",
+      "feedKey": [
+        "4329386256923797069",
+        "2697338078154256501",
+        "3036367485672727019",
+        "1519482947978997403"
+      ],
+      "createdMs": 1790613283703,
+      "settledAt": 1790613621931,
+      "hidden": true
+    },
+    "0x1b5a6db4347682514e5d79715e5186": {
+      "deadlineMs": 1790726340000,
+      "lockHeight": 591061,
+      "graceS": 2592000,
+      "unit": 1000000,
+      "assetIdWord": [
+        "0",
+        "0",
+        "7345323674754581761",
+        "1733920650650809521"
+      ],
+      "oracleId": "0x91456cba0c509191225c89225c385a",
+      "oracleRoot": [
+        "1981213289986970776",
+        "15105134555494835915",
+        "13485627950703404713",
+        "14258625366430178332"
+      ],
+      "asset": "0x18101fa522c174b165efd4f70a0385",
+      "topic": "When will zkGaylord post something dumb?",
+      "short": "zkGaylord posts something dumb",
+      "stem": "Will zkGaylord post something dumb",
+      "label": "before Sep 29, 2026",
+      "question": "Will zkGaylord post something dumb before Sep 29, 2026?",
+      "handle": "zkGaylord",
+      "account": "1811045655449899008",
+      "pattern": "something dumb",
+      "feedKey": [
+        "4465514125462235932",
+        "2972731475201018083",
+        "1377375735716177008",
+        "3918590350554294654"
+      ],
+      "createdMs": 1790614610658,
+      "settledAt": 1790726439329
+    }
+  }
 }

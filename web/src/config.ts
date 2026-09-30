@@ -14,9 +14,9 @@ export const ORACLE = "0x91456cba0c509191225c89225c385a";
 
 /** Pots the app shows when /markets.json (written by the operator server) is missing. */
 export const MARKETS = [
-  { id: "0x8eddfd14bf6626913cb31a58428793", topic: "When will Miden Partner Mainnet be announced?", short: "Miden Partner Mainnet", label: "before Oct 20, 2026", question: "Will Miden Partner Mainnet be announced before Oct 20, 2026?", deadlineMs: Date.parse("2026-10-20T00:00:00Z") },
-  { id: "0x1d20145e5360cfd10671e1f093e97c", topic: "When will Miden Partner Mainnet be announced?", short: "Miden Partner Mainnet", label: "before Oct 28, 2026", question: "Will Miden Partner Mainnet be announced before Oct 28, 2026?", deadlineMs: Date.parse("2026-10-28T00:00:00Z") },
-  { id: "0xfb13ce79ff4bb7d1310de3bc1c8d3b", topic: "When will Miden Partner Mainnet be announced?", short: "Miden Partner Mainnet", label: "before Nov 5, 2026", question: "Will Miden Partner Mainnet be announced before Nov 5, 2026?", deadlineMs: Date.parse("2026-11-05T00:00:00Z") },
+  { id: "0xd9eb2b7b96157651149d98d26a5a5b", topic: "When will Miden Partner Mainnet be announced?", short: "Miden Partner Mainnet", label: "before Oct 20, 2026", question: "Will Miden Partner Mainnet be announced before Oct 20, 2026?", deadlineMs: Date.parse("2026-10-20T00:00:00Z") },
+  { id: "0x1033adda76b4bd910616709fdf14c1", topic: "When will Miden Partner Mainnet be announced?", short: "Miden Partner Mainnet", label: "before Oct 28, 2026", question: "Will Miden Partner Mainnet be announced before Oct 28, 2026?", deadlineMs: Date.parse("2026-10-28T00:00:00Z") },
+  { id: "0x48ee84fc7675539124c3a2f58d7968", topic: "When will Miden Partner Mainnet be announced?", short: "Miden Partner Mainnet", label: "before Nov 5, 2026", question: "Will Miden Partner Mainnet be announced before Nov 5, 2026?", deadlineMs: Date.parse("2026-11-05T00:00:00Z") },
 ];
 export const MARKETS_URL = "/markets.json";
 /** Wallets allowed to see the admin view (any address form the SDK parses). */

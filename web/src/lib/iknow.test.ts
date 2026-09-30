@@ -4,7 +4,7 @@
 import { beforeEach, expect, test, vi } from "vitest";
 import fc from "fast-check";
 import { ADMINS } from "@/config";
-import { draftOf, felt, loadPositions, parseId, payoutIfWins, pct, remaining, short, type Market, type Position } from "./iknow";
+import { draftOf, felt, loadPositions, parseId, payoutIfWins, pct, pendingState, remaining, short, type Market, type Position } from "./iknow";
 
 if (import.meta.env.FC_SEED) fc.configureGlobal({ seed: Number(import.meta.env.FC_SEED) }); // fixed in the Vercel gate, random in CI
 const store = new Map<string, string>();
@@ -63,4 +63,11 @@ test("the payout preview is the pot's formula: floor(units * total / side)", () 
 test("odds and countdowns stay in range", () => {
   fc.assert(fc.property(fc.nat(), fc.nat(), (yes, no) => { const v = pct(yes, no); return v >= 0 && v <= 100; }));
   fc.assert(fc.property(fc.integer({ min: -1e12, max: 1e13 }), (ms) => /^(\d+d \d+h|\d+h \d+m|\d+m)$/.test(remaining(ms))));
+});
+
+test("a pending note the node does not know is missing only after the grace period", () => {
+  expect(pendingState(true, 0)).toBe("pending");
+  expect(pendingState(false, 60_000)).toBe("pending");
+  expect(pendingState(true, 3_600_000)).toBe("pending");
+  expect(pendingState(false, 3 * 60_000)).toBe("missing");
 });

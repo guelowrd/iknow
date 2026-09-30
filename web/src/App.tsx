@@ -12,7 +12,7 @@ import { useSession } from "@/hooks/useSession";
 import { usePrediction } from "@/hooks/usePrediction";
 import { useForwarding } from "@/hooks/useForwarding";
 import { ADMINS } from "@/config";
-import { loadPositions, parseId, positionStates, type Position } from "@/lib/iknow";
+import { loadPositions, parseId, positionStates, removePosition, type Position } from "@/lib/iknow";
 
 /** useMidenClient throws until the client exists, so everything below waits for isReady. */
 export default function App() {
@@ -66,8 +66,9 @@ function Main() {
   }, [markets, isReady]);
 
   const withdraw = useCallback(async (p: Position) => {
-    await prediction.withdraw(p);
-    setPositions(loadPositions());
+    if (p.state === "missing") removePosition(p.noteId); // nothing on chain to take back
+    else await prediction.withdraw(p);
+    setPositions((ps) => ps.filter((x) => x.noteId !== p.noteId)); // the others keep their states until the next refresh
   }, [prediction]);
 
   // the guest wallet is run by the app: payouts are opened, and forwarded to Bread once linked

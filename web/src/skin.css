@@ -350,6 +350,7 @@ a { color: var(--lcd); }
 .row .led.lost { background: #555; box-shadow: none; }
 .row .led.paid, .row .led.refund { background: #fff; box-shadow: 0 0 6px #fff; }
 .row .led.pending { animation: blink 1.2s steps(2, jump-none) infinite; }
+.row .led.missing { background: #c33; box-shadow: 0 0 6px #c33; }
 /* resolved window: the outcome is the first column */
 .list.resolved .row { grid-template-columns: 44px 1fr auto auto; }
 .out.yes { color: var(--yes); }
@@ -395,6 +396,7 @@ a { color: var(--lcd); }
 .detail .kv .state.in { color: var(--lcd); }
 .detail .kv .state.paid, .detail .kv .state.refund { color: #fff; }
 .detail .kv .state.lost { color: #777; }
+.detail .kv .state.missing { color: #c33; }
 .detail .controls { margin-top: 8px; }
 .detail .item { padding: 3px 0; }
 .detail .item > .kv { cursor: pointer; }

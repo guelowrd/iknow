@@ -116,3 +116,7 @@ dual-context Rust note script, batch proving time. Open Pragma question: an even
 - [ ] 3. pot relay on the resolved pots (unconsumed payout notes resent) → pot retire on every old pot → publish
 - [ ] 4. contract: claim = u + u * losing / winning (checked 09-29), optional VOID when the winning side is empty and the losing side is not; rebuild packages, web/public/packages/pot.masp, boundary test back on; payout relay loop tolerant of an unreadable output note (midnight 09-30 failure) → verify: cargo test 16/16, npm test, web test
 - [ ] 5. pot deploy Partner Mainnet before Oct 20 / Oct 28 / Nov 5 (00:00 UTC, @0xMiden, default pattern) → publish → restart the server → verify: app shows the three new pots, a test stake batches, CI green
+
+## Missing notes (2026-09-30)
+
+- [x] a prediction whose wallet transaction never reached the chain showed "next batch" forever and withdraw failed in Bread ("note not found"); positionStates now asks the node (getNotesById) for every pending note, a pending note unknown after 3 min becomes "missing" (red LED, "not on chain", FORGET instead of withdraw, left out of the staked totals) → verify: Gaylord's note 0x013f14dd is absent from the node while a known stake is found; fake stale position in Chrome shows the state and FORGET removes it; vitest 6/6, build ok

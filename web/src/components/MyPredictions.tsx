@@ -5,8 +5,9 @@ import { fmt, mmss, nextBatchMs, parseId, payoutIfWins, short, type Market, type
 import { useNow } from "@/hooks/useNow";
 
 type State = NonNullable<Position["state"]>;
-const STATE_LABEL: Record<State, string> = { pending: "next batch", in: "in pot", won: "won", lost: "lost", paid: "paid", refund: "refunded" };
-const LED_ORDER: State[] = ["pending", "won", "paid", "in", "refund", "lost"]; // what a topic's LED shows first
+const STATE_LABEL: Record<State, string> = { pending: "next batch", in: "in pot", won: "won", lost: "lost", paid: "paid", refund: "refunded", missing: "not on chain" };
+const LED_ORDER: State[] = ["missing", "pending", "won", "paid", "in", "refund", "lost"]; // what a topic's LED shows first
+const ALONE: State[] = ["pending", "missing"]; // each on its own line: withdraw or forget one at a time
 const SETTLED: State[] = ["won", "paid", "lost", "refund"];
 
 type Props = { positions: Position[]; markets: Market[]; onWithdraw: (p: Position) => Promise<void>; connected: boolean; guestId: string | null };
@@ -23,7 +24,7 @@ function gather(ps: Position[]): Group[] {
   const map = new Map<string, Group>();
   for (const p of ps) {
     const state = stateOf(p);
-    const key = state === "pending" ? `pending:${p.noteId}` : `${p.market}:${p.side}:${state}`;
+    const key = ALONE.includes(state) ? `${state}:${p.noteId}` : `${p.market}:${p.side}:${state}`;
     const g = map.get(key) ?? { key, items: [], state };
     g.items.push(p);
     map.set(key, g);
@@ -51,12 +52,13 @@ export function MyPredictions({ positions, markets, onWithdraw, connected, guest
   const settledAt = (topic: string) => Math.max(...positions.filter((p) => topicOf(p) === topic).map((p) => marketOf(p)?.settledAt ?? marketOf(p)?.deadlineMs ?? 0));
   const order = (topic: string) => markets.findIndex((m) => m.topic === topic);
   const topics = [...new Set(positions.map(topicOf))].sort((a, b) => Number(isLive(b)) - Number(isLive(a)) || (isLive(a) ? order(a) - order(b) : settledAt(b) - settledAt(a)));
-  const inTopic = (topic: string) => positions.filter((p) => topicOf(p) === topic).sort((a, b) => Number(stateOf(b) === "pending") - Number(stateOf(a) === "pending") || potIndex(a) - potIndex(b) || a.side - b.side || b.at - a.at);
+  const inTopic = (topic: string) => positions.filter((p) => topicOf(p) === topic).sort((a, b) => Number(ALONE.includes(stateOf(b))) - Number(ALONE.includes(stateOf(a))) || potIndex(a) - potIndex(b) || a.side - b.side || b.at - a.at);
   /** The topic in a few words: "2 pending · 5 in pot", or "won 10 · lost 1 · net +8". */
   const story = (ps: Position[]) => {
     const by = (s: State) => ps.filter((p) => stateOf(p) === s);
     const parts: string[] = [];
     if (by("pending").length) parts.push(`${fmt(units(by("pending")))} pending`);
+    if (by("missing").length) parts.push(`${by("missing").length} not on chain`);
     if (by("in").length) parts.push(`${fmt(units(by("in")))} in pot`);
     const won = [...by("won"), ...by("paid")];
     if (won.length) parts.push(`won ${fmt(won.reduce((s, p) => s + back(p), 0))}`);
@@ -66,6 +68,7 @@ export function MyPredictions({ positions, markets, onWithdraw, connected, guest
     if (n.settled) parts.push(`net ${signed(n.net)}`);
     return parts.join(" · ");
   };
+  const staked = (ps: Position[]) => units(ps.filter((p) => stateOf(p) !== "missing")); // what actually reached a pot
   const led = (ps: Position[]) => LED_ORDER.find((s) => ps.some((p) => stateOf(p) === s)) ?? "in";
 
   const withdraw = async (p: Position) => {
@@ -96,7 +99,7 @@ export function MyPredictions({ positions, markets, onWithdraw, connected, guest
     return (
       <div className="detail">
         <div className="q"><Close onClick={() => setOpen(null)} />{topic}</div>
-        <div className="kv sum"><span>staked {fmt(units(ps))}</span><span>{n.settled ? `got back ${fmt(n.back)} · net ${signed(n.net)}` : story(ps)}</span></div>
+        <div className="kv sum"><span>staked {fmt(staked(ps))}</span><span>{n.settled ? `got back ${fmt(n.back)} · net ${signed(n.net)}` : story(ps)}</span></div>
         {gather(ps).map((g) => {
           const first = g.items[0];
           return (
@@ -109,6 +112,12 @@ export function MyPredictions({ positions, markets, onWithdraw, connected, guest
                 <div className="kv sub">
                   <span>{first.relayed === false ? "not sent to the pot yet, retrying" : `in the pot in ${mmss(nextBatchMs() - now)} at most, sooner once ${BATCH_MIN} wait`}</span>
                   <button className="btn small danger" onClick={() => withdraw(first)} disabled={busy === first.noteId}>{busy === first.noteId ? "withdrawing…" : "withdraw"}</button>
+                </div>
+              )}
+              {g.state === "missing" && (
+                <div className="kv sub">
+                  <span>the wallet's transaction never reached the chain: nothing was staked, place it again</span>
+                  <button className="btn small danger" onClick={() => withdraw(first)} disabled={busy === first.noteId}>forget</button>
                 </div>
               )}
               {g.state === "won" && <div className="kv sub"><span>payout on its way: the pot pays at the next 10-minute mark</span></div>}
@@ -144,7 +153,7 @@ export function MyPredictions({ positions, markets, onWithdraw, connected, guest
                 <span><i className={`led ${led(ps)}`} /></span>
                 <span>{marketOf(ps[0])?.short ?? topic}</span>
                 <span className="right hide-sm">{story(ps)}</span>
-                <span className="right">{fmt(units(ps))}</span>
+                <span className="right">{fmt(staked(ps))}</span>
               </div>
             );
           })}

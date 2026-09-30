@@ -1,9 +1,9 @@
 import {
   AccountComponent, AccountId, Address, Felt, FeltArray, FungibleAsset, Note, NoteArray, NoteAssets, NoteMetadata,
-  NoteRecipient, NoteScript, NoteStorage, NoteTag, NoteType, Package, Poseidon2, StorageMap, StorageSlot,
-  StorageSlotArray, TransactionRequestBuilder, Word, type Account, type WebClient,
+  NoteId, NoteRecipient, NoteScript, NoteStorage, NoteTag, NoteType, Package, Poseidon2, RpcClient, StorageMap, StorageSlot,
+  StorageSlotArray, TransactionRequestBuilder, Word, Endpoint, type Account, type WebClient,
 } from "@miden-sdk/miden-sdk";
-import { BATCH_MS, FAUCET_URL, MARKETS, MARKETS_URL, MIDEN_FAUCET, POT_PACKAGE_URL, UNIT } from "@/config";
+import { BATCH_MS, FAUCET_URL, MARKETS, MARKETS_URL, MIDEN_FAUCET, POT_PACKAGE_URL, RPC_URL, UNIT } from "@/config";
 import stakeMasm from "../../../contracts/stake-note.masm?raw";
 
 /** topic = the header question ("When will X be announced?"), short = its name in lists, label = the
@@ -31,7 +31,8 @@ export type Position = {
   wallet: string;
   /** Guest predictions: whether the note reached the pot through the transport service. */
   relayed?: boolean;
-  state?: "pending" | "in" | "won" | "lost" | "paid" | "refund";
+  /** missing: the wallet's transaction never reached the chain (the note is unknown to the node). */
+  state?: "pending" | "in" | "won" | "lost" | "paid" | "refund" | "missing";
   /** The pot's payout note for this position, once the operator paid it. */
   payout?: Payout;
 };
@@ -110,14 +111,30 @@ export function positionKey(target: AccountId, side: number, units: number, salt
   return Poseidon2.hashElements(new FeltArray([target.prefix(), target.suffix(), felt(side), felt(units), ...salt.map(felt)]));
 }
 
+/** A pending note the node does not know after this long never made it (a wallet's submission that timed out). */
+const MISSING_AFTER_MS = 3 * 60_000;
+export const pendingState = (onChain: boolean, ageMs: number): Position["state"] => (onChain || ageMs < MISSING_AFTER_MS ? "pending" : "missing");
+
+/** Which of these notes the node has committed; on a network error, all of them (never call a note missing on a hunch). */
+async function onChain(noteIds: string[]): Promise<Set<string>> {
+  if (noteIds.length === 0) return new Set();
+  try {
+    const rpc = new RpcClient(RPC_URL === "testnet" ? Endpoint.testnet() : new Endpoint(RPC_URL));
+    return new Set((await rpc.getNotesById(noteIds.map((id) => NoteId.fromHex(id)))).map((n) => n.noteId.toString()));
+  } catch {
+    return new Set(noteIds);
+  }
+}
+
 export async function positionStates(client: WebClient, positions: Position[], markets: Market[]): Promise<Position[]> {
   const out: Position[] = [];
+  const known = await onChain(positions.filter((p) => !p.state || p.state === "pending" || p.state === "missing").map((p) => p.noteId));
   for (const p of positions) {
     const market = markets.find((m) => m.id === p.market);
     const account = await potAccount(client, p.market);
     const key = positionKey(parseId(p.wallet), p.side, p.units, p.salt);
     const flag = Number(account?.storage().getMapItem("pot::pot::positions", key)?.toU64s()[0] ?? 0n);
-    let state: Position["state"] = flag === 0 ? "pending" : "in";
+    let state: Position["state"] = flag === 0 ? pendingState(known.has(p.noteId), Date.now() - p.at) : "in";
     if (flag === 2) state = "paid";
     else if (flag === 1 && market?.outcome) state = market.outcome === 3 ? "refund" : market.outcome === p.side ? "won" : "lost";
     out.push({ ...p, state, payout: market?.payouts?.[Array.from(key.toU64s(), String).join(",")] });

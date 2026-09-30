@@ -497,8 +497,10 @@ export const commands = {
     for (const out of r.result.executedTransaction().outputNotes().notes()) {
       const note = out.intoFull();
       if (!note) continue;
-      const [suffix, prefix] = note.recipient().storage().items();
-      const target = AccountId.fromPrefixSuffix(prefix, suffix).toString();
+      // an output note that is not one of our P2ID payouts (seen 2026-09-30: a Felt the binding could not
+      // read) must not stop the relay of the others
+      let target;
+      try { const [suffix, prefix] = note.recipient().storage().items(); target = AccountId.fromPrefixSuffix(prefix, suffix).toString(); } catch (err) { console.log(`skipped an output note: ${err.message ?? err}`); continue; }
       const amount = (note.assets().fungibleAssets()[0]?.amount() ?? 0n) / BigInt(state.pots[potId].unit);
       const p = due.find((x) => !x.payout && x.wallet === target && pays(x) === amount);
       if (p) { p.payout = { note: note.id().toString(), tx: tx(r), at: Date.now() }; saveState(state); writeMarkets(state); }

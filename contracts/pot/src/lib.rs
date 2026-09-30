@@ -136,6 +136,16 @@ impl Pot for PotStorage {
         } else {
             panic!()
         };
+        // nobody backed the winning side: every stake goes back instead of staying in the pot for good
+        let t = self.totals.get().into_elements();
+        let outcome = if outcome != VOID
+            && t[(outcome - 1) as usize].as_canonical_u64() == 0
+            && t[(2 - outcome) as usize].as_canonical_u64() > 0
+        {
+            VOID
+        } else {
+            outcome
+        };
         self.outcome.set(Felt::new_unchecked(outcome));
     }
 
@@ -152,9 +162,11 @@ impl Pot for PotStorage {
         } else {
             assert!(side.as_canonical_u64() == outcome);
             let t = self.totals.get().into_elements();
-            let total = t[0].as_canonical_u64() + t[1].as_canonical_u64();
+            // floor(u * total / winning) = u + floor(u * losing / winning); u and losing stay below 2^32,
+            // so the product fits u64 where u * total did not
             let winning = t[(outcome - 1) as usize].as_canonical_u64();
-            u * total / winning
+            let losing = t[(2 - outcome) as usize].as_canonical_u64();
+            u + u * losing / winning
         };
         let unit = self.market.get().into_elements()[3].as_canonical_u64();
         let amount = Word::from([Felt::new_unchecked(payout_units * unit), felt!(0), felt!(0), felt!(0)]);

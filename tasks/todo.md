@@ -111,10 +111,10 @@ dual-context Rust note script, batch proving time. Open Pragma question: an even
 ## Reset (2026-09-30): refund, retire, redeploy on the fixed contract. AWAITING GO before anything moves on chain
 
 - [x] pot refund / pot retire commands, mock-tested (f720641): the pot is a basic wallet the operator runs, so stakes go back from its vault
-- [ ] 1. stop the operator server → hide the three open pots and publish (the app stops offering them) → last batch of waiting notes
-- [ ] 2. pot refund on Oct 20 (216 MIDEN, 20 notes, incl. 124 to 0x31fa), Oct 28 (44, 6), Nov 5 (21, 6) → verify: each vault back to ~100 MIDEN funding; report per wallet
-- [ ] 3. pot relay on the resolved pots (unconsumed payout notes resent) → pot retire on every old pot → publish
-- [ ] 4. contract: claim = u + u * losing / winning (checked 09-29), optional VOID when the winning side is empty and the losing side is not; rebuild packages, web/public/packages/pot.masp, boundary test back on; payout relay loop tolerant of an unreadable output note (midnight 09-30 failure) → verify: cargo test 16/16, npm test, web test
+- [x] 1. stop the operator server → hide the three open pots and publish (the app stops offering them) → last batch of waiting notes
+- [x] 2. (08:50-08:58 UTC, 32 notes relayed, vaults 99.99) pot refund on Oct 20 (216 MIDEN, 20 notes, incl. 124 to 0x31fa), Oct 28 (44, 6), Nov 5 (21, 6) → verify: each vault back to ~100 MIDEN funding; report per wallet
+- [x] 3. (nothing to relay; 8 pots retired) pot relay on the resolved pots (unconsumed payout notes resent) → pot retire on every old pot → publish
+- [x] 4. (cargo test 17/17, 0 ignored) contract: claim = u + u * losing / winning (checked 09-29), optional VOID when the winning side is empty and the losing side is not; rebuild packages, web/public/packages/pot.masp, boundary test back on; payout relay loop tolerant of an unreadable output note (midnight 09-30 failure) → verify: cargo test 16/16, npm test, web test
 - [ ] 5. pot deploy Partner Mainnet before Oct 20 / Oct 28 / Nov 5 (00:00 UTC, @0xMiden, default pattern) → publish → restart the server → verify: app shows the three new pots, a test stake batches, CI green
 
 ## Missing notes (2026-09-30)

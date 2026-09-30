@@ -1,9 +1,10 @@
 //! Money properties of the pot on random stake sets: every winner is paid floor(units * total /
-//! winning side), never more than the vault holds, with less than one unit of dust per winner. Plus
-//! the refusals the batch relies on: past the lock height, past the per-side cap.
+//! winning side), never more than the vault holds, with less than one unit of dust per winner; a
+//! winning side nobody backed settles VOID and every stake comes back. Plus the refusals the batch
+//! relies on: past the lock height, past the per-side cap.
 use std::path::Path;
 
-use integration::helpers::{add_oracle, add_pot, build_project_in_dir, claim_note, entry, stake_note, word, AUTH, DEADLINE_MS, UNIT};
+use integration::helpers::{add_oracle, add_pot, build_project_in_dir, claim_note, entry, pot_slot, stake_note, word, AUTH, DEADLINE_MS, UNIT};
 use miden_client::{account::Account, asset::FungibleAsset, note::Note, transaction::{RawOutputNote, TransactionScript}};
 use miden_mast_package::Package;
 use miden_testing::MockChain;
@@ -52,11 +53,9 @@ async fn scenario(p: &Pkgs, stakes: &[(u64, u64)], yes: bool) -> anyhow::Result<
         let bettor = builder.add_existing_wallet(AUTH)?;
         let salt = word(i as u64 + 1, 0, 0, 0)?;
         stake_notes.push(stake_note(&p.pot, &bettor, &pot, &faucet, side, units, salt)?);
-        if side == outcome {
-            claims.push((units, claim_note(&p.claim, &bettor, &bettor, side, units, salt)?));
-        }
+        claims.push((side, units, claim_note(&p.claim, &bettor, &bettor, side, units, salt)?));
     }
-    for n in stake_notes.iter().chain(claims.iter().map(|c| &c.1)) {
+    for n in stake_notes.iter().chain(claims.iter().map(|c| &c.2)) {
         builder.add_output_note(RawOutputNote::Full(n.clone()));
     }
     let mut chain = builder.build()?;
@@ -69,20 +68,32 @@ async fn scenario(p: &Pkgs, stakes: &[(u64, u64)], yes: bool) -> anyhow::Result<
     chain.prove_next_block()?;
 
     let total: u64 = stakes.iter().map(|s| s.1).sum();
-    let winning: u64 = claims.iter().map(|c| c.0).sum();
+    let winners: Vec<&(u64, u64, Note)> = claims.iter().filter(|c| c.0 == outcome).collect();
+    let winning: u64 = winners.iter().map(|c| c.1).sum();
     let staked = total * UNIT;
     anyhow::ensure!(vault(&chain, &pot, &faucet)? == staked, "the vault holds every stake");
-    if claims.is_empty() {
-        return Ok(()); // nobody backed the winning side: nothing is claimable, the stakes stay in the pot
+    let settled = chain.committed_account(pot.id())?.storage().get_item(&pot_slot("outcome")?)?.as_elements()[0].as_canonical_u64();
+    if winners.is_empty() {
+        // nobody backed the winning side: VOID, and every stake comes back
+        anyhow::ensure!(settled == 3, "an unbacked winning side settles VOID, got {settled}");
+        let notes: Vec<Note> = claims.iter().map(|c| c.2.clone()).collect();
+        let mut paid = consume(&mut chain, &pot, &notes).await?.ok_or_else(|| anyhow::anyhow!("the refund claims failed"))?;
+        let mut expected: Vec<u64> = claims.iter().map(|c| c.1 * UNIT).collect();
+        paid.sort();
+        expected.sort();
+        anyhow::ensure!(paid == expected, "refunds: paid {paid:?}, expected {expected:?}");
+        anyhow::ensure!(vault(&chain, &pot, &faucet)? == 0, "the vault is empty after the refunds");
+        return Ok(());
     }
-    let notes: Vec<Note> = claims.iter().map(|c| c.1.clone()).collect();
+    anyhow::ensure!(settled == outcome, "settled {settled}, expected {outcome}");
+    let notes: Vec<Note> = winners.iter().map(|c| c.2.clone()).collect();
     let mut paid = consume(&mut chain, &pot, &notes).await?.ok_or_else(|| anyhow::anyhow!("the winners' claims failed"))?;
-    let mut expected: Vec<u64> = claims.iter().map(|c| (c.0 as u128 * total as u128 / winning as u128) as u64 * UNIT).collect();
+    let mut expected: Vec<u64> = winners.iter().map(|c| (c.1 as u128 * total as u128 / winning as u128) as u64 * UNIT).collect();
     paid.sort();
     expected.sort();
     anyhow::ensure!(paid == expected, "pro rata floor: paid {paid:?}, expected {expected:?}");
     let sum: u64 = paid.iter().sum();
-    anyhow::ensure!(sum <= staked && staked - sum < claims.len() as u64 * UNIT, "dust below one unit per winner");
+    anyhow::ensure!(sum <= staked && staked - sum < winners.len() as u64 * UNIT, "dust below one unit per winner");
     anyhow::ensure!(vault(&chain, &pot, &faucet)? == staked - sum, "the vault keeps only the dust");
     Ok(())
 }
@@ -127,7 +138,13 @@ async fn stakes_past_the_side_cap_or_the_lock_height_are_refused() -> anyhow::Re
 }
 
 #[tokio::test]
-#[ignore = "known bug: claim computes units * total in u64 and wraps (paid 4294967289 units for 8589934588); the fix changes the claim procedure root, see tasks/todo.md"]
+async fn a_winning_side_nobody_backed_refunds_everyone() -> anyhow::Result<()> {
+    let p = pkgs()?;
+    scenario(&p, &[(2, 5), (2, 7)], true).await?; // YES wins, both on NO
+    scenario(&p, &[(1, 4)], false).await // NO wins, the only stake on YES
+}
+
+#[tokio::test]
 async fn claim_math_holds_with_both_sides_near_the_cap() -> anyhow::Result<()> {
     // units * total reaches about 2^65 here, past u64
     scenario(&pkgs()?, &[(1, CAP - 1), (2, CAP - 1)], true).await

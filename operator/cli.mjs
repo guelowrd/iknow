@@ -510,6 +510,41 @@ export const commands = {
       }
     }
   },
+  /** Sends every open stake of a pot back to its wallet from the pot's own vault (the pot is a basic
+   * wallet the operator runs), one private P2ID note per position, relayed through the transport.
+   * Refunded positions count as claimed, so payout never pays them and a second run sends nothing. */
+  async "pot refund"(c, state, args) {
+    const potId = arg(args, "pot");
+    const p = state.pots[potId];
+    if ((await potDetails(c, potId)).outcome !== 0) throw new Error("the pot is settled: its open positions are the losers, payout handles the winners");
+    const due = state.positions.filter((x) => x.pot === potId && !x.claimed);
+    if (due.length === 0) { console.log("nothing to refund"); return []; }
+    const report = [];
+    for (const x of due) {
+      const r = await c.transactions.send({ account: id(potId), to: id(x.wallet), token: id(p.asset), amount: BigInt(x.units) * BigInt(p.unit), type: "private", returnNote: true, ...confirm });
+      await commit(c);
+      const noteId = r.note.id().toString();
+      Object.assign(x, { claimed: true, refund: { note: noteId, tx: tx(r), at: Date.now() } });
+      saveState(state);
+      let sent = "in this client";
+      if (!MOCK) { try { await c.notes.sendPrivateOutput({ noteId, to: id(x.wallet) }); sent = "relayed"; } catch (err) { sent = `relay skipped: ${String(err.message ?? err).slice(0, 80)}`; } }
+      report.push(`${x.units} unit(s) to ${x.wallet.slice(0, 10)} note ${noteId.slice(0, 12)} ${sent}`);
+      console.log(report.at(-1));
+    }
+    return report;
+  },
+  /** Takes a pot out of the app and of the schedule: its record moves to state.retired, its positions
+   * stay. A pending pot must have every position refunded first. */
+  async "pot retire"(c, state, args) {
+    const potId = arg(args, "pot");
+    const d = await potDetails(c, potId);
+    if (d.outcome === 0 && state.positions.some((x) => x.pot === potId && !x.claimed)) throw new Error("refund the open positions first");
+    (state.retired ??= {})[potId] = state.pots[potId];
+    delete state.pots[potId];
+    saveState(state);
+    writeMarkets(state);
+    return { retired: potId };
+  },
   /** Sends the pot's unconsumed payout notes to their wallets again (a relay that failed earlier). */
   async "pot relay"(c, state, args) {
     const potId = arg(args, "pot");

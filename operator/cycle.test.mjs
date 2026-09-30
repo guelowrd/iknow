@@ -36,7 +36,7 @@ test("stakes become positions; a plain payment to the pot does not (Sep 26 incid
   await c.transactions.send({ account: id(w2), to: id(pot), token: id(loadState().mockFaucet), amount: 5n * UNIT, type: "public", reclaimAfter: 1000 });
   await commit(c);
   assert.equal(await run("pot batch", "--pot", pot), 2);
-  const positions = loadState().positions.map(({ wallet, side, units }) => ({ wallet, side, units }));
+  const positions = loadState().positions.map(({ wallet, side, units }) => ({ wallet, side, units })).sort((a, b) => a.side - b.side); // the store lists notes in no fixed order
   assert.deepEqual(positions, [{ wallet: w1, side: 1, units: 3 }, { wallet: w2, side: 2, units: 1 }]);
   const status = await run("pot status", "--pot", pot);
   assert.deepEqual([status.yesUnits, status.noUnits, BigInt(status.vault)], [3, 1, before + 4n * UNIT]);
@@ -63,6 +63,30 @@ test("settle refuses a pot that is still pending", async () => {
   const pot = await run("pot deploy", "--deadline", inDays(90), "--lock-height", "100000");
   await assert.rejects(run("pot settle", "--pot", pot), /assertion failed/);
   assert.equal((await run("pot status", "--pot", pot)).outcome, "pending");
+});
+
+test("refund sends every open stake back from the pot, then retire drops the pot", async () => {
+  const pot = await run("pot deploy", "--deadline", inDays(90), "--lock-height", "100000");
+  await run("wallet new"); // w2 holds a P2IDE it cannot reclaim yet, which consumeAll would trip on
+  const w3 = loadState().wallets.at(-1);
+  await run("bet", "--wallet", w1, "--pot", pot, "--side", "yes", "--units", "2");
+  await run("bet", "--wallet", w3, "--pot", pot, "--side", "no", "--units", "1");
+  assert.equal(await run("pot batch", "--pot", pot), 2);
+  const funded = (await vault(pot)) - 3n * UNIT;
+  await assert.rejects(run("pot retire", "--pot", pot), /refund the open positions first/);
+  await assert.rejects(run("pot refund", "--pot", Object.keys(loadState().pots)[0]), /settled/, "a settled pot's losers are not refunded");
+  const [b1, b3] = [await balance(w1), await balance(w3)];
+  assert.equal((await run("pot refund", "--pot", pot)).length, 2);
+  await run("wallet claim", "--wallet", w1);
+  await run("wallet claim", "--wallet", w3);
+  assert.deepEqual([(await balance(w1)) - b1, (await balance(w3)) - b3], [2n * UNIT, 1n * UNIT]);
+  assert.equal(await vault(pot), funded, "the pot keeps only its fee funding");
+  assert.deepEqual(await run("pot refund", "--pot", pot), [], "a second refund sends nothing");
+  assert.ok(loadState().positions.filter((x) => x.pot === pot).every((x) => x.claimed && x.refund?.note));
+  await run("pot retire", "--pot", pot);
+  const s = loadState();
+  assert.ok(!s.pots[pot] && s.retired[pot] && s.positions.some((x) => x.pot === pot), "record kept, pot gone");
+  assert.ok(!JSON.parse(fs.readFileSync(new URL("./markets.mock.json", import.meta.url), "utf8")).markets.some((m) => m.id === pot), "gone from the app's list");
 });
 
 test("the live markets.json is untouched", () => {

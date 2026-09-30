@@ -144,6 +144,8 @@ node cli.mjs pot inbox|batch|status|settle|payout --pot <id>
 node cli.mjs wallet claim --wallet <id>         # winner consumes the payout note
 node cli.mjs pot deploy --deadline <iso> [--label ..] [--question ..] [--account <x id>] [--pattern <regex>]
 node cli.mjs pot hide --pot <id> [--hidden 0]                  # leave a pot out of the app (or show it again)
+node cli.mjs pot refund --pot <id>                            # every open stake back to its wallet, from the pot's vault
+node cli.mjs pot retire --pot <id>                            # out of the app and the schedule (refund first if pending)
 node cli.mjs oracle resolve --pot <id> --post-id <id or url>   # the pot's account + regex
 node cli.mjs oracle publish --pot <id> --value <post ms>       # manual override, 0 = not yet
 node admin.mjs                                  # operator server: API + schedule (replaces loop.sh)

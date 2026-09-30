@@ -87,8 +87,12 @@ export function usePrediction(session: Session, onPlaced: (p: Position) => void)
         await consume.consume({ accountId: p.wallet, notes: [p.noteId] });
       } else {
         const draft = draftOf(p);
-        if (!draft || !bread.requestConsume) throw new Error("this prediction cannot be withdrawn from here");
+        if (!draft || !bread.requestConsume || !bread.importPrivateNote) throw new Error("this prediction cannot be withdrawn from here");
         const note = buildStakeNote(await script(), draft);
+        // Bread consumes only notes in its own store, and it keeps no record of a stake note it sent to
+        // the pot (the bytes on the consume request only feed its preview): hand the note over first.
+        // Bread wraps it with the pot's tag and finds it on chain at its next sync.
+        await bread.importPrivateNote(note.serialize()).catch(() => undefined); // already there on a retry
         const txId = await bread.requestConsume(Transaction.createConsumeTransaction(MIDEN_FAUCET, p.noteId, "private", Number(BigInt(p.units) * UNIT), note.serialize()).payload as never);
         await bread.waitForTransaction?.(txId, 180_000).catch(() => undefined);
       }

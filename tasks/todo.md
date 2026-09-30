@@ -120,3 +120,7 @@ dual-context Rust note script, batch proving time. Open Pragma question: an even
 ## Missing notes (2026-09-30)
 
 - [x] a prediction whose wallet transaction never reached the chain showed "next batch" forever and withdraw failed in Bread ("note not found"); positionStates now asks the node (getNotesById) for every pending note, a pending note unknown after 3 min becomes "missing" (red LED, "not on chain", FORGET instead of withdraw, left out of the staked totals) → verify: Gaylord's note 0x013f14dd is absent from the node while a known stake is found; fake stale position in Chrome shows the state and FORGET removes it; vitest 6/6, build ok
+
+## Bread withdraw (2026-09-30)
+
+- [x] "Note … not found" on withdraw from Bread, for a note that IS on chain (0x0791717c, 3 NO on Nov 5, batched 14:00 UTC before the retry): Bread's consume looks the note up in its own store and a stake note is an output Bread sent to the pot, the bytes on the consume request only feed its preview (wallet src/lib/miden/back/dapp.ts resolveConsumeNote). The app now calls importPrivateNote(note bytes) first: Bread wraps them as an expected note with the pot's tag, syncs and finds it on chain (wallet miden-client-interface.ts deserializeNoteFileOrNote) → verify: build ok; UNTESTED live, needs Gaylord: predict with Bread, withdraw within the 10-minute window, two Bread confirmations (import, then consume)

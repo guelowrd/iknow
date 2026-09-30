@@ -182,10 +182,16 @@
         "3918590350554294654"
       ],
       "hidden": false,
-      "settledAt": null,
+      "settledAt": 1790726439329,
       "resolvedAt": null,
       "post": null,
-      "payouts": {}
+      "payouts": {
+        "17806133296326821668,4646736616977871738,9921785754066447238,2855494697121044198": {
+          "note": "0xdc3b4f501c63397d64121b06e222aaf671a25d8444cc0c6a7dc15bc2d92db03b",
+          "tx": "0xf46a85260477a90a7c8dfe52e2d92e8e9becb5ede58457dfa5115747682e94d3",
+          "at": 1790726448179
+        }
+      }
     }
   ]
 }

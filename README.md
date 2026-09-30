@@ -56,8 +56,8 @@ that matches the pot's regex is published to the oracle. At every 10-minute mark
 settles every pot it can (a published post, or a deadline passed with a fresh heartbeat) and pays the
 winners out, so a matching post is money in wallets within about ten minutes.
 
-Live markets: oracle `0x91456cba0c509191225c89225c385a`, pots `0x8eddfd14bf6626913cb31a58428793`
-(Oct 20), `0x1d20145e5360cfd10671e1f093e97c` (Oct 28), `0xfb13ce79ff4bb7d1310de3bc1c8d3b` (Nov 5).
+Live markets: oracle `0x91456cba0c509191225c89225c385a`, pots `0xd9eb2b7b96157651149d98d26a5a5b`
+(Oct 20), `0x1033adda76b4bd910616709fdf14c1` (Oct 28), `0x48ee84fc7675539124c3a2f58d7968` (Nov 5).
 
 Design in one paragraph: one pari-mutuel pot per market date. Bettors send private stake notes to the pot;
 the pot opens them in daily batches, so per-side totals are public and verifiable on chain while individual

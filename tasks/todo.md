@@ -107,3 +107,12 @@ dual-context Rust note script, batch proving time. Open Pragma question: an even
 - [ ] 3b. DECIDE, product: a winning side nobody backed leaves every stake in the pot for good (docs cover only the mirror case, nobody on NO). Pari-mutuel usually refunds: settle VOID when the winning side is empty; also a settle code change
 - [x] 4. web: vitest + fast-check (iknow.test.ts): any stored content loads as a list every reader can use, valid positions all survive in order (hex guests and suffixed Bread addresses), payout preview equals the pot formula, odds and countdowns in range → verify: 5/5; on the old code a stored {} came back as a non-array (every caller crashes, blank app) and the preview showed one unit too many past 2^53; build passes
 - [x] 5. CI: .github/workflows/ci.yml (web; cargo audit; contracts then operator on the packages they built), actions pinned by commit, read-only token, markets.json commits skip it; vercel.json runs the web tests on FC_SEED=1 before the build (fixed seed so a new fuzz find cannot block market publishing) → verify: run 36570161966 green (web and advisories under 1 min, contracts-and-operator 20 min uncached); Vercel production deploy of 80dd817 succeeded with the test gate
+
+## Reset (2026-09-30): refund, retire, redeploy on the fixed contract. AWAITING GO before anything moves on chain
+
+- [x] pot refund / pot retire commands, mock-tested (f720641): the pot is a basic wallet the operator runs, so stakes go back from its vault
+- [ ] 1. stop the operator server → hide the three open pots and publish (the app stops offering them) → last batch of waiting notes
+- [ ] 2. pot refund on Oct 20 (216 MIDEN, 20 notes, incl. 124 to 0x31fa), Oct 28 (44, 6), Nov 5 (21, 6) → verify: each vault back to ~100 MIDEN funding; report per wallet
+- [ ] 3. pot relay on the resolved pots (unconsumed payout notes resent) → pot retire on every old pot → publish
+- [ ] 4. contract: claim = u + u * losing / winning (checked 09-29), optional VOID when the winning side is empty and the losing side is not; rebuild packages, web/public/packages/pot.masp, boundary test back on; payout relay loop tolerant of an unreadable output note (midnight 09-30 failure) → verify: cargo test 16/16, npm test, web test
+- [ ] 5. pot deploy Partner Mainnet before Oct 20 / Oct 28 / Nov 5 (00:00 UTC, @0xMiden, default pattern) → publish → restart the server → verify: app shows the three new pots, a test stake batches, CI green

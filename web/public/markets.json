@@ -17,7 +17,7 @@
         "0",
         "100"
       ],
-      "hidden": false,
+      "hidden": true,
       "settledAt": null,
       "resolvedAt": null,
       "post": null,
@@ -39,7 +39,7 @@
         "0",
         "100"
       ],
-      "hidden": false,
+      "hidden": true,
       "settledAt": null,
       "resolvedAt": null,
       "post": null,
@@ -61,7 +61,7 @@
         "0",
         "100"
       ],
-      "hidden": false,
+      "hidden": true,
       "settledAt": null,
       "resolvedAt": null,
       "post": null,

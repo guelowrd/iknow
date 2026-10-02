@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const TRACKS = ["/audio/prove-it.mp3", "/audio/circuit-chase.mp3", "/audio/nullified.mp3"];
+const TRACKS = ["/audio/prove-it.mp3", "/audio/circuit-chase.mp3", "/audio/nullified.mp3", "/audio/roots-of-unity.mp3", "/audio/stop-interacting.mp3"];
 
 /** The title-bar player: three tracks in a loop, play/pause, next and previous, feeds the spectrum. */
 export function useAudio() {
